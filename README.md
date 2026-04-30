@@ -1,12 +1,12 @@
 ![Header](https://capsule-render.vercel.app/render?type=waving&color=0b1f2a&height=300&section=header&text=XML%2FXSD%20Contract%20Hub&fontSize=70&animation=fadeIn&fontColor=ffffff&desc=The%20Source%20of%20Truth%20for%20Enterprise%20Integrations&descSize=20&descAlignY=51)
 
-# XML/XSD Contract Hub
-
 <div align="center">
 <a href="https://skillicons.dev">
-  <img src="https://skillicons.dev/icons?i=rabbitmq,py,githubactions,md&theme=dark" />
+  <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
 </a>
 </div>
+
+# XML/XSD Contract Hub
 
 [![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
 [![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
@@ -17,12 +17,12 @@
 
 ## Status & Metrics
 
-[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions)
+[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions)
 [![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/teams-notify.yml)
+[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/teams-notify.yml)
 [![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
 [![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/enforce-maintainers.yml)
+[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml)
 
 > **Wat is dit?**  
 > Deze repository is de **centrale Source of Truth** voor alle XML/XSD berichtafspraken binnen het Integration Project. Elke koppeling — CRM, Kassa, Frontend, Planning, Facturatie en meer — is gebonden aan de contractdefinities die hier beheerd worden. Afwijkingen worden hier gemeld, besproken en vastgelegd.
@@ -61,7 +61,7 @@
 
 ### Ben je een Niet-Admin User (CRM, Kassa, Frontend, …)?
 
-1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
+1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
 2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
 3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
 4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
@@ -236,7 +236,7 @@ Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het 
 
 | Bestand | Doel |
 |---|---|
-| [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
+| [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
 | [`xml-expert.md`](xml-expert.md) | Agent-definitie en strikte werkmodus voor contractwijzigingen |
 | [`instructions.md`](instructions.md) | Bindende werkinstructies voor alle bijdragers (mens en AI) |
 | [`issue-guide.md`](issue-guide.md) | Stap-voor-stap handleiding voor het openen van XML/XSD issues |
