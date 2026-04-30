@@ -88,13 +88,8 @@ jobs:
           done <<< "$changed_files"
 
           if [[ -f changelog.md ]]; then
-            latest_changelog="$(awk '
-              /^## / {
-                if (found) exit
-                found=1
-              }
-              found {print}
-            ' changelog.md)"
+            # Pak de LAATSTE entry (onderaan het bestand)
+            latest_changelog="$(awk '/^## / { entry = ""; found = 1 } found { entry = entry $0 "\n" } END { printf "%s", entry }' changelog.md)"
           else
             latest_changelog="changelog.md niet gevonden"
           fi
@@ -120,40 +115,79 @@ jobs:
             title_context="Push naar main"
           fi
 
-          text_message="XML is geupdate"
-
           payload="$(jq -n \
-            --arg message "$text_message" \
-            --arg text "$text_message" \
-            --arg title "XML is geupdate" \
-            --arg summary "XML is geupdate" \
+            --arg title "XML Update: $title_context" \
             --arg repository "$REPOSITORY" \
             --arg actor "$ACTOR" \
-            --arg event "$EVENT_NAME" \
-            --arg action "$EVENT_ACTION" \
-            --arg ref "$REF_NAME" \
             --arg context "$title_context" \
             --arg source_url "$source_url" \
-            --arg repository_url "$REPOSITORY_URL" \
             --arg teams "$teams_csv" \
             --arg changelog "$latest_changelog" \
             --arg changed_files "$changed_files" \
             '{
-              text: $text,
-              title: $title,
-              summary: $summary,
-              message: $message,
-              repository: $repository,
-              actor: $actor,
-              event: $event,
-              action: $action,
-              ref: $ref,
-              context: $context,
-              source_url: $source_url,
-              repository_url: $repository_url,
-              betrokken_teams: $teams,
-              latest_changelog: $changelog,
-              changed_files: $changed_files
+              type: "message",
+              attachments: [
+                {
+                  contentType: "application/vnd.microsoft.card.adaptive",
+                  content: {
+                    type: "AdaptiveCard",
+                    version: "1.2",
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    body: [
+                      {
+                        type: "TextBlock",
+                        text: $title,
+                        weight: "Bolder",
+                        size: "Medium",
+                        wrap: true
+                      },
+                      {
+                        type: "FactSet",
+                        facts: [
+                          { title: "Repository:", value: $repository },
+                          { title: "Auteur:", value: $actor },
+                          { title: "Teams:", value: $teams }
+                        ]
+                      },
+                      {
+                        type: "TextBlock",
+                        text: "Laatste Changelog Entry:",
+                        weight: "Bolder",
+                        wrap: true,
+                        separator: true
+                      },
+                      {
+                        type: "TextBlock",
+                        text: $changelog,
+                        wrap: true,
+                        fontType: "Monospace",
+                        size: "Small"
+                      },
+                      {
+                        type: "TextBlock",
+                        text: "Gewijzigde Bestanden:",
+                        weight: "Bolder",
+                        wrap: true,
+                        separator: true
+                      },
+                      {
+                        type: "TextBlock",
+                        text: $changed_files,
+                        wrap: true,
+                        fontType: "Monospace",
+                        size: "Small"
+                      }
+                    ],
+                    actions: [
+                      {
+                        type: "Action.OpenUrl",
+                        title: "Bekijk Details",
+                        url: $source_url
+                      }
+                    ]
+                  }
+                }
+              ]
             }')"
 
           {

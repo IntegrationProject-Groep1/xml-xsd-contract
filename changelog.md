@@ -47,3 +47,10 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 - Bestanden: .github/PULL_REQUEST_TEMPLATE.md (verwijderd), changelog.md
 - Wijziging: PR-template verwijderd om verwarring te voorkomen en duidelijk te maken dat PR's uitsluitend voorbehouden zijn aan maintainers.
 - Reden: Maximale duidelijkheid en voorkoming van false positives - andere teams mogen geen PR's openen en hoeven geen template te zien.
+
+## 2026-04-30 15:15 (+02:00)
+- Auteur: Gemini CLI (Lead Integratie Agent)
+- Betrokken teams: CRM, Kassa, Frontend, Planning, Facturatie, Monitoring, Mailing, Identity
+- Bestanden: .github/workflows/teams-notify.yml, README.md, changelog.md
+- Wijziging: Teams notificatie workflow hersteld naar Adaptive Card formaat (v1.2), changelog extractie gefixed naar laatste entry, README aangescherpt met governance (alleen maintainers) en communicatiekanalen (XML - XSD Channel).
+- Reden: Betrouwbare teamcommunicatie garanderen en contractintegriteit beschermen via strikte beheersregels.

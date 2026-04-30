@@ -32,27 +32,26 @@ Bij elke prompt of wijziging in deze repo:
 3. Werk volgens de xml-expert werkwijze (scope en stappen respecteren).
 4. Voeg na elke wijziging een entry toe in `changelog.md`.
 
-## Wijzigingsrechten (Belangrijk)
+## Wijzigingsrechten & Communicatie (Belangrijk)
 
-**Alleen aangewezen maintainers mogen wijzigingen doen in deze repository.**
+**Strikte Governance:** Alleen de aangewezen maintainers mogen wijzigingen doorvoeren in deze repository.
+- **Maintainers:** @tombomeke-ehb en één andere aangewezen developer.
 
-Andere teams mogen:
+Indien er iets mis is met de XML (missende elementen, fouten of onduidelijkheden):
 
-- Issues openen (zie `issue-guide.md`)
-- Vragen stellen
-- Contractnoden melden
+1.  **Discussie:** Ga direct naar het Teams-kanaal: **XML - XSD Channel**. Hier vindt alle inhoudelijke discussie plaats.
+2.  **Issue:** Maak na overleg een formeel [GitHub Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose) aan.
 
-Andere teams mogen niet:
+**Andere teams mogen:**
+- Vragen stellen in het Teams-kanaal.
+- Issues openen op GitHub.
 
-- Contractbestanden wijzigen
-- Push naar main
-- Pull requests openen
+**Andere teams mogen NIET:**
+- Contractbestanden wijzigen.
+- Pushes uitvoeren naar `main`.
+- Pull requests openen.
 
-Dit voorkomt fouten en drift. Alle wijzigingen gaan via centrale maintainers.
-
-Deze regel wordt afgedwongen door:
-
-- `.github/workflows/enforce-maintainers.yml`
+Dit wordt technisch afgedwongen door de `.github/workflows/enforce-maintainers.yml` workflow.
 
 ### Secret voor maintainer lijst (verplicht)
 
