@@ -131,7 +131,7 @@ flowchart TB
 
     %% Functional Flows
     Alle_teams -. "heartbeat" .-> Monitoring
-    CRM -- "consumption_order (passthrough)<br/>invoice_request<br/>new_registration" --> Facturatie
+    CRM -- "invoice_request<br/>new_registration" --> Facturatie
     CRM -- "payment_registered" --> Frontend
     CRM -- "RPC request" --> Identity
     CRM -- "cancel_registration<br/>new_registration<br/>profile_update" --> Kassa
@@ -146,25 +146,16 @@ flowchart TB
     Frontend -. "heartbeat" .-> Monitoring
     Frontend -- "calendar_invite<br/>session_create_request<br/>session_delete_request<br/>session_update_request" --> Planning
     Heartbeat -. "heartbeat" .-> Monitoring
-    Identity -- "/xsd/*.xsd (alle 7 bestanden)<br/>CRM<br/>Eén team fout<br/>Geen eigen XSD's — PHP senders bouwen XML inline<br/>Intern issue<br/>Mailing<br/>cancel_registration<br/>invoice_status<br/>mailing_status<br/>payment_registered<br/>send_mailing<br/>src/sender.js XML builders<br/>user_checkin<br/>user_deleted<br/>user_event<br/>� Beiden fout" --> CRM
-    Identity -- "CRM<br/>Facturatie<br/>Intern issue<br/>Mailing<br/>consumption_order (passthrough)<br/>invoice_cancelled<br/>invoice_request<br/>invoice_status<br/>payment_registered<br/>payment_registered (passthrough)<br/>send_mailing<br/>src/sender.js XML builders<br/>� Beiden fout" --> Facturatie
-    Identity -- "/xsd/*.xsd (alle 7 bestanden)<br/>Geen eigen XSD's — PHP senders bouwen XML inline<br/>calendar_invite<br/>calendar_invite_confirmed<br/>payment_registered<br/>payment_status<br/>session_create_request<br/>session_created<br/>session_delete_request<br/>session_deleted<br/>session_update_request<br/>session_updated<br/>session_view_request<br/>session_view_response<br/>vat_validation_error<br/>wallet_balance_update<br/>Één team fout" --> Frontend
-    Identity -- "XML builder<br/>Één team fout" --> Heartbeat
-    Identity -- "Identity" --> Identity
-    Identity -- "Kassa<br/>badge_assigned<br/>badge_scanned<br/>cancel_registration<br/>consumption_order<br/>invoice_request<br/>new_registration<br/>payment_registered<br/>payment_status<br/>profile_update<br/>refund_processed<br/>src/sender.js XML builders<br/>system_error<br/>wallet_balance_update" --> Kassa
-    Identity -- "Mailing<br/>alert.xsd<br/>send_mailing<br/>src/sender.js XML builders" --> Mailing
-    Identity -- "Mailing<br/>alert.xsd<br/>system_alert" --> Monitoring
-    Identity -- "/xsd/*.xsd (alle 7 bestanden)<br/>CRM<br/>Geen eigen XSD's — PHP senders bouwen XML inline<br/>Intern issue<br/>Planning<br/>calendar_invite<br/>calendar_invite_confirmed<br/>cancel_registration<br/>session_create_request<br/>session_created<br/>session_delete_request<br/>session_deleted<br/>session_update_request<br/>session_updated<br/>session_view_request<br/>session_view_response" --> Planning
+    Identity -- "user_event" --> CRM
     Identity -- "identity_response" --> Requestor
     Kassa -- "payment_registered" --> CRM
-    Kassa -- "consumption_order (passthrough)" --> Facturatie
     Kassa -- "payment_status<br/>wallet_balance_update" --> Frontend
     Kassa -. "heartbeat" .-> Monitoring
     Mailing -- "mailing_status" --> CRM
     Mailing -. "heartbeat" .-> Monitoring
     Monitoring -- "system_alert" --> Mailing
     Planning -- "session_created<br/>session_deleted<br/>session_updated" --> CRM
-    Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated<br/>session_view_request / session_view_response" --> Frontend
+    Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend
     Planning -. "heartbeat" .-> Monitoring
 
     %% Styling

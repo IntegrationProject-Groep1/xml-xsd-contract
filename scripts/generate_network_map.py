@@ -24,6 +24,18 @@ def get_canonical_teams(text):
             
     return found
 
+def clean_berichttype(text):
+    # Only keep things that look like message types (snake_case or specific phrases)
+    # Remove long sentences, paths, or code snippets
+    parts = re.split(r'[,<>]', text)
+    cleaned = []
+    for p in parts:
+        p = p.replace('`', '').strip()
+        # Regex for snake_case or simple words/phrases
+        if re.match(r'^[a-z0-9_ ]+$', p, re.IGNORECASE) and len(p) < 40:
+            cleaned.append(p)
+    return cleaned
+
 def generate_mermaid():
     contract_path = 'XML_XSD_Contract_v2.3_Centralized 1.md'
     readme_path = 'README.md'
@@ -37,9 +49,21 @@ def generate_mermaid():
 
     connections = []
     current_teams = []
+    in_quick_reference = False
     in_table = False
 
     for line in lines:
+        # Detect start/end of Quick Reference section
+        if '##  QUICK REFERENCE' in line:
+            in_quick_reference = True
+            continue
+        if in_quick_reference and (line.startswith('## Navigatie') or line.startswith('## 0.')):
+            in_quick_reference = False
+            break
+
+        if not in_quick_reference:
+            continue
+
         # Detect team section
         team_match = re.search(r'^###\s+\*\*Team\s+([^*]+)\*\*', line)
         if team_match:
@@ -59,13 +83,13 @@ def generate_mermaid():
             parts = [p.strip() for p in line.split('|')]
             if len(parts) >= 4:
                 richting = parts[1].upper()
-                berichttype = parts[2].replace('`', '').strip()
-                van_naar = parts[3].strip()
+                berichttype_raw = parts[2]
+                van_naar = parts[3]
 
                 other_teams = get_canonical_teams(van_naar)
+                types = clean_berichttype(berichttype_raw)
                 
-                if current_teams and other_teams and berichttype:
-                    types = [t.strip() for t in berichttype.split(',')]
+                if current_teams and other_teams and types:
                     for ct in current_teams:
                         for ot in other_teams:
                             for t in types:
@@ -78,7 +102,6 @@ def generate_mermaid():
     grouped = {}
     unique_teams = set()
     for sender, receiver, msg in connections:
-        # Skip self-loops for heartbeats if they exist
         if sender == receiver and "heartbeat" in msg.lower():
             continue
             
