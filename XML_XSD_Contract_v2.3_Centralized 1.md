@@ -39,7 +39,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **ONTVANGT** | `new_registration` | ← Frontend | v2.0  | [5.1](#51-new_registration-frontend--crm) |
-|  **ONTVANGT** | `user_created`, `user_updated`, `user_deleted` | ← Frontend |  dotted type | [5.2-5.4](#52-user_created-frontend--crm) |
+|  **ONTVANGT** | `user_created`, `user_updated`, `user_deleted` | ← Frontend |  dotted type | [5.2-5.4](#52-user_created) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  `session_update` (fout) | [7.1-7.2](#71-session_created-planning--crm) |
 |  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.1](#61-payment_registered-kassa--crm) |
 |  **ONTVANGT** | `invoice_created_notification` | ← Facturatie |  | [8.1](#81-invoice_created_notification-facturatie--crm) |
@@ -68,9 +68,9 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **VERZENDT** | `new_registration` | → CRM |  bevat `<master_uuid>`, `<age>` | [5.1](#51-new_registration-frontend--crm) |
-|  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | _(XSD nog te documenteren — zie audit 0.6)_ |
-|  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.2](#52-user_updated) |
-|  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.3](#53-user_deleted-frontend--crm) |
+|  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | [5.2](#52-user_created) |
+|  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.3](#53-user_updated) |
+|  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.4](#54-user_deleted) |
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [21.1](#211-user_checkin-frontend--crm) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
@@ -1116,7 +1116,125 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
 
 ---
 
-### 5.2 `user_updated`
+### 5.2 `user_created`
+
+Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-inschrijving (profile-only). Voor sessie-inschrijvingen gebruik je `new_registration` (§5.1).
+
+> **Volgorde t.o.v. Identity Service:** dit bericht wordt pas gepubliceerd nadat Frontend de `master_uuid` heeft opgehaald via de Identity RPC (`identity.user.create.request`, zie §15.1). Identity zelf broadcast óók een `user_event` (UserCreated) op de `user.events` fanout (§15.5) — dit `user_created` bericht naar CRM is een aanvulling met de profielvelden die Identity niet heeft (naam, geboortedatum, bedrijfsdata).
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="xs:string"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="user_created"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="customer">
+            <xs:complexType><xs:sequence>
+              <!-- user_id: de master_uuid van de Identity Service -->
+              <xs:element name="user_id"       type="xs:string"/>
+              <xs:element name="email"         type="xs:string"/>
+              <xs:element name="date_of_birth" type="xs:date"/>
+              <xs:element name="contact">
+                <xs:complexType><xs:sequence>
+                  <xs:element name="first_name" type="xs:string"/>
+                  <xs:element name="last_name"  type="xs:string"/>
+                </xs:sequence></xs:complexType>
+              </xs:element>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="phone"        type="xs:string" minOccurs="0"/>
+              <xs:element name="company_name" type="xs:string" minOccurs="0"/>
+              <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
+              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
+            </xs:sequence></xs:complexType>
+          </xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML — particulier
+
+```xml
+<message>
+  <header>
+    <message_id>1a2b3c4d-5e6f-7890-1234-567890abcdef</message_id>
+    <timestamp>2026-04-24T09:14:00Z</timestamp>
+    <source>frontend</source>
+    <type>user_created</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <customer>
+      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <email>jan.peeters@ehb.be</email>
+      <date_of_birth>1995-03-21</date_of_birth>
+      <contact>
+        <first_name>Jan</first_name>
+        <last_name>Peeters</last_name>
+      </contact>
+      <type>private</type>
+      <phone>+32477123456</phone>
+    </customer>
+  </body>
+</message>
+```
+
+#### Voorbeeld XML — bedrijf
+
+```xml
+<message>
+  <header>
+    <message_id>2b3c4d5e-6f70-8901-2345-67890abcdef0</message_id>
+    <timestamp>2026-04-24T09:14:00Z</timestamp>
+    <source>frontend</source>
+    <type>user_created</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <customer>
+      <user_id>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</user_id>
+      <email>info@ehb.be</email>
+      <date_of_birth>1980-01-01</date_of_birth>
+      <contact>
+        <first_name>An</first_name>
+        <last_name>Janssens</last_name>
+      </contact>
+      <type>company</type>
+      <company_name>Erasmushogeschool Brussel</company_name>
+      <vat_number>BE0876543210</vat_number>
+      <company_id>ehb-001</company_id>
+    </customer>
+  </body>
+</message>
+```
+
+> **Voor CRM:** Maak/update een Salesforce Contact met deze velden. Géén sessie-inschrijving aanmaken — dat gebeurt later via `new_registration` (§5.1) als de gebruiker zich daadwerkelijk inschrijft op een sessie.
+
+---
+
+### 5.3 `user_updated`
 
 Wanneer een gebruiker zijn profiel wijzigt.
 
@@ -1191,7 +1309,7 @@ Wanneer een gebruiker zijn profiel wijzigt.
 
 ---
 
-### 5.3 `user_deleted`
+### 5.4 `user_deleted`
 
 Wanneer een account volledig wordt verwijderd.  
 > **Naamwijziging:** was `user.unregistered` → nu `user_deleted` (snake_case, duidelijker).
