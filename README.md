@@ -1,4 +1,4 @@
-![Header](https://capsule-render.vercel.app/render?type=waving&color=0b1f2a&height=300&section=header&text=XML%2FXSD%20Contract%20Hub&fontSize=70&animation=fadeIn&fontColor=ffffff&desc=The%20Source%20of%20Truth%20for%20Enterprise%20Integrations&descSize=20&descAlignY=51)
+![Header](https://capsule-render.vercel.app/render?type=waving&color=0b1f2a&height=300&text=XML%2FXSD%20Contract%20Hub&fontSize=70&animation=scaleIn&fontColor=ffffff&desc=The%20Source%20of%20Truth%20for%20Enterprise%20Integrations&descSize=20&descAlignY=51)
 
 <div align="center">
 <a href="https://skillicons.dev">
