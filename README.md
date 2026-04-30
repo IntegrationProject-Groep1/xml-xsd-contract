@@ -180,6 +180,14 @@ flowchart LR
 
 <!-- NETWORK_MAP_END -->
 
+#### 💡 Legende
+| Stijl | Betekenis |
+| :--- | :--- |
+| <span style="color:#10b981">**Groene pijl**</span> | Functioneel bericht **NAAR** de CRM (Inbound) |
+| <span style="color:#3b82f6">**Blauwe pijl**</span> | Functioneel bericht **VANAF** de CRM (Outbound) |
+| <span style="color:#6366f1">**Indigo pijl**</span> | Direct bericht tussen teams (Peer-to-peer) |
+| <span style="color:#94a3b8">**Grijze stippellijn**</span> | Heartbeat / Status bericht naar Monitoring |
+
 Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
 
 ---
