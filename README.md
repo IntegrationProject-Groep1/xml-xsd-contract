@@ -10,7 +10,6 @@
 </a>
 
 </div>
-# XML/XSD Contract Hub
 
 [![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
 [![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
