@@ -103,7 +103,7 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-### ![https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a](https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a)
+![Network Map](https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a)
 
 #### 💡 Legende
 | Kleur / Stijl | Richting & Betekenis |

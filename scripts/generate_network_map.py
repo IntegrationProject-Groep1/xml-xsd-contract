@@ -170,7 +170,7 @@ def generate_mermaid():
     
     # Construct the Legend as Markdown
     legend = [
-        f"### ![{badge_url}]({badge_url})",
+        f"![Network Map]({badge_url})",
         "\n#### 💡 Legende",
         "| Kleur / Stijl | Richting & Betekenis |",
         "| :--- | :--- |",
