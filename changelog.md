@@ -1,4 +1,11 @@
-# Changelog
+#
+## 2026-04-30 17:40 (+02:00)
+- Auteur: tombomeke-ehb
+- Betrokken teams: Geen
+- Bestanden: README.md
+- Wijziging: Added a new mermaid page for overview of all the exchanges through rabbitmq
+- Reden: Now when you look at this you instantly know what communicates with what and how without having to understand how xml works
+ Changelog
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
