@@ -103,7 +103,13 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-![](https://img.shields.io/badge/SYSTEM-NERVES-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)![](https://img.shields.io/badge/CONTRACT-v2.3-2f855a?style=for-the-badge&logo=gitbook&logoColor=white)![](https://img.shields.io/badge/FEED-LIVE-0a7ea4?style=for-the-badge&logo=activitypub&logoColor=white)
+<details>
+<summary>
+
+![System Dashboard](https://img.shields.io/badge/INTEGRATION_HUB-MASTER_CONTROL_ACTIVE-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)![Status](https://img.shields.io/badge/VIEW_LIVE_MAP-CLICK_TO_EXPAND-2f855a?style=for-the-badge&logo=diagrams.net&logoColor=white)
+
+</summary>
+
 
 > [!TIP]
 > **📡 Message Flow Logic**
@@ -208,6 +214,8 @@ flowchart LR
     linkStyle 25 stroke:#6366f1,stroke-width:2px;
     linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
 ```
+
+</details>
 
 <!-- NETWORK_MAP_END -->
 

@@ -165,16 +165,14 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
-    # Pro "Control Bar" Header
-    badge_header = (
-        "![](https://img.shields.io/badge/SYSTEM-NERVES-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)"
-        "![](https://img.shields.io/badge/CONTRACT-v2.3-2f855a?style=for-the-badge&logo=gitbook&logoColor=white)"
-        "![](https://img.shields.io/badge/FEED-LIVE-0a7ea4?style=for-the-badge&logo=activitypub&logoColor=white)"
+    # Interactive Master Control Header
+    master_badge = (
+        "![System Dashboard](https://img.shields.io/badge/INTEGRATION_HUB-MASTER_CONTROL_ACTIVE-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)"
+        "![Status](https://img.shields.io/badge/VIEW_LIVE_MAP-CLICK_TO_EXPAND-2f855a?style=for-the-badge&logo=diagrams.net&logoColor=white)"
     )
     
     # Pro "Admonition" Legend
     legend = [
-        badge_header,
         "\n> [!TIP]",
         "> **📡 Message Flow Logic**",
         "> - **GROEN** ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) &nbsp; Bericht **NAAR** de CRM (Inbound Hub)",
@@ -189,16 +187,24 @@ def generate_mermaid():
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
-            # Re-run replacements to inject new logic
-            full_section = f"{start}\n\n{legend_str}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}"
+            # Full section: Master Badge as Summary, then Legend and Mermaid Diagram
+            interactive_wrapper = (
+                f"<details>\n"
+                f"<summary>\n\n{master_badge}\n\n</summary>\n\n"
+                f"{legend_str}\n\n"
+                f"```mermaid\n{mermaid_str}\n```\n\n"
+                f"</details>"
+            )
+            
+            full_section = f"{start}\n\n{interactive_wrapper}\n\n{end}"
             new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
             
-            # Additional cleanup for any legacy legend tables
+            # Final cleanup
             new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
 
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with PRO System Dashboard.")
+            print("README.md updated with INTERACTIVE MASTER CONTROL.")
 
 if __name__ == "__main__":
     generate_mermaid()
