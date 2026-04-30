@@ -96,9 +96,7 @@ def generate_mermaid():
         unique_teams.add(sender)
         unique_teams.add(receiver)
 
-    # Use flowchart LR for hub-and-spoke layout
     mermaid = ["flowchart LR"]
-    mermaid.append("    %% Style Definitions")
     mermaid.append("    classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;")
     mermaid.append("    classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;")
     mermaid.append("    classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;")
@@ -106,12 +104,10 @@ def generate_mermaid():
     def get_id(name):
         return re.sub(r'[^a-zA-Z0-9]', '_', name)
 
-    # CRM as the Central Hub
     if "CRM" in unique_teams:
         mermaid.append(f"    CRM([\"CRM\"])")
         mermaid.append(f"    class CRM core;")
 
-    # Connections and dynamic styling
     link_styles = []
     link_count = 0
 
@@ -123,21 +119,19 @@ def generate_mermaid():
         if functional:
             msg_label = "<br/>".join(sorted(list(functional)))
             mermaid.append(f"    {s_id} -- \"{msg_label}\" --> {r_id}")
-            
             if s == "CRM":
-                link_styles.append(f"    linkStyle {link_count} stroke:#3b82f6,stroke-width:2px,color:#3b82f6;")
+                link_styles.append(f"    linkStyle {link_count} stroke:#3b82f6,stroke-width:2px;")
             elif r == "CRM":
-                link_styles.append(f"    linkStyle {link_count} stroke:#10b981,stroke-width:2px,color:#10b981;")
+                link_styles.append(f"    linkStyle {link_count} stroke:#10b981,stroke-width:2px;")
             else:
-                link_styles.append(f"    linkStyle {link_count} stroke:#6366f1,stroke-width:2px,color:#6366f1;")
+                link_styles.append(f"    linkStyle {link_count} stroke:#6366f1,stroke-width:2px;")
             link_count += 1
         
         if heartbeats:
             mermaid.append(f"    {s_id} -. \"heartbeat\" .-> {r_id}")
-            link_styles.append(f"    linkStyle {link_count} stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;")
+            link_styles.append(f"    linkStyle {link_count} stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;")
             link_count += 1
 
-    # Apply classes to other teams
     for name in sorted(list(unique_teams)):
         if name == "CRM": continue
         t_id = get_id(name)
@@ -161,7 +155,7 @@ def generate_mermaid():
             new_content = re.sub(f"{start}.*?{end}", f"{start}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}", content, flags=re.DOTALL)
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with HUB-centric map.")
+            print("README.md updated with CLEAN HUB map.")
 
 if __name__ == "__main__":
     generate_mermaid()

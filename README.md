@@ -105,7 +105,6 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 ```mermaid
 flowchart LR
-    %% Style Definitions
     classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;
     classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
     classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;
@@ -150,33 +149,33 @@ flowchart LR
     class Requestor core;
 
     %% Edge Styles
-    linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 1 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 2 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 3 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 4 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 5 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 6 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 7 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 8 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 9 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 10 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 11 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 12 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 14 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 15 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 16 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 17 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 18 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 19 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 20 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 21 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 22 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
-    linkStyle 23 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 24 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 25 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
+    linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 1 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 2 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 3 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 4 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 5 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 6 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 7 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 8 stroke:#10b981,stroke-width:2px;
+    linkStyle 9 stroke:#6366f1,stroke-width:2px;
+    linkStyle 10 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 11 stroke:#10b981,stroke-width:2px;
+    linkStyle 12 stroke:#6366f1,stroke-width:2px;
+    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 14 stroke:#6366f1,stroke-width:2px;
+    linkStyle 15 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 16 stroke:#10b981,stroke-width:2px;
+    linkStyle 17 stroke:#6366f1,stroke-width:2px;
+    linkStyle 18 stroke:#10b981,stroke-width:2px;
+    linkStyle 19 stroke:#6366f1,stroke-width:2px;
+    linkStyle 20 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 21 stroke:#10b981,stroke-width:2px;
+    linkStyle 22 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 23 stroke:#6366f1,stroke-width:2px;
+    linkStyle 24 stroke:#10b981,stroke-width:2px;
+    linkStyle 25 stroke:#6366f1,stroke-width:2px;
+    linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
 ```
 
 <!-- NETWORK_MAP_END -->
