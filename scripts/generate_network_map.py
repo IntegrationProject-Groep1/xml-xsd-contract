@@ -60,32 +60,76 @@ def generate_mermaid():
 
     # Deduplicate and group by sender/receiver
     grouped = {}
+    teams = set()
     for sender, receiver, msg in connections:
         key = (sender, receiver)
         if key not in grouped:
             grouped[key] = set()
         grouped[key].add(msg)
+        
+        # Track all unique teams and their IDs
+        s_id = re.sub(r'[^a-zA-Z0-9]', '_', sender)
+        r_id = re.sub(r'[^a-zA-Z0-9]', '_', receiver)
+        teams.add((s_id, sender))
+        teams.add((r_id, receiver))
 
     # Generate Mermaid syntax
-    mermaid = ["flowchart LR"]
+    mermaid = ["flowchart TB"]
     
     # Style definitions
-    mermaid.append("    classDef team fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;")
-    mermaid.append("    classDef external fill:#0b1f2a,color:#fff,stroke:#2f855a,stroke-width:1px;")
+    mermaid.append("    classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;")
+    mermaid.append("    classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;")
+    mermaid.append("    classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;")
+    
+    # Categorize teams
+    core_teams = {"CRM", "Identity", "Requestor"}
+    support_teams = {"Monitoring", "Mailing", "Heartbeat", "Alle teams", "Heartbeat team"}
 
-    teams = set()
-    for (s, r), msgs in grouped.items():
-        msg_label = "<br/>".join(sorted(list(msgs)))
-        # Replace problematic characters for Mermaid
+    # Group connections to identify "Heartbeat-only" lines
+    mermaid.append("\n    subgraph CORE [\"🔑 Core & Routing\"]")
+    for t_id, t_name in sorted(list(teams)):
+        if t_name in core_teams:
+            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    mermaid.append("    end")
+
+    mermaid.append("\n    subgraph OPS [\"⚙️ Operational Teams\"]")
+    for t_id, t_name in sorted(list(teams)):
+        if t_name not in core_teams and t_name not in support_teams:
+            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    mermaid.append("    end")
+
+    mermaid.append("\n    subgraph SUPPORT [\"📢 Support & Alerts\"]")
+    for t_id, t_name in sorted(list(teams)):
+        if t_name in support_teams:
+            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    mermaid.append("    end")
+
+    mermaid.append("\n    %% Connections")
+    for (s, r), msgs in sorted(grouped.items()):
+        # Separate heartbeats from other messages
+        heartbeats = {m for m in msgs if "heartbeat" in m.lower()}
+        functional = msgs - heartbeats
+        
         s_id = re.sub(r'[^a-zA-Z0-9]', '_', s)
         r_id = re.sub(r'[^a-zA-Z0-9]', '_', r)
-        
-        mermaid.append(f"    {s_id}([\"{s}\"]) -- \"{msg_label}\" --> {r_id}([\"{r}\"])")
-        teams.add((s_id, s))
-        teams.add((r_id, r))
 
-    for t_id, t_name in teams:
-        mermaid.append(f"    class {t_id} team;")
+        if functional:
+            msg_label = "<br/>".join(sorted(list(functional)))
+            mermaid.append(f"    {s_id} -- \"{msg_label}\" --> {r_id}")
+        
+        if heartbeats:
+            # Use dotted lines for heartbeats to reduce noise
+            mermaid.append(f"    {s_id} -. \"heartbeat\" .-> {r_id}")
+
+    # Apply classes
+    mermaid.append("\n    %% Styling classes")
+    for t_id, t_name in sorted(list(teams)):
+        if t_name in core_teams:
+            mermaid.append(f"    class {t_id} core;")
+        elif t_name in support_teams:
+            mermaid.append(f"    class {t_id} support;")
+        else:
+            mermaid.append(f"    class {t_id} ops;")
 
     mermaid_str = "\n".join(mermaid)
 
