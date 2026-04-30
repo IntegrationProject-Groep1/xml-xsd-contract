@@ -1,7 +1,7 @@
 <div align="center">
 
-# 🌐 XML/XSD Contract Hub
-### ⚖️ The Source of Truth for Enterprise Integrations
+# XML/XSD Contract Hub
+### The Source of Truth for Enterprise Integrations
 
 <br/>
 
