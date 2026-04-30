@@ -181,16 +181,19 @@ def generate_mermaid():
         f"</div>\n\n"
         f"---"
     )
+# Pro Legend - Enterprise Technical Key
+legend = [
+    "#### 🧭 System Integration Key",
+    "| Flow Type | Visual Logic | Path Description |",
+    "| :--- | :--- | :--- |",
+    "| **INBOUND** | ![](https://img.shields.io/badge/-%20-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |",
+    "| **OUTBOUND** | ![](https://img.shields.io/badge/-%20-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |",
+    "| **PEER-TO-PEER** | ![](https://img.shields.io/badge/-%20-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |",
+    "| **MONITORING** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |",
+    "\n---"
+]
+legend_str = "\n".join(legend)
 
-    legend = [
-        "\n> [!TIP]",
-        "> **📡 Message Flow Logic**",
-        "> - **GROEN** ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) &nbsp; Bericht **NAAR** de CRM (Inbound Hub)",
-        "> - **BLAUW** ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) &nbsp; Bericht **VANAF** de CRM (Outbound Hub)",
-        "> - **INDIGO** ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) &nbsp; Bericht **TUSSEN TEAMS** (Direct peer-to-peer)",
-        "> - **GRIJS** ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) &nbsp; **HEARTBEATS** (Status naar Monitoring)"
-    ]
-    legend_str = "\n".join(legend)
 
     if os.path.exists(readme_path):
         with open(readme_path, 'r', encoding='utf-8') as f:
