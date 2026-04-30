@@ -22,7 +22,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Sectie |
 |----------|---|---|---|
 |  **ONTVANGT** | `new_registration`, `profile_update`, `cancel_registration` | ← CRM | [10. CRM → Kassa](#10-crm--kassa) |
-|  **VERZENDT** | `payment_registered` | → CRM | [6.1 Kassa → CRM](#61-payment_registered-kassa--crm) |
+|  **VERZENDT** | `payment_registered` | → CRM | [6.6 Kassa → CRM](#66-payment_registered-kassa--rabbitmq) |
 |  **VERZENDT** | `payment_status`, `wallet_balance_update` | → Frontend | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **BROADCAST** | `heartbeat` | → Monitoring | [3. Heartbeat](#3-heartbeat--alle-teams--monitoring) |
 
@@ -68,8 +68,8 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **VERZENDT** | `new_registration` | → CRM |  bevat `<master_uuid>`, `<age>` | [5.1](#51-new_registration-frontend--crm) |
-|  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | [5.2](#52-user_created-frontend--crm) |
-|  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.2](#52-user_created-frontend--crm) |
+|  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | _(XSD nog te documenteren — zie audit 0.6)_ |
+|  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.2](#52-user_updated) |
 |  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.3](#53-user_deleted-frontend--crm) |
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [21.1](#211-user_checkin-frontend--crm) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
@@ -121,8 +121,8 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `invoice_request` | ← CRM |  XSD bevat `<items>` | [11.1](#111-invoice_request-crm--facturatie) |
 |  **ONTVANGT** | `consumption_order` (passthrough) | ← CRM/Kassa |  | [11.3](#113-consumption_order-crm--facturatie--passthrough) |
 |  **ONTVANGT** | `new_registration` | ← CRM |  | [10.1](#101-new_registration-crm--kassa) |
-|  **VERZENDT** | `invoice_created_notification` | → CRM |  XSD broken | [8.1](#81-invoice_created_notification-facturatie--crm) |
-|  **VERZENDT** | `invoice_status` | → CRM |  type is `send_invoice` | [8.1](#81-invoice_created_notification-facturatie--crm) |
+|  **VERZENDT** | `invoice_status` | → CRM |  type is `send_invoice` | [8.1](#81-invoice_status) |
+|  **VERZENDT** | `payment_registered` | → CRM |  XSD bevat `<master_uuid>` | [8.2](#82-payment_registered) |
 |  **VERZENDT** | `send_mailing` | → Mailing |  | [13.1](#131-send_mailing-facturatie--mailing) |
 |  **BROADCAST** | `heartbeat` | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
@@ -185,8 +185,8 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **ONTVANGT** | RPC request | ← CRM, Frontend |  platte XML (OK) | [15](#15-identity-service--uitzondering-op-de-standaard) |
-|  **VERZENDT** | `identity_response` | → Requestor |  platte XML (OK) | [14.1](#141-identity_response) |
-|  **BROADCAST** | `user_event` | → CRM |  platte XML (OK) | [14.2](#142-user_event) |
+|  **VERZENDT** | `identity_response` | → Requestor |  platte XML (OK) | [15.4](#154-rpc-response--identity-antwoord-alle-3-de-requests) |
+|  **BROADCAST** | `user_event` | → CRM |  platte XML (OK) | [15.5](#155-fanout-event--usercreated) |
 
 **Opmerkingen:**
 - Identity Service is **bewust uitzondering** — uses RPC pattern met platte XML
@@ -556,7 +556,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 8. [Facturatie → CRM](#8-facturatie--crm)
 9. [Mailing → CRM](#9-mailing--crm)
 10. [CRM → Kassa](#10-crm--kassa)
-11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough)*
+11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough, 11.4 payment_registered passthrough)*
 12. [CRM → Mailing](#12-crm--mailing)
 13. [Facturatie → Mailing](#13-facturatie--mailing)
 14. [CRM → Frontend](#14-crm--frontend)
@@ -4889,7 +4889,7 @@ Elk team voegt dan dit als git-submodule toe en valideert inkomende berichten te
 > **Als twee teams hetzelfde bericht anders interpreteren, is het contract fout.**
 
 Niet het team.
-� Maak een issue aan op GitHub en update dit document.
+Maak een issue aan op GitHub en update dit document.
 
 Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update geweest is, geldt deze versie.
 
@@ -4897,6 +4897,4 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 *Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-document IS nu de canonieke bron. Zolang er geen issue + update geweest is, geldt deze versie.
 
