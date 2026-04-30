@@ -118,12 +118,12 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 ---
 
 #### 🧭 System Integration Key
-| Flow Type | Visual Logic | Path Description |
-| :--- | :--- | :--- |
-| **INBOUND** | ![](https://img.shields.io/badge/-%20-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |
-| **OUTBOUND** | ![](https://img.shields.io/badge/-%20-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |
-| **PEER-TO-PEER** | ![](https://img.shields.io/badge/-%20-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |
-| **SYSTEM** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
+| Integration Flow | Architectural Path Description |
+| :--- | :--- |
+| ![](https://img.shields.io/badge/INBOUND-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |
+| ![](https://img.shields.io/badge/OUTBOUND-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |
+| ![](https://img.shields.io/badge/PEER--TO--PEER-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |
+| ![](https://img.shields.io/badge/SYSTEM-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
 
 ---
 

@@ -194,7 +194,7 @@ def generate_mermaid():
         "\n---"
     ]
     legend_str = "\n".join(legend)
- Applied fuzzy match at line 184-194.
+
     if os.path.exists(readme_path):
         with open(readme_path, 'r', encoding='utf-8') as f:
             content = f.read()
