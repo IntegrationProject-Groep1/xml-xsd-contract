@@ -13,6 +13,8 @@ Doel: de XML/XSD contracten consistent, controleerbaar en traceerbaar houden.
 1. Deze repository beheert de contract-documentatie en afspraken rond XML/XSD berichten.
 2. Het centrale contractbestand is de functionele waarheid voor structuur en validatieregels.
 3. Wijzigingen gebeuren bewust en gecontroleerd, nooit impulsief.
+4. Alleen aangewezen maintainers mogen wijzigingen in deze repository uitvoeren.
+5. Andere teams gebruiken issues om fouten, ontbrekende XML of contractvragen te melden.
 
 ## 2. Verplichte Start bij Elke Prompt of Taak
 
@@ -31,6 +33,7 @@ Als deze volgorde niet gevolgd wordt, is het werkproces onvolledig.
 3. Vermijd brede bulk-wijzigingen zonder duidelijke motivatie.
 4. Noteer impact op teams, flows en message types.
 5. Gebruik duidelijke commit- en PR-beschrijvingen.
+6. Als je geen maintainer bent: maak een issue, wijzig het contract niet zelf.
 
 ## 4. Werkwijze Voor AI-assistenten en Agents
 
@@ -82,6 +85,8 @@ Regel: geen changelog-entry betekent geen complete wijziging.
 2. Gebruik het XML/XSD issue-template voor volledige context.
 3. Pull requests volgen de PR-template en moeten changelog-updates bevestigen.
 4. Een PR zonder duidelijke impactbeschrijving is niet review-klaar.
+5. PR's van niet-maintainers voor contractwijzigingen worden niet geaccepteerd.
+6. Niet-maintainers openen alleen issues en doen geen push of PR voor contractwijzigingen.
 
 ## 8. Definitie van Klaar
 

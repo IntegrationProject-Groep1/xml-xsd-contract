@@ -32,6 +32,39 @@ Bij elke prompt of wijziging in deze repo:
 3. Werk volgens de xml-expert werkwijze (scope en stappen respecteren).
 4. Voeg na elke wijziging een entry toe in `changelog.md`.
 
+## Wijzigingsrechten (Belangrijk)
+
+**Alleen aangewezen maintainers mogen wijzigingen doen in deze repository.**
+
+Andere teams mogen:
+
+- Issues openen (zie `issue-guide.md`)
+- Vragen stellen
+- Contractnoden melden
+
+Andere teams mogen niet:
+
+- Contractbestanden wijzigen
+- Push naar main
+- Pull requests openen
+
+Dit voorkomt fouten en drift. Alle wijzigingen gaan via centrale maintainers.
+
+Deze regel wordt afgedwongen door:
+
+- `.github/workflows/enforce-maintainers.yml`
+
+### Secret voor maintainer lijst (verplicht)
+
+1. Open GitHub repo `Settings`.
+2. Ga naar `Secrets and variables` > `Actions`.
+3. Klik `New repository secret`.
+4. Naam: `ALLOWED_CONTRACT_EDITORS`
+5. Waarde: GitHub usernames, komma-gescheiden. Voorbeeld: `jouwusername,andereusername`
+6. Opslaan.
+
+Zonder deze secret faalt de enforcement workflow bewust.
+
 ## Issue Melden op GitHub
 
 Voor XML/XSD problemen gebruik je de handleiding in:

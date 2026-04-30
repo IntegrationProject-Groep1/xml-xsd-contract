@@ -1,0 +1,60 @@
+name: Enforce Maintainer-Only Edits
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - main
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Enforce allowed maintainers
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          ALLOWED_EDITORS: ${{ secrets.ALLOWED_CONTRACT_EDITORS }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${ALLOWED_EDITORS:-}" ]]; then
+            echo "Secret ALLOWED_CONTRACT_EDITORS ontbreekt."
+            echo "Voeg een repository secret toe met bv: jouwusername,andereusername"
+            exit 1
+          fi
+
+          subject_user="$ACTOR"
+          if [[ "$EVENT_NAME" == "pull_request" && -n "${PR_AUTHOR:-}" ]]; then
+            subject_user="$PR_AUTHOR"
+          fi
+
+          normalized_allowed="$(echo "$ALLOWED_EDITORS" | tr '[:upper:]' '[:lower:]' | tr ';' ',' | tr -d ' ')"
+          normalized_subject="$(echo "$subject_user" | tr '[:upper:]' '[:lower:]')"
+
+          is_allowed="false"
+          IFS=',' read -r -a allowlist <<< "$normalized_allowed"
+          for user in "${allowlist[@]}"; do
+            if [[ -n "$user" && "$normalized_subject" == "$user" ]]; then
+              is_allowed="true"
+              break
+            fi
+          done
+
+          if [[ "$is_allowed" != "true" ]]; then
+            echo "Niet-toegelaten wijziging gedetecteerd."
+            echo "Gebruiker: $subject_user"
+            echo "Alleen maintainers uit ALLOWED_CONTRACT_EDITORS mogen deze repo wijzigen."
+            echo "Andere teams mogen issues aanmaken, maar geen contractwijzigingen pushen of mergen."
+            exit 1
+          fi
+
+          echo "Gebruiker $subject_user is toegelaten als maintainer."

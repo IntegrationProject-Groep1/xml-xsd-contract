@@ -124,6 +124,9 @@ jobs:
 
           payload="$(jq -n \
             --arg message "$text_message" \
+            --arg text "$text_message" \
+            --arg title "XML is geupdate" \
+            --arg summary "XML is geupdate" \
             --arg repository "$REPOSITORY" \
             --arg actor "$ACTOR" \
             --arg event "$EVENT_NAME" \
@@ -136,6 +139,9 @@ jobs:
             --arg changelog "$latest_changelog" \
             --arg changed_files "$changed_files" \
             '{
+              text: $text,
+              title: $title,
+              summary: $summary,
               message: $message,
               repository: $repository,
               actor: $actor,
@@ -166,11 +172,23 @@ jobs:
 
           if [[ -z "${WEBHOOK_URL:-}" ]]; then
             echo "TEAMS_WEBHOOK_URL secret is niet ingesteld. Geen notificatie verstuurd."
-            exit 0
+            exit 1
           fi
 
-          curl --fail --silent --show-error \
+          response_file="response.txt"
+          http_code="$(curl --silent --show-error \
+            --output "$response_file" \
+            --write-out "%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
-            "$WEBHOOK_URL"
+            "$WEBHOOK_URL")"
+
+          echo "Webhook HTTP status: $http_code"
+          echo "Webhook response body:"
+          cat "$response_file"
+
+          if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+            echo "Webhook call mislukt met status $http_code"
+            exit 1
+          fi
