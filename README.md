@@ -1,3 +1,15 @@
+<div align="center">
+
+# 🌐 XML/XSD Contract Hub
+### ⚖️ The Source of Truth for Enterprise Integrations
+
+<br/>
+
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
+</a>
+
+</div>
 # XML/XSD Contract Hub
 
 [![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
@@ -9,12 +21,12 @@
 
 ## Status & Metrics
 
-[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions)
+[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions)
 [![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/teams-notify.yml)
+[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/teams-notify.yml)
 [![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
 [![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/enforce-maintainers.yml)
+[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml)
 
 > **Wat is dit?**  
 > Deze repository is de **centrale Source of Truth** voor alle XML/XSD berichtafspraken binnen het Integration Project. Elke koppeling — CRM, Kassa, Frontend, Planning, Facturatie en meer — is gebonden aan de contractdefinities die hier beheerd worden. Afwijkingen worden hier gemeld, besproken en vastgelegd.
@@ -53,7 +65,7 @@
 
 ### Ben je een Niet-Admin User (CRM, Kassa, Frontend, …)?
 
-1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
+1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
 2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
 3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
 4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
@@ -103,15 +115,23 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-### ![https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a](https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a)
+<div align='center'>
 
-#### 💡 Legende
-| Kleur / Stijl | Richting & Betekenis |
+![Integration Map](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines=INTEGRATION+NETWORK+MAP;REAL-TIME+MESSAGE+FLOWS;CONTRACT+V2.3+SOURCE+OF+TRUTH;HUB-AND-SPOKE+ARCHITECTURE)
+
+</div>
+
+---
+
+#### 🧭 System Integration Key
+| Integration Flow | Architectural Path Description |
 | :--- | :--- |
-| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |
-| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |
-| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |
-| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |
+| ![](https://img.shields.io/badge/INBOUND-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |
+| ![](https://img.shields.io/badge/OUTBOUND-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |
+| ![](https://img.shields.io/badge/PEER--TO--PEER-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |
+| ![](https://img.shields.io/badge/SYSTEM-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
+
+---
 
 ```mermaid
 flowchart LR
@@ -220,7 +240,7 @@ Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het 
 
 | Bestand | Doel |
 |---|---|
-| [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
+| [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
 | [`xml-expert.md`](xml-expert.md) | Agent-definitie en strikte werkmodus voor contractwijzigingen |
 | [`instructions.md`](instructions.md) | Bindende werkinstructies voor alle bijdragers (mens en AI) |
 | [`issue-guide.md`](issue-guide.md) | Stap-voor-stap handleiding voor het openen van XML/XSD issues |

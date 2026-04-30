@@ -165,19 +165,33 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
-    # High-Impact "For-the-Badge" Custom Badge using advanced syntax
-    badge_url = "https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a"
+    # Dynamic Typing SVG Header (Personalized for this Repo)
+    typing_svg = (
+        "https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines="
+        "INTEGRATION+NETWORK+MAP;"
+        "REAL-TIME+MESSAGE+FLOWS;"
+        "CONTRACT+V2.3+SOURCE+OF+TRUTH;"
+        "HUB-AND-SPOKE+ARCHITECTURE"
+    )
     
-    # Construct the Legend as Markdown
+    # Pro Dashboard Layout (Focus on Dynamic Title)
+    header_section = (
+        f"<div align='center'>\n\n"
+        f"![Integration Map]({typing_svg})\n\n"
+        f"</div>\n\n"
+        f"---"
+    )
+
+    # Pro Legend - Enterprise Technical Key (Badge-as-Key)
     legend = [
-        f"### ![{badge_url}]({badge_url})",
-        "\n#### 💡 Legende",
-        "| Kleur / Stijl | Richting & Betekenis |",
+        "#### 🧭 System Integration Key",
+        "| Integration Flow | Architectural Path Description |",
         "| :--- | :--- |",
-        "| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |",
-        "| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |",
-        "| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |",
-        "| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |",
+        "| ![](https://img.shields.io/badge/INBOUND-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |",
+        "| ![](https://img.shields.io/badge/OUTBOUND-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |",
+        "| ![](https://img.shields.io/badge/PEER--TO--PEER-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |",
+        "| ![](https://img.shields.io/badge/SYSTEM-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |",
+        "\n---"
     ]
     legend_str = "\n".join(legend)
 
@@ -186,27 +200,23 @@ def generate_mermaid():
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
-            # Full section: Legend then Mermaid Diagram
-            full_section = f"{start}\n\n{legend_str}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}"
+            # Reassemble into a static PRO Dashboard
+            full_section = (
+                f"{start}\n\n"
+                f"{header_section}\n\n"
+                f"{legend_str}\n\n"
+                f"```mermaid\n{mermaid_str}\n```\n\n"
+                f"{end}"
+            )
             
-            # Replace tagged section
             new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
             
-            # CRITICAL FIX: Only clean up legend if it is NOT inside the tags (avoids deleting our fresh work)
-            # We look for a legend that doesn't have the START marker before it in the same block
-            parts = new_content.split(start)
-            if len(parts) > 1:
-                # The legend should be in parts[1], so we only clean up in parts[0] or parts[2:]
-                cleaned_parts = [re.sub(r"#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", p) for i, p in enumerate(parts) if i != 1]
-                # Reassemble
-                if len(parts) > 1:
-                    new_content = cleaned_parts[0] + start + parts[1]
-                    if len(cleaned_parts) > 1:
-                        new_content += start.join(cleaned_parts[1:])
+            # Final legacy cleanup
+            new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
 
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with High-Impact Badge and Restored Legend.")
+            print("README.md updated with DYNAMIC TYPING DASHBOARD.")
 
 if __name__ == "__main__":
     generate_mermaid()
