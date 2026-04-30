@@ -138,22 +138,69 @@ jobs:
                         type: "TextBlock",
                         text: $title,
                         weight: "Bolder",
-                        size: "Medium",
+                        size: "Large",
+                        color: "Accent",
                         wrap: true
                       },
                       {
-                        type: "FactSet",
-                        facts: [
-                          { title: "Repository:", value: $repository },
-                          { title: "Auteur:", value: $actor },
-                          { title: "Teams:", value: $teams }
+                        type: "ColumnSet",
+                        columns: [
+                          {
+                            type: "Column",
+                            width: "auto",
+                            items: [
+                              {
+                                type: "Image",
+                                url: "https://github.com/github.png",
+                                size: "Small",
+                                style: "Person"
+                              }
+                            ]
+                          },
+                          {
+                            type: "Column",
+                            width: "stretch",
+                            items: [
+                              {
+                                type: "TextBlock",
+                                text: $actor,
+                                weight: "Bolder",
+                                wrap: true
+                              },
+                              {
+                                type: "TextBlock",
+                                spacing: "None",
+                                text: $repository,
+                                isSubtle: true,
+                                wrap: true
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        type: "Container",
+                        spacing: "Medium",
+                        style: "Emphasis",
+                        items: [
+                          {
+                            type: "TextBlock",
+                            text: "Betrokken Teams",
+                            weight: "Bolder"
+                          },
+                          {
+                            type: "TextBlock",
+                            text: $teams,
+                            wrap: true,
+                            color: "Attention"
+                          }
                         ]
                       },
                       {
                         type: "TextBlock",
-                        text: "Laatste Changelog Entry:",
+                        text: "📝 Laatste Changelog",
                         weight: "Bolder",
-                        wrap: true,
+                        spacing: "Medium",
                         separator: true
                       },
                       {
@@ -165,9 +212,9 @@ jobs:
                       },
                       {
                         type: "TextBlock",
-                        text: "Gewijzigde Bestanden:",
+                        text: "📂 Gewijzigde Bestanden",
                         weight: "Bolder",
-                        wrap: true,
+                        spacing: "Medium",
                         separator: true
                       },
                       {
@@ -175,13 +222,14 @@ jobs:
                         text: $changed_files,
                         wrap: true,
                         fontType: "Monospace",
-                        size: "Small"
+                        size: "Small",
+                        isSubtle: true
                       }
                     ],
                     actions: [
                       {
                         type: "Action.OpenUrl",
-                        title: "Bekijk Details",
+                        title: "Bekijk Wijzigingen",
                         url: $source_url
                       }
                     ]
