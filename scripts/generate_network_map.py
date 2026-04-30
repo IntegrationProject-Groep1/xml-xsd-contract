@@ -1,6 +1,29 @@
 import re
 import os
 
+CANONICAL_TEAMS = [
+    "CRM", "Kassa", "Frontend", "Planning", "Facturatie", 
+    "Monitoring", "Mailing", "Identity"
+]
+
+def get_canonical_teams(text):
+    found = []
+    # Check for each canonical team in the text (case insensitive)
+    for team in CANONICAL_TEAMS:
+        if re.search(rf'\b{team}\b', text, re.IGNORECASE):
+            found.append(team)
+    
+    # Special cases
+    if not found:
+        if "Alle teams" in text or "Alle-teams" in text:
+            found.append("Alle teams")
+        elif "Heartbeat" in text and "Monitoring" not in text:
+            found.append("Heartbeat")
+        elif "Requestor" in text:
+            found.append("Requestor")
+            
+    return found
+
 def generate_mermaid():
     contract_path = 'XML_XSD_Contract_v2.3_Centralized 1.md'
     readme_path = 'README.md'
@@ -13,14 +36,14 @@ def generate_mermaid():
         lines = f.readlines()
 
     connections = []
-    current_team = None
+    current_teams = []
     in_table = False
 
     for line in lines:
         # Detect team section
         team_match = re.search(r'^###\s+\*\*Team\s+([^*]+)\*\*', line)
         if team_match:
-            current_team = team_match.group(1).strip()
+            current_teams = get_canonical_teams(team_match.group(1))
             in_table = False
             continue
 
@@ -39,39 +62,33 @@ def generate_mermaid():
                 berichttype = parts[2].replace('`', '').strip()
                 van_naar = parts[3].strip()
 
-                # Clean up van_naar (remove arrows and extra text)
-                other_team = re.sub(r'[←→]', '', van_naar).strip()
-                # Remove extra info like "(NIEUW - Option A)" or "← CRM"
-                other_team = other_team.split('(')[0].strip()
+                other_teams = get_canonical_teams(van_naar)
                 
-                if current_team and other_team and berichttype:
-                    # Clean team names
-                    t1 = current_team.split('—')[0].strip()
-                    t2 = other_team.split('—')[0].strip()
-
-                    # Handle multiple message types
+                if current_teams and other_teams and berichttype:
                     types = [t.strip() for t in berichttype.split(',')]
-                    
-                    for t in types:
-                        if 'ONTVANGT' in richting:
-                            connections.append((t2, t1, t))
-                        elif 'VERZENDT' in richting or 'BROADCAST' in richting:
-                            connections.append((t1, t2, t))
+                    for ct in current_teams:
+                        for ot in other_teams:
+                            for t in types:
+                                if 'ONTVANGT' in richting:
+                                    connections.append((ot, ct, t))
+                                else:
+                                    connections.append((ct, ot, t))
 
-    # Deduplicate and group by sender/receiver
+    # Deduplicate and group
     grouped = {}
-    teams = set()
+    unique_teams = set()
     for sender, receiver, msg in connections:
+        # Skip self-loops for heartbeats if they exist
+        if sender == receiver and "heartbeat" in msg.lower():
+            continue
+            
         key = (sender, receiver)
         if key not in grouped:
             grouped[key] = set()
         grouped[key].add(msg)
         
-        # Track all unique teams and their IDs
-        s_id = re.sub(r'[^a-zA-Z0-9]', '_', sender)
-        r_id = re.sub(r'[^a-zA-Z0-9]', '_', receiver)
-        teams.add((s_id, sender))
-        teams.add((r_id, receiver))
+        unique_teams.add(sender)
+        unique_teams.add(receiver)
 
     # Generate Mermaid syntax
     mermaid = ["flowchart TB"]
@@ -81,52 +98,52 @@ def generate_mermaid():
     mermaid.append("    classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;")
     mermaid.append("    classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;")
     
-    # Categorize teams
-    core_teams = {"CRM", "Identity", "Requestor"}
-    support_teams = {"Monitoring", "Mailing", "Heartbeat", "Alle teams", "Heartbeat team"}
+    # Categories for subgraphs
+    core_names = {"CRM", "Identity", "Requestor"}
+    support_names = {"Monitoring", "Mailing", "Heartbeat", "Alle teams"}
 
-    # Group connections to identify "Heartbeat-only" lines
+    def get_id(name):
+        return re.sub(r'[^a-zA-Z0-9]', '_', name)
+
+    # Subgraphs
     mermaid.append("\n    subgraph CORE [\"🔑 Core & Routing\"]")
-    for t_id, t_name in sorted(list(teams)):
-        if t_name in core_teams:
-            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    for name in sorted(list(unique_teams)):
+        if name in core_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
     mermaid.append("    end")
 
     mermaid.append("\n    subgraph OPS [\"⚙️ Operational Teams\"]")
-    for t_id, t_name in sorted(list(teams)):
-        if t_name not in core_teams and t_name not in support_teams:
-            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    for name in sorted(list(unique_teams)):
+        if name not in core_names and name not in support_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
     mermaid.append("    end")
 
     mermaid.append("\n    subgraph SUPPORT [\"📢 Support & Alerts\"]")
-    for t_id, t_name in sorted(list(teams)):
-        if t_name in support_teams:
-            mermaid.append(f"        {t_id}([\"{t_name}\"])")
+    for name in sorted(list(unique_teams)):
+        if name in support_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
     mermaid.append("    end")
 
-    mermaid.append("\n    %% Connections")
+    # Connections
+    mermaid.append("\n    %% Functional Flows")
     for (s, r), msgs in sorted(grouped.items()):
-        # Separate heartbeats from other messages
         heartbeats = {m for m in msgs if "heartbeat" in m.lower()}
         functional = msgs - heartbeats
         
-        s_id = re.sub(r'[^a-zA-Z0-9]', '_', s)
-        r_id = re.sub(r'[^a-zA-Z0-9]', '_', r)
-
         if functional:
             msg_label = "<br/>".join(sorted(list(functional)))
-            mermaid.append(f"    {s_id} -- \"{msg_label}\" --> {r_id}")
+            mermaid.append(f"    {get_id(s)} -- \"{msg_label}\" --> {get_id(r)}")
         
         if heartbeats:
-            # Use dotted lines for heartbeats to reduce noise
-            mermaid.append(f"    {s_id} -. \"heartbeat\" .-> {r_id}")
+            mermaid.append(f"    {get_id(s)} -. \"heartbeat\" .-> {get_id(r)}")
 
-    # Apply classes
-    mermaid.append("\n    %% Styling classes")
-    for t_id, t_name in sorted(list(teams)):
-        if t_name in core_teams:
+    # Classes
+    mermaid.append("\n    %% Styling")
+    for name in sorted(list(unique_teams)):
+        t_id = get_id(name)
+        if name in core_names:
             mermaid.append(f"    class {t_id} core;")
-        elif t_name in support_teams:
+        elif name in support_names:
             mermaid.append(f"    class {t_id} support;")
         else:
             mermaid.append(f"    class {t_id} ops;")
@@ -137,24 +154,12 @@ def generate_mermaid():
     if os.path.exists(readme_path):
         with open(readme_path, 'r', encoding='utf-8') as f:
             content = f.read()
-
-        start_marker = "<!-- NETWORK_MAP_START -->"
-        end_marker = "<!-- NETWORK_MAP_END -->"
-        
-        if start_marker in content and end_marker in content:
-            new_content = re.sub(
-                f"{start_marker}.*?{end_marker}",
-                f"{start_marker}\n\n```mermaid\n{mermaid_str}\n```\n\n{end_marker}",
-                content,
-                flags=re.DOTALL
-            )
+        start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
+        if start in content and end in content:
+            new_content = re.sub(f"{start}.*?{end}", f"{start}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}", content, flags=re.DOTALL)
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with network map.")
-        else:
-            print("Markers not found in README.md. Please add <!-- NETWORK_MAP_START --> and <!-- NETWORK_MAP_END -->.")
-    else:
-        print("README.md not found.")
+            print("README.md updated with CLEAN normalized map.")
 
 if __name__ == "__main__":
     generate_mermaid()
