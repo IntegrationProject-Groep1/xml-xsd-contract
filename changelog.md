@@ -54,3 +54,10 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 - Bestanden: .github/workflows/teams-notify.yml, README.md, changelog.md
 - Wijziging: Teams notificatie workflow hersteld naar Adaptive Card formaat (v1.2), changelog extractie gefixed naar laatste entry, README aangescherpt met governance (alleen maintainers) en communicatiekanalen (XML - XSD Channel).
 - Reden: Betrouwbare teamcommunicatie garanderen en contractintegriteit beschermen via strikte beheersregels.
+
+## 2026-04-30 16:55 (+02:00)
+- Auteur: Gemini CLI (Lead Integratie Agent)
+- Betrokken teams: CRM, Kassa, Frontend, Planning, Facturatie, Monitoring, Mailing, Identity
+- Bestanden: scripts/generate_network_map.py, README.md, changelog.md
+- Wijziging: Netwerk-map script volledig herschreven met subgraph-architectuur, logische teamcategorisering (Core/Ops/Support) en verbeterde Mermaid node-styling.
+- Reden: Verbetering van de visuele structuur en leesbaarheid van het centrale integratieoverzicht.

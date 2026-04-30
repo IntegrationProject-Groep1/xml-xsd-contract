@@ -98,6 +98,120 @@ flowchart TB
     INTTEAMS  -->|"💬 Teams: XML - XSD Channel"| HUB
 ```
 
+### Interactieve Netwerk-Map
+Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en toont alle live berichtstromen tussen teams.
+
+<!-- NETWORK_MAP_START -->
+
+### ![https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a](https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a)
+
+#### 💡 Legende
+| Kleur / Stijl | Richting & Betekenis |
+| :--- | :--- |
+| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |
+| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |
+| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |
+| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |
+
+```mermaid
+flowchart LR
+    %% Style Definitions
+    classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;
+    classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
+    classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;
+
+    subgraph CORE ["🔑 Core & Routing"]
+        CRM(["CRM"])
+        class CRM core;
+        Identity(["Identity"])
+        class Identity core;
+        Requestor(["Requestor"])
+        class Requestor core;
+    end
+
+    subgraph OPS ["⚙️ Operational Teams"]
+        Facturatie(["Facturatie"])
+        class Facturatie ops;
+        Frontend(["Frontend"])
+        class Frontend ops;
+        Kassa(["Kassa"])
+        class Kassa ops;
+        Planning(["Planning"])
+        class Planning ops;
+    end
+
+    subgraph SUPPORT ["📢 Support & Alerts"]
+        Alle_teams(["Alle teams"])
+        class Alle_teams support;
+        Heartbeat(["Heartbeat"])
+        class Heartbeat support;
+        Mailing(["Mailing"])
+        class Mailing support;
+        Monitoring(["Monitoring"])
+        class Monitoring support;
+    end
+
+    %% Functional Flows
+    Alle_teams -. "heartbeat" .-> Monitoring
+    CRM -- "invoice_request<br/>new_registration" --> Facturatie
+    CRM -- "payment_registered" --> Frontend
+    CRM -- "RPC request" --> Identity
+    CRM -- "cancel_registration<br/>new_registration<br/>profile_update" --> Kassa
+    CRM -- "send_mailing" --> Mailing
+    CRM -. "heartbeat" .-> Monitoring
+    CRM -- "cancel_registration" --> Planning
+    Facturatie -- "invoice_created_notification<br/>invoice_status" --> CRM
+    Facturatie -- "send_mailing" --> Mailing
+    Facturatie -. "heartbeat" .-> Monitoring
+    Frontend -- "new_registration<br/>user_checkin<br/>user_created<br/>user_deleted<br/>user_updated" --> CRM
+    Frontend -- "RPC request" --> Identity
+    Frontend -. "heartbeat" .-> Monitoring
+    Frontend -- "calendar_invite<br/>session_create_request<br/>session_delete_request<br/>session_update_request" --> Planning
+    Heartbeat -. "heartbeat" .-> Monitoring
+    Identity -- "user_event" --> CRM
+    Identity -- "identity_response" --> Requestor
+    Kassa -- "payment_registered" --> CRM
+    Kassa -- "payment_status<br/>wallet_balance_update" --> Frontend
+    Kassa -. "heartbeat" .-> Monitoring
+    Mailing -- "mailing_status" --> CRM
+    Mailing -. "heartbeat" .-> Monitoring
+    Monitoring -- "system_alert" --> Mailing
+    Planning -- "session_created<br/>session_deleted<br/>session_updated" --> CRM
+    Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend
+    Planning -. "heartbeat" .-> Monitoring
+
+    %% Edge Styles
+    linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 1 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 2 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 3 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 4 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 5 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 6 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 7 stroke:#3b82f6,stroke-width:2px;
+    linkStyle 8 stroke:#10b981,stroke-width:2px;
+    linkStyle 9 stroke:#6366f1,stroke-width:2px;
+    linkStyle 10 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 11 stroke:#10b981,stroke-width:2px;
+    linkStyle 12 stroke:#6366f1,stroke-width:2px;
+    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 14 stroke:#6366f1,stroke-width:2px;
+    linkStyle 15 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 16 stroke:#10b981,stroke-width:2px;
+    linkStyle 17 stroke:#6366f1,stroke-width:2px;
+    linkStyle 18 stroke:#10b981,stroke-width:2px;
+    linkStyle 19 stroke:#6366f1,stroke-width:2px;
+    linkStyle 20 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 21 stroke:#10b981,stroke-width:2px;
+    linkStyle 22 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 23 stroke:#6366f1,stroke-width:2px;
+    linkStyle 24 stroke:#10b981,stroke-width:2px;
+    linkStyle 25 stroke:#6366f1,stroke-width:2px;
+    linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+```
+
+<!-- NETWORK_MAP_END -->
+
 Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
 
 ---
