@@ -174,15 +174,10 @@ def generate_mermaid():
         "HUB-AND-SPOKE+ARCHITECTURE"
     )
     
-    # Tech Stack Icon Grid (Customized for this Repo)
-    # Icons: rabbitmq, python, mermaid, markdown
-    skill_icons = "https://skillicons.dev/icons?i=rabbitmq,py,mermaid,md&theme=dark"
-    
-    # Pro Dashboard Layout (Integrated Icon Grid)
+    # Pro Dashboard Layout (Focus on Dynamic Title)
     header_section = (
         f"<div align='center'>\n\n"
         f"![Integration Map]({typing_svg})\n\n"
-        f"[![Tech Stack]({skill_icons})](https://skillicons.dev)\n\n"
         f"</div>\n\n"
         f"---"
     )

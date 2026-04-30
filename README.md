@@ -1,5 +1,11 @@
 # XML/XSD Contract Hub
 
+<div align="center">
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=rabbitmq,py,githubactions,md&theme=dark" />
+</a>
+</div>
+
 [![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
 [![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
 [![Governance](https://img.shields.io/badge/Governance-Maintainers%20Only-c53030?style=flat-square&logo=shield&logoColor=white&labelColor=0b1f2a)](instructions.md)
@@ -106,8 +112,6 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 <div align='center'>
 
 ![Integration Map](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines=INTEGRATION+NETWORK+MAP;REAL-TIME+MESSAGE+FLOWS;CONTRACT+V2.3+SOURCE+OF+TRUTH;HUB-AND-SPOKE+ARCHITECTURE)
-
-[![Tech Stack](https://skillicons.dev/icons?i=rabbitmq,py,mermaid,md&theme=dark)](https://skillicons.dev)
 
 </div>
 
