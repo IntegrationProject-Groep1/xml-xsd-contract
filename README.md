@@ -1,12 +1,13 @@
 <div align="center">
+  <img src="https://capsule-render.vercel.app/render?type=waving&color=0b1f2a&height=300&text=XML%20XSD%20Contract%20Hub&fontSize=80&fontColor=ffffff&desc=Integration%20Project%20Groep%201&descSize=20" alt="Header" />
 
-![Header](https://capsule-render.vercel.app/render?type=waving&color=0b1f2a&height=300&section=header&text=XML%2FXSD%20Contract%20Hub&fontSize=80&fontColor=ffffff&desc=Integration%20Project%20Groep%201&descSize=20&descAlignY=51)
+  <br/>
 
-<a href="https://skillicons.dev">
-  <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
-</a>
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
+  </a>
 </div>
-
+Applied fuzzy match at line 1-11.
 # XML/XSD Contract Hub
 
 [![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
