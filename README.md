@@ -105,11 +105,43 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 ```mermaid
 flowchart LR
+    %% Style Definitions
     classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;
     classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
     classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;
-    CRM(["CRM"])
-    class CRM core;
+
+    subgraph CORE ["🔑 Core & Routing"]
+        CRM(["CRM"])
+        class CRM core;
+        Identity(["Identity"])
+        class Identity core;
+        Requestor(["Requestor"])
+        class Requestor core;
+    end
+
+    subgraph OPS ["⚙️ Operational Teams"]
+        Facturatie(["Facturatie"])
+        class Facturatie ops;
+        Frontend(["Frontend"])
+        class Frontend ops;
+        Kassa(["Kassa"])
+        class Kassa ops;
+        Planning(["Planning"])
+        class Planning ops;
+    end
+
+    subgraph SUPPORT ["📢 Support & Alerts"]
+        Alle_teams(["Alle teams"])
+        class Alle_teams support;
+        Heartbeat(["Heartbeat"])
+        class Heartbeat support;
+        Mailing(["Mailing"])
+        class Mailing support;
+        Monitoring(["Monitoring"])
+        class Monitoring support;
+    end
+
+    %% Functional Flows
     Alle_teams -. "heartbeat" .-> Monitoring
     CRM -- "invoice_request<br/>new_registration" --> Facturatie
     CRM -- "payment_registered" --> Frontend
@@ -137,16 +169,6 @@ flowchart LR
     Planning -- "session_created<br/>session_deleted<br/>session_updated" --> CRM
     Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend
     Planning -. "heartbeat" .-> Monitoring
-    class Alle_teams support;
-    class Facturatie ops;
-    class Frontend ops;
-    class Heartbeat support;
-    class Identity core;
-    class Kassa ops;
-    class Mailing support;
-    class Monitoring support;
-    class Planning ops;
-    class Requestor core;
 
     %% Edge Styles
     linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;

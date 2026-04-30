@@ -96,7 +96,9 @@ def generate_mermaid():
         unique_teams.add(sender)
         unique_teams.add(receiver)
 
+    # Layout: Horizontal (LR) with Subgraphs
     mermaid = ["flowchart LR"]
+    mermaid.append("    %% Style Definitions")
     mermaid.append("    classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;")
     mermaid.append("    classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;")
     mermaid.append("    classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;")
@@ -104,10 +106,34 @@ def generate_mermaid():
     def get_id(name):
         return re.sub(r'[^a-zA-Z0-9]', '_', name)
 
-    if "CRM" in unique_teams:
-        mermaid.append(f"    CRM([\"CRM\"])")
-        mermaid.append(f"    class CRM core;")
+    # Define Categories
+    core_names = {"CRM", "Identity", "Requestor"}
+    support_names = {"Monitoring", "Mailing", "Heartbeat", "Alle teams", "Heartbeat team"}
 
+    # Group into Subgraphs
+    mermaid.append("\n    subgraph CORE [\"🔑 Core & Routing\"]")
+    for name in sorted(list(unique_teams)):
+        if name in core_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
+            mermaid.append(f"        class {get_id(name)} core;")
+    mermaid.append("    end")
+
+    mermaid.append("\n    subgraph OPS [\"⚙️ Operational Teams\"]")
+    for name in sorted(list(unique_teams)):
+        if name not in core_names and name not in support_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
+            mermaid.append(f"        class {get_id(name)} ops;")
+    mermaid.append("    end")
+
+    mermaid.append("\n    subgraph SUPPORT [\"📢 Support & Alerts\"]")
+    for name in sorted(list(unique_teams)):
+        if name in support_names:
+            mermaid.append(f"        {get_id(name)}([\"{name}\"])")
+            mermaid.append(f"        class {get_id(name)} support;")
+    mermaid.append("    end")
+
+    # Connections
+    mermaid.append("\n    %% Functional Flows")
     link_styles = []
     link_count = 0
 
@@ -119,11 +145,13 @@ def generate_mermaid():
         if functional:
             msg_label = "<br/>".join(sorted(list(functional)))
             mermaid.append(f"    {s_id} -- \"{msg_label}\" --> {r_id}")
-            if s == "CRM":
+            
+            # Color-coding logic based on hub-and-spoke
+            if s == "CRM": # Outbound from hub
                 link_styles.append(f"    linkStyle {link_count} stroke:#3b82f6,stroke-width:2px;")
-            elif r == "CRM":
+            elif r == "CRM": # Inbound to hub
                 link_styles.append(f"    linkStyle {link_count} stroke:#10b981,stroke-width:2px;")
-            else:
+            else: # Peer-to-peer or other
                 link_styles.append(f"    linkStyle {link_count} stroke:#6366f1,stroke-width:2px;")
             link_count += 1
         
@@ -131,16 +159,6 @@ def generate_mermaid():
             mermaid.append(f"    {s_id} -. \"heartbeat\" .-> {r_id}")
             link_styles.append(f"    linkStyle {link_count} stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;")
             link_count += 1
-
-    for name in sorted(list(unique_teams)):
-        if name == "CRM": continue
-        t_id = get_id(name)
-        if name in ["Identity", "Requestor"]:
-            mermaid.append(f"    class {t_id} core;")
-        elif name in ["Monitoring", "Mailing", "Heartbeat", "Alle teams"]:
-            mermaid.append(f"    class {t_id} support;")
-        else:
-            mermaid.append(f"    class {t_id} ops;")
 
     mermaid.append("\n    %% Edge Styles")
     mermaid.extend(link_styles)
@@ -152,10 +170,11 @@ def generate_mermaid():
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
+            # Construct legend table if not already better placed
             new_content = re.sub(f"{start}.*?{end}", f"{start}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}", content, flags=re.DOTALL)
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with CLEAN HUB map.")
+            print("README.md updated with Refined Architectural Map.")
 
 if __name__ == "__main__":
     generate_mermaid()
