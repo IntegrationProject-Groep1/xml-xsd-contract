@@ -165,13 +165,23 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
-    # Interactive Master Control Header
-    master_badge = (
-        "![System Dashboard](https://img.shields.io/badge/INTEGRATION_HUB-MASTER_CONTROL_ACTIVE-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)"
-        "![Status](https://img.shields.io/badge/VIEW_LIVE_MAP-CLICK_TO_EXPAND-2f855a?style=for-the-badge&logo=diagrams.net&logoColor=white)"
+    # Dynamic Typing SVG Header (Personalized for this Repo)
+    typing_svg = (
+        "https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines="
+        "INTEGRATION+NETWORK+MAP;"
+        "REAL-TIME+MESSAGE+FLOWS;"
+        "CONTRACT+V2.3+SOURCE+OF+TRUTH;"
+        "HUB-AND-SPOKE+ARCHITECTURE"
     )
     
-    # Pro "Admonition" Legend
+    # Pro Dashboard Layout (Static, No Collapsible)
+    header_section = (
+        f"<div align='center'>\n\n"
+        f"![Integration Map]({typing_svg})\n\n"
+        f"</div>\n\n"
+        f"---"
+    )
+
     legend = [
         "\n> [!TIP]",
         "> **📡 Message Flow Logic**",
@@ -187,24 +197,23 @@ def generate_mermaid():
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
-            # Full section: Master Badge as Summary, then Legend and Mermaid Diagram
-            interactive_wrapper = (
-                f"<details>\n"
-                f"<summary>\n\n{master_badge}\n\n</summary>\n\n"
+            # Reassemble into a static PRO Dashboard
+            full_section = (
+                f"{start}\n\n"
+                f"{header_section}\n\n"
                 f"{legend_str}\n\n"
                 f"```mermaid\n{mermaid_str}\n```\n\n"
-                f"</details>"
+                f"{end}"
             )
             
-            full_section = f"{start}\n\n{interactive_wrapper}\n\n{end}"
             new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
             
-            # Final cleanup
+            # Final legacy cleanup
             new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
 
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with INTERACTIVE MASTER CONTROL.")
+            print("README.md updated with DYNAMIC TYPING DASHBOARD.")
 
 if __name__ == "__main__":
     generate_mermaid()

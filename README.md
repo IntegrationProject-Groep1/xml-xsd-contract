@@ -103,12 +103,13 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-<details>
-<summary>
+<div align='center'>
 
-![System Dashboard](https://img.shields.io/badge/INTEGRATION_HUB-MASTER_CONTROL_ACTIVE-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)![Status](https://img.shields.io/badge/VIEW_LIVE_MAP-CLICK_TO_EXPAND-2f855a?style=for-the-badge&logo=diagrams.net&logoColor=white)
+![Integration Map](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines=INTEGRATION+NETWORK+MAP;REAL-TIME+MESSAGE+FLOWS;CONTRACT+V2.3+SOURCE+OF+TRUTH;HUB-AND-SPOKE+ARCHITECTURE)
 
-</summary>
+</div>
+
+---
 
 
 > [!TIP]
@@ -214,8 +215,6 @@ flowchart LR
     linkStyle 25 stroke:#6366f1,stroke-width:2px;
     linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
 ```
-
-</details>
 
 <!-- NETWORK_MAP_END -->
 
