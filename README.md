@@ -1,125 +1,271 @@
 # XML/XSD Contract Hub
 
-![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=for-the-badge&labelColor=0b1f2a)
-![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-XML%2FXSD-2f855a?style=for-the-badge&labelColor=0b1f2a)
-![Workflow](https://img.shields.io/badge/Workflow-Instructions%20%2B%20Changelog-f59e0b?style=for-the-badge&labelColor=0b1f2a)
-![Language](https://img.shields.io/badge/Docs-Nederlands-1f2937?style=for-the-badge&labelColor=0b1f2a)
+[![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
+[![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20→%20XML%2FXSD-2f855a?style=flat-square&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
+[![Governance](https://img.shields.io/badge/Governance-Maintainers%20Only-c53030?style=flat-square&labelColor=0b1f2a)](instructions.md)
+[![Docs](https://img.shields.io/badge/Docs-Nederlands-1f2937?style=flat-square&labelColor=0b1f2a)](#kernbestanden)
 
-Deze repository bevat het gecentraliseerde XML/XSD contract voor het Integration Project.
-Het doel is dat alle teams dezelfde berichtenstructuur gebruiken en afwijkingen snel zichtbaar zijn.
+---
 
-## Waarom Deze Repo Bestaat
+## Status & Metrics
 
-- Een centrale plek voor het officiële XML/XSD contract.
-- Duidelijke afspraken tussen teams over message-structuren.
-- Minder regressies en snellere troubleshooting bij integratieproblemen.
-- Volledige traceerbaarheid van wijzigingen via changelog.
+[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions)
+[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&labelColor=0b1f2a)](changelog.md)
+[![Last Teams Notify](https://img.shields.io/badge/Last%20Teams%20Notify-see%20Actions-f59e0b?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/teams-notify.yml)
+[![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=github&logoColor=white&labelColor=0b1f2a)](#maintainers)
+
+> **Wat is dit?**  
+> Deze repository is de **centrale Source of Truth** voor alle XML/XSD berichtafspraken binnen het Integration Project. Elke koppeling — CRM, Kassa, Frontend, Planning, Facturatie en meer — is gebonden aan de contractdefinities die hier beheerd worden. Afwijkingen worden hier gemeld, besproken en vastgelegd.
+
+---
+
+## Inhoudsopgave
+
+1. [Doelgroep: wie ben jij?](#doelgroep-wie-ben-jij)
+2. [Getting Started](#getting-started)
+3. [Source of Truth Architectuur](#source-of-truth-architectuur)
+4. [Kernbestanden](#kernbestanden)
+5. [Governance & Regels](#governance--regels)
+6. [Voor Niet-Admin Users: Problemen Melden](#voor-niet-admin-users-problemen-melden)
+7. [Voor Maintainers: Wijzigingen Doorvoeren](#voor-maintainers-wijzigingen-doorvoeren)
+8. [Teams Notificaties](#teams-notificaties-automatisch)
+9. [Secrets Configuratie](#secrets-configuratie)
+10. [Samenwerkingsafspraken](#samenwerkingsafspraken)
+
+---
+
+## Doelgroep: wie ben jij?
+
+| Rol | Teams | Rechten |
+|---|---|---|
+| **Maintainer** | @tombomeke-ehb + aangewezen developer | Lezen · Wijzigen · Pushen naar `main` · PR mergen |
+| **Niet-Admin User** | CRM · Kassa · Frontend · Planning · Facturatie · Monitoring · Mailing · Identity | Lezen · Issues openen · Teams-bericht sturen |
+
+> ⚠️ **Niet-Admin Users mogen GEEN directe wijzigingen of Pull Requests doen aan de contractbestanden.**  
+> Dit is technisch afgedwongen via `.github/workflows/enforce-maintainers.yml`.  
+> Bij problemen of vragen volg je het proces onder [Voor Niet-Admin Users](#voor-niet-admin-users-problemen-melden).
+
+---
+
+## Getting Started
+
+### Ben je een Niet-Admin User (CRM, Kassa, Frontend, …)?
+
+1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
+2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
+3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
+4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
+
+### Ben je een Maintainer?
+
+1. Lees [`xml-expert.md`](xml-expert.md) — verplicht voor elke sessie.
+2. Lees [`instructions.md`](instructions.md) — bindende werkinstructies.
+3. Werk in kleine, traceerbare stappen.
+4. Registreer **elke** wijziging in [`changelog.md`](changelog.md) vóór je commit.
+5. Configureer de vereiste secrets (zie [Secrets Configuratie](#secrets-configuratie)).
+
+---
+
+## Source of Truth Architectuur
+
+De contractdefinities in deze repository bepalen de structuur voor alle integrerende systemen:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              XML/XSD Contract Hub  (deze repo)                  │
+│                                                                 │
+│  XML_XSD_Contract_v2.3_Centralized 1.md  ←  Source of Truth    │
+│  instructions.md                         ←  Governance regels  │
+│  xml-expert.md                           ←  Agent/AI kader     │
+│  changelog.md                            ←  Wijzigingshistorie │
+│  issue-guide.md                          ←  Meldingsproces     │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │  contractdefinities
+          ┌────────────▼────────────┐
+          │   Integrerende Teams    │
+          │                         │
+          │  CRM · Kassa · Frontend │
+          │  Planning · Facturatie  │
+          │  Monitoring · Mailing   │
+          │  Identity               │
+          └─────────────────────────┘
+                       │
+          Problemen en vragen via:
+          GitHub Issues  +  Teams: XML - XSD Channel
+```
+
+Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen in het contract gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
+
+---
 
 ## Kernbestanden
 
-- `XML_XSD_Contract_v2.3_Centralized 1.md`: het officiële en gecentraliseerde contract.
-- `xml-expert.md`: agent-definitie en strikte werkmodus voor contractwijzigingen.
-- `instructions.md`: verplichte werkinstructies voor bijdragen in deze repo.
-- `issue-guide.md`: handleiding om XML/XSD issues op GitHub te openen.
-- `changelog.md`: historiek van alle wijzigingen met datum en tijd.
+| Bestand | Doel |
+|---|---|
+| [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
+| [`xml-expert.md`](xml-expert.md) | Agent-definitie en strikte werkmodus voor contractwijzigingen |
+| [`instructions.md`](instructions.md) | Bindende werkinstructies voor alle bijdragers (mens en AI) |
+| [`issue-guide.md`](issue-guide.md) | Stap-voor-stap handleiding voor het openen van XML/XSD issues |
+| [`changelog.md`](changelog.md) | Volledige historiek van wijzigingen met datum, tijd en auteur |
 
-## Verplichte Workflow
+---
 
-Bij elke prompt of wijziging in deze repo:
+## Governance & Regels
 
-1. Lees `xml-expert.md`.
-2. Lees `instructions.md`.
-3. Werk volgens de xml-expert werkwijze (scope en stappen respecteren).
-4. Voeg na elke wijziging een entry toe in `changelog.md`.
+> De volgende regels zijn bindend voor iedereen die in of met deze repository werkt.  
+> Volledig kader: [`instructions.md`](instructions.md).
 
-## Wijzigingsrechten & Communicatie (Belangrijk)
+### Scope & Autoriteit
+- Deze repository beheert de contract-documentatie en afspraken rond XML/XSD berichten.
+- Het centrale contractbestand is de **functionele waarheid** voor structuur en validatieregels.
+- Wijzigingen gebeuren bewust en gecontroleerd — nooit impulsief.
+- **Alleen aangewezen maintainers** mogen wijzigingen uitvoeren.
 
-**Strikte Governance:** Alleen de aangewezen maintainers mogen wijzigingen doorvoeren in deze repository.
-- **Maintainers:** @tombomeke-ehb en één andere aangewezen developer.
+### Kwaliteitsregels
+- Consistentie gaat voor snelheid.
+- Elke wijziging heeft een expliciete, gedocumenteerde reden.
+- Berichtstructuren, naming en versies blijven uniform.
+- Vermijd regressies door wijzigingen te toetsen aan bestaande afspraken.
+- Twijfelgevallen worden eerst als issue gedocumenteerd.
 
-Indien er iets mis is met de XML (missende elementen, fouten of onduidelijkheden):
+### Verplichte Changelog-Entry
+Na elke wijziging volgt **direct** een entry in `changelog.md` met dit formaat:
 
-1.  **Discussie:** Ga direct naar het Teams-kanaal: **XML - XSD Channel**. Hier vindt alle inhoudelijke discussie plaats.
-2.  **Issue:** Maak na overleg een formeel [GitHub Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose) aan.
+```md
+## YYYY-MM-DD HH:MM (tijdzone)
+- Auteur: ...
+- Betrokken teams: ...
+- Bestanden: ...
+- Wijziging: ...
+- Reden: ...
+```
 
-**Andere teams mogen:**
-- Vragen stellen in het Teams-kanaal.
-- Issues openen op GitHub.
+> Geen changelog-entry = geen complete wijziging.
 
-**Andere teams mogen NIET:**
-- Contractbestanden wijzigen.
-- Pushes uitvoeren naar `main`.
-- Pull requests openen.
+### Definitie van Klaar
+Een wijziging is pas klaar als:
+1. De wijziging binnen scope is uitgevoerd.
+2. De aanpassing duidelijk is beschreven.
+3. `changelog.md` is bijgewerkt met datum en tijd.
+4. Eventuele issue/PR context volledig is ingevuld.
 
-Dit wordt technisch afgedwongen door de `.github/workflows/enforce-maintainers.yml` workflow.
+---
 
-### Secret voor maintainer lijst (verplicht)
+## Voor Niet-Admin Users: Problemen Melden
 
-1. Open GitHub repo `Settings`.
-2. Ga naar `Secrets and variables` > `Actions`.
-3. Klik `New repository secret`.
-4. Naam: `ALLOWED_CONTRACT_EDITORS`
-5. Waarde: GitHub usernames, komma-gescheiden. Voorbeeld: `jouwusername,andereusername`
-6. Opslaan.
+> Je mag het contract **niet** zelf wijzigen of een Pull Request openen. Dit wordt technisch geblokkeerd.  
+> Volg onderstaand twee-stappen-proces wanneer je een fout, onduidelijkheid of gewenste wijziging tegenkomt.
 
-Zonder deze secret faalt de enforcement workflow bewust.
+### Stap 1 — Open een formeel GitHub Issue
 
-## Issue Melden op GitHub
+1. Ga naar **[Issues → New Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose)**.
+2. Kies het `[XML/XSD]` template.
+3. Vul het template volledig in (zie [`issue-guide.md`](issue-guide.md) voor details):
+   - Samenvatting van het probleem
+   - Verwacht vs. huidig gedrag
+   - Betrokken contractsectie
+   - Reproductiestappen
+   - Voorbeeld XML/XSD of foutmelding
+   - Impact op teams/flows
+4. Label het issue correct: `xml`, `xsd`, `bug`, `contract`.
+5. Submit het issue en **kopieer de issue-URL**.
 
-Voor XML/XSD problemen gebruik je de handleiding in:
+### Stap 2 — Stuur direct daarna een bericht in Teams
 
-- `issue-guide.md`
+Ga naar het Microsoft Teams kanaal: **XML - XSD Channel**
 
-Kort samengevat:
+Stuur een bericht met:
+- De issue-URL uit stap 1
+- Een korte omschrijving van het probleem
+- Welke flow/team er impact van ondervindt
 
-1. Open een nieuwe issue in GitHub.
-2. Gebruik titelprefix `[XML/XSD]`.
-3. Voeg contractsectie, reproduceerstappen en voorbeeld XML/XSD toe.
-4. Label correct (`xml`, `xsd`, `bug`, `contract`).
+> Dit zorgt ervoor dat maintainers **direct** op de hoogte zijn en de urgentie kunnen inschatten. Enkel een issue zonder Teams-bericht kan over het hoofd worden gezien.
+
+---
+
+## Voor Maintainers: Wijzigingen Doorvoeren
+
+<a name="maintainers"></a>
+
+**Actieve Maintainers:** @tombomeke-ehb · aangewezen developer
+
+### Workflow bij elke wijziging
+
+1. Lees `xml-expert.md` en `instructions.md` — verplicht bij elke sessie.
+2. Werk in kleine, begrijpelijke stappen; pas alleen aan wat binnen scope valt.
+3. Vermijd brede bulk-wijzigingen zonder duidelijke motivatie.
+4. Noteer impact op teams, flows en message types.
+5. Schrijf duidelijke commit- en PR-beschrijvingen.
+6. Update `changelog.md` **vóór** de commit.
+
+### Enforcement
+
+Toegang wordt gecontroleerd via:
+- **`.github/workflows/enforce-maintainers.yml`** — blokkeert contractwijzigingen van niet-maintainers.
+- **Secret `ALLOWED_CONTRACT_EDITORS`** — komma-gescheiden lijst van toegestane GitHub usernames.
+
+> Zonder deze secret faalt de enforcement workflow bewust.
+
+---
 
 ## Teams Notificaties (Automatisch)
 
-Deze repo heeft een GitHub Actions workflow die een webhook-bericht stuurt naar het XML - XSD Teams channel bij:
+Bij elke push naar `main` of PR-event stuurt `.github/workflows/teams-notify.yml` automatisch een Adaptive Card naar het **XML - XSD Teams channel** met:
 
-1. Push naar `main`
-2. Pull request events naar `main` (open, update, reopen, merge)
-
-Bestand:
-
-- `.github/workflows/teams-notify.yml`
-
-De melding bevat:
-
-- Vaste tekst: `XML is geupdate`
-- Laatste entry uit `changelog.md`
-- Gedetecteerde betrokken teams (best effort)
 - Event context (push of PR)
+- Actor (wie heeft de wijziging gedaan)
+- Betrokken teams (gedetecteerd op basis van bestandsnamen en changelog)
+- Laatste entry uit `changelog.md`
+- Lijst van gewijzigde bestanden
+- Directe link naar de commit of PR
 
-### Secret instellen (verplicht)
+**Getriggerde events:**
+- `push` naar `main`
+- `pull_request` → opened, synchronize, reopened, merged
 
-1. Open GitHub repo `Settings`.
-2. Ga naar `Secrets and variables` > `Actions`.
-3. Klik `New repository secret`.
+---
+
+## Secrets Configuratie
+
+Beide secrets zijn vereist voor volledige werking van de workflows.
+
+### `TEAMS_WEBHOOK_URL`
+
+Benodigd door: `teams-notify.yml`
+
+1. Open GitHub repo **Settings**.
+2. Ga naar **Secrets and variables → Actions**.
+3. Klik **New repository secret**.
 4. Naam: `TEAMS_WEBHOOK_URL`
 5. Waarde: jouw Power Automate webhook URL.
 6. Opslaan.
 
-Zonder deze secret draait de workflow wel, maar verstuurt ze geen webhook.
+> Zonder deze secret draait de workflow wel, maar verstuurt ze **geen** webhook.
+
+### `ALLOWED_CONTRACT_EDITORS`
+
+Benodigd door: `enforce-maintainers.yml`
+
+1. Open GitHub repo **Settings**.
+2. Ga naar **Secrets and variables → Actions**.
+3. Klik **New repository secret**.
+4. Naam: `ALLOWED_CONTRACT_EDITORS`
+5. Waarde: GitHub usernames, komma-gescheiden. Voorbeeld: `tombomeke-ehb,andereusername`
+6. Opslaan.
+
+> Zonder deze secret faalt de enforcement workflow bewust om ongeautoriseerde wijzigingen te blokkeren.
+
+---
 
 ## Samenwerkingsafspraken
 
 - Kleine, duidelijke wijzigingen werken beter dan grote bulk-edits.
-- Elke wijziging moet verklaarbaar zijn: wat, waarom, impact.
+- Elke wijziging is verklaarbaar: wat, waarom, impact.
 - Geen wijziging zonder changelog-entry.
-- Bij twijfel: issue openen en afstemmen voor implementatie.
+- Bij twijfel: issue openen en afstemmen vóór implementatie.
+- PR's van niet-maintainers voor contractwijzigingen worden niet geaccepteerd.
 
-## Snelle Start
+---
 
-1. Lees `XML_XSD_Contract_v2.3_Centralized 1.md`.
-2. Lees `xml-expert.md` en `instructions.md`.
-3. Werk je wijziging uit.
-4. Log de wijziging in `changelog.md` met datum en tijd.
-
-## Status
-
-Actieve beheerrepo voor contractbeheer en afstemming tussen teams.
+> *XML/XSD Contract Hub — Integration Project Groep 1*  
+> Centraal beheer van XML/XSD berichtafspraken voor alle integrerende teams.
