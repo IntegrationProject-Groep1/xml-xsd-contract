@@ -1,0 +1,176 @@
+name: Teams Notification - XML/XSD Update
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  notify:
+    name: Send Teams Webhook Notification
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build notification payload
+        id: build_payload
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          REF_NAME: ${{ github.ref_name }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          add_team() {
+            local team="$1"
+            if [[ -z "$team" ]]; then
+              return
+            fi
+            if [[ " ${teams[*]} " != *" $team "* ]]; then
+              teams+=("$team")
+            fi
+          }
+
+          map_file_to_team() {
+            local file="$1"
+            case "$file" in
+              *CRM*|*crm*) add_team "CRM" ;;
+              *Kassa*|*kassa*) add_team "Kassa" ;;
+              *frontend*|*Frontend*|*IP-groep1-frontend*) add_team "Frontend" ;;
+              *Planning*|*planning*) add_team "Planning" ;;
+              *Facturatie*|*facturatie*) add_team "Facturatie" ;;
+              *monitoring*|*Monitoring*) add_team "Monitoring" ;;
+              *mailing*|*Mailing*) add_team "Mailing" ;;
+              *identity*|*Identity*) add_team "Identity" ;;
+            esac
+          }
+
+          teams=()
+
+          changed_files=""
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            if [[ -n "${BEFORE_SHA:-}" && "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+              changed_files="$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA")"
+            else
+              changed_files="$(git show --name-only --pretty='' "$AFTER_SHA")"
+            fi
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            changed_files="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          fi
+
+          if [[ -z "$changed_files" ]]; then
+            changed_files="(geen bestandsdiff beschikbaar)"
+          fi
+
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            map_file_to_team "$file"
+          done <<< "$changed_files"
+
+          if [[ -f changelog.md ]]; then
+            latest_changelog="$(awk '
+              /^## / {
+                if (found) exit
+                found=1
+              }
+              found {print}
+            ' changelog.md)"
+          else
+            latest_changelog="changelog.md niet gevonden"
+          fi
+
+          for team in CRM Kassa Frontend Planning Facturatie Monitoring Mailing Identity; do
+            if echo "$latest_changelog" | grep -Eiq "(^|[^a-zA-Z])${team}([^a-zA-Z]|$)"; then
+              add_team "$team"
+            fi
+          done
+
+          teams_csv=""
+          if [[ ${#teams[@]} -gt 0 ]]; then
+            teams_csv="$(printf "%s\n" "${teams[@]}" | sort -u | paste -sd ", " -)"
+          else
+            teams_csv="Onbekend of niet expliciet vermeld"
+          fi
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            source_url="${PR_URL:-$COMMIT_URL}"
+            title_context="PR: ${PR_TITLE:-zonder titel}"
+          else
+            source_url="$COMMIT_URL"
+            title_context="Push naar main"
+          fi
+
+          text_message="XML is geupdate"
+
+          payload="$(jq -n \
+            --arg message "$text_message" \
+            --arg repository "$REPOSITORY" \
+            --arg actor "$ACTOR" \
+            --arg event "$EVENT_NAME" \
+            --arg action "$EVENT_ACTION" \
+            --arg ref "$REF_NAME" \
+            --arg context "$title_context" \
+            --arg source_url "$source_url" \
+            --arg repository_url "$REPOSITORY_URL" \
+            --arg teams "$teams_csv" \
+            --arg changelog "$latest_changelog" \
+            --arg changed_files "$changed_files" \
+            '{
+              message: $message,
+              repository: $repository,
+              actor: $actor,
+              event: $event,
+              action: $action,
+              ref: $ref,
+              context: $context,
+              source_url: $source_url,
+              repository_url: $repository_url,
+              betrokken_teams: $teams,
+              latest_changelog: $changelog,
+              changed_files: $changed_files
+            }')"
+
+          {
+            echo "payload<<EOF"
+            echo "$payload"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send webhook to Teams workflow
+        shell: bash
+        env:
+          WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          PAYLOAD: ${{ steps.build_payload.outputs.payload }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${WEBHOOK_URL:-}" ]]; then
+            echo "TEAMS_WEBHOOK_URL secret is niet ingesteld. Geen notificatie verstuurd."
+            exit 0
+          fi
+
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK_URL"

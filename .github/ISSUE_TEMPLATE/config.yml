@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: XML/XSD Handleiding
+    url: https://github.com/IntegrationProject-Groep1/xml-xsd-contract/blob/main/issue-guide.md
+    about: Lees eerst de interne issue-handleiding in deze repository.
