@@ -165,9 +165,12 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
+    # High-Impact "For-the-Badge" Custom Badge
+    badge_url = "https://img.shields.io/badge/System_Architecture-Central_Hub_Active-0a7ea4?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a"
+    
     # Construct the Legend as Markdown
     legend = [
-        "### [![Network Map](https://img.shields.io/badge/Network%20Map-Gegenereerd-2f855a?style=flat-square&logo=mermaid&logoColor=white&labelColor=0b1f2a)](#interactieve-netwerk-map)",
+        f"### ![{badge_url}]({badge_url})",
         "\n#### 💡 Legende",
         "| Kleur / Stijl | Richting & Betekenis |",
         "| :--- | :--- |",
@@ -189,12 +192,21 @@ def generate_mermaid():
             # Replace tagged section
             new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
             
-            # Clean up old manual legend if it exists outside the tags
-            new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
+            # CRITICAL FIX: Only clean up legend if it is NOT inside the tags (avoids deleting our fresh work)
+            # We look for a legend that doesn't have the START marker before it in the same block
+            parts = new_content.split(start)
+            if len(parts) > 1:
+                # The legend should be in parts[1], so we only clean up in parts[0] or parts[2:]
+                cleaned_parts = [re.sub(r"#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", p) for i, p in enumerate(parts) if i != 1]
+                # Reassemble
+                if len(parts) > 1:
+                    new_content = cleaned_parts[0] + start + parts[1]
+                    if len(cleaned_parts) > 1:
+                        new_content += start.join(cleaned_parts[1:])
 
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated: Legend moved to top and diagram refreshed.")
+            print("README.md updated with High-Impact Badge and Restored Legend.")
 
 if __name__ == "__main__":
     generate_mermaid()
