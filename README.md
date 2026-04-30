@@ -104,33 +104,13 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 <!-- NETWORK_MAP_START -->
 
 ```mermaid
-flowchart TB
+flowchart LR
     %% Style Definitions
     classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;
     classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
     classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;
-
-    subgraph CORE ["🔑 Core & Routing"]
-        CRM(["CRM"])
-        Identity(["Identity"])
-        Requestor(["Requestor"])
-    end
-
-    subgraph OPS ["⚙️ Operational Teams"]
-        Facturatie(["Facturatie"])
-        Frontend(["Frontend"])
-        Kassa(["Kassa"])
-        Planning(["Planning"])
-    end
-
-    subgraph SUPPORT ["📢 Support & Alerts"]
-        Alle_teams(["Alle teams"])
-        Heartbeat(["Heartbeat"])
-        Mailing(["Mailing"])
-        Monitoring(["Monitoring"])
-    end
-
-    %% Functional Flows with Color Coding
+    CRM(["CRM"])
+    class CRM core;
     Alle_teams -. "heartbeat" .-> Monitoring
     CRM -- "invoice_request<br/>new_registration" --> Facturatie
     CRM -- "payment_registered" --> Frontend
@@ -158,10 +138,7 @@ flowchart TB
     Planning -- "session_created<br/>session_deleted<br/>session_updated" --> CRM
     Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend
     Planning -. "heartbeat" .-> Monitoring
-
-    %% Styling Classes
     class Alle_teams support;
-    class CRM core;
     class Facturatie ops;
     class Frontend ops;
     class Heartbeat support;
@@ -173,33 +150,33 @@ flowchart TB
     class Requestor core;
 
     %% Edge Styles
-    linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 1 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
     linkStyle 2 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
     linkStyle 3 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
     linkStyle 4 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
     linkStyle 5 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
-    linkStyle 6 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 6 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 7 stroke:#3b82f6,stroke-width:2px,color:#3b82f6;
     linkStyle 8 stroke:#10b981,stroke-width:2px,color:#10b981;
     linkStyle 9 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 10 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 10 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 11 stroke:#10b981,stroke-width:2px,color:#10b981;
     linkStyle 12 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 14 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 15 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 15 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 16 stroke:#10b981,stroke-width:2px,color:#10b981;
     linkStyle 17 stroke:#6366f1,stroke-width:2px,color:#6366f1;
     linkStyle 18 stroke:#10b981,stroke-width:2px,color:#10b981;
     linkStyle 19 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 20 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 20 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 21 stroke:#10b981,stroke-width:2px,color:#10b981;
-    linkStyle 22 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 22 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
     linkStyle 23 stroke:#6366f1,stroke-width:2px,color:#6366f1;
     linkStyle 24 stroke:#10b981,stroke-width:2px,color:#10b981;
     linkStyle 25 stroke:#6366f1,stroke-width:2px,color:#6366f1;
-    linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
+    linkStyle 26 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5,color:#94a3b8;
 ```
 
 <!-- NETWORK_MAP_END -->
