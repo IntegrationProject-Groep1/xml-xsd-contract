@@ -103,6 +103,16 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
+#### 💡 Interactieve Legende
+| Kleur / Stijl | Richting & Betekenis |
+| :--- | :--- |
+| <span style='color:#10b981; font-size: 20px;'>⬤</span> **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |
+| <span style='color:#3b82f6; font-size: 20px;'>⬤</span> **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |
+| <span style='color:#6366f1; font-size: 20px;'>⬤</span> **Indigo** | Direct bericht tussen teams (Peer-to-peer) |
+| <span style='color:#94a3b8; font-size: 20px;'>---</span> **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |
+
+*Beweeg je muis over de lijnen in het diagram om de berichttypes te zien.*
+
 ```mermaid
 flowchart LR
     %% Style Definitions
@@ -201,14 +211,6 @@ flowchart LR
 ```
 
 <!-- NETWORK_MAP_END -->
-
-#### 💡 Legende
-| Stijl | Betekenis |
-| :--- | :--- |
-| <span style="color:#10b981">**Groene pijl**</span> | Functioneel bericht **NAAR** de CRM (Inbound) |
-| <span style="color:#3b82f6">**Blauwe pijl**</span> | Functioneel bericht **VANAF** de CRM (Outbound) |
-| <span style="color:#6366f1">**Indigo pijl**</span> | Direct bericht tussen teams (Peer-to-peer) |
-| <span style="color:#94a3b8">**Grijze stippellijn**</span> | Heartbeat / Status bericht naar Monitoring |
 
 Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
 

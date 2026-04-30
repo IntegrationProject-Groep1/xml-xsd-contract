@@ -165,16 +165,36 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
+    # Construct the Legend as Markdown
+    legend = [
+        "#### 💡 Interactieve Legende",
+        "| Kleur / Stijl | Richting & Betekenis |",
+        "| :--- | :--- |",
+        "| <span style='color:#10b981; font-size: 20px;'>⬤</span> **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |",
+        "| <span style='color:#3b82f6; font-size: 20px;'>⬤</span> **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |",
+        "| <span style='color:#6366f1; font-size: 20px;'>⬤</span> **Indigo** | Direct bericht tussen teams (Peer-to-peer) |",
+        "| <span style='color:#94a3b8; font-size: 20px;'>---</span> **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |",
+        "\n*Beweeg je muis over de lijnen in het diagram om de berichttypes te zien.*"
+    ]
+    legend_str = "\n".join(legend)
+
     if os.path.exists(readme_path):
         with open(readme_path, 'r', encoding='utf-8') as f:
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
-            # Construct legend table if not already better placed
-            new_content = re.sub(f"{start}.*?{end}", f"{start}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}", content, flags=re.DOTALL)
+            # Full section: Legend then Mermaid Diagram
+            full_section = f"{start}\n\n{legend_str}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}"
+            
+            # Replace tagged section
+            new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
+            
+            # Clean up old manual legend if it exists outside the tags
+            new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
+
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with Refined Architectural Map.")
+            print("README.md updated: Legend moved to top and diagram refreshed.")
 
 if __name__ == "__main__":
     generate_mermaid()
