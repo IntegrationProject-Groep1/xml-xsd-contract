@@ -165,19 +165,22 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
-    # High-Impact "For-the-Badge" Custom Badge using advanced syntax
-    badge_url = "https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a"
+    # Pro "Control Bar" Header
+    badge_header = (
+        "![](https://img.shields.io/badge/SYSTEM-NERVES-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)"
+        "![](https://img.shields.io/badge/CONTRACT-v2.3-2f855a?style=for-the-badge&logo=gitbook&logoColor=white)"
+        "![](https://img.shields.io/badge/FEED-LIVE-0a7ea4?style=for-the-badge&logo=activitypub&logoColor=white)"
+    )
     
-    # Construct the Legend as Markdown
+    # Pro "Admonition" Legend
     legend = [
-        f"![Network Map]({badge_url})",
-        "\n#### 💡 Legende",
-        "| Kleur / Stijl | Richting & Betekenis |",
-        "| :--- | :--- |",
-        "| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |",
-        "| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |",
-        "| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |",
-        "| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |",
+        badge_header,
+        "\n> [!TIP]",
+        "> **📡 Message Flow Logic**",
+        "> - **GROEN** ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) &nbsp; Bericht **NAAR** de CRM (Inbound Hub)",
+        "> - **BLAUW** ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) &nbsp; Bericht **VANAF** de CRM (Outbound Hub)",
+        "> - **INDIGO** ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) &nbsp; Bericht **TUSSEN TEAMS** (Direct peer-to-peer)",
+        "> - **GRIJS** ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) &nbsp; **HEARTBEATS** (Status naar Monitoring)"
     ]
     legend_str = "\n".join(legend)
 
@@ -186,27 +189,16 @@ def generate_mermaid():
             content = f.read()
         start, end = "<!-- NETWORK_MAP_START -->", "<!-- NETWORK_MAP_END -->"
         if start in content and end in content:
-            # Full section: Legend then Mermaid Diagram
+            # Re-run replacements to inject new logic
             full_section = f"{start}\n\n{legend_str}\n\n```mermaid\n{mermaid_str}\n```\n\n{end}"
-            
-            # Replace tagged section
             new_content = re.sub(f"{start}.*?{end}", full_section, content, flags=re.DOTALL)
             
-            # CRITICAL FIX: Only clean up legend if it is NOT inside the tags (avoids deleting our fresh work)
-            # We look for a legend that doesn't have the START marker before it in the same block
-            parts = new_content.split(start)
-            if len(parts) > 1:
-                # The legend should be in parts[1], so we only clean up in parts[0] or parts[2:]
-                cleaned_parts = [re.sub(r"#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", p) for i, p in enumerate(parts) if i != 1]
-                # Reassemble
-                if len(parts) > 1:
-                    new_content = cleaned_parts[0] + start + parts[1]
-                    if len(cleaned_parts) > 1:
-                        new_content += start.join(cleaned_parts[1:])
+            # Additional cleanup for any legacy legend tables
+            new_content = re.sub(r"\n#### 💡 Legende\n\|.*?\n\|.*?\n(?:\|.*?\n)+", "", new_content)
 
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
-            print("README.md updated with High-Impact Badge and Restored Legend.")
+            print("README.md updated with PRO System Dashboard.")
 
 if __name__ == "__main__":
     generate_mermaid()

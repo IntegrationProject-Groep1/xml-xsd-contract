@@ -103,15 +103,14 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-![Network Map](https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a)
+![](https://img.shields.io/badge/SYSTEM-NERVES-0b1f2a?style=for-the-badge&logo=opsgenie&logoColor=10b981)![](https://img.shields.io/badge/CONTRACT-v2.3-2f855a?style=for-the-badge&logo=gitbook&logoColor=white)![](https://img.shields.io/badge/FEED-LIVE-0a7ea4?style=for-the-badge&logo=activitypub&logoColor=white)
 
-#### 💡 Legende
-| Kleur / Stijl | Richting & Betekenis |
-| :--- | :--- |
-| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |
-| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |
-| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |
-| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |
+> [!TIP]
+> **📡 Message Flow Logic**
+> - **GROEN** ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) &nbsp; Bericht **NAAR** de CRM (Inbound Hub)
+> - **BLAUW** ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) &nbsp; Bericht **VANAF** de CRM (Outbound Hub)
+> - **INDIGO** ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) &nbsp; Bericht **TUSSEN TEAMS** (Direct peer-to-peer)
+> - **GRIJS** ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) &nbsp; **HEARTBEATS** (Status naar Monitoring)
 
 ```mermaid
 flowchart LR
