@@ -1,18 +1,20 @@
 # XML/XSD Contract Hub
 
-[![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
-[![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20→%20XML%2FXSD-2f855a?style=flat-square&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
-[![Governance](https://img.shields.io/badge/Governance-Maintainers%20Only-c53030?style=flat-square&labelColor=0b1f2a)](instructions.md)
-[![Docs](https://img.shields.io/badge/Docs-Nederlands-1f2937?style=flat-square&labelColor=0b1f2a)](#kernbestanden)
+[![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
+[![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
+[![Governance](https://img.shields.io/badge/Governance-Maintainers%20Only-c53030?style=flat-square&logo=shield&logoColor=white&labelColor=0b1f2a)](instructions.md)
+[![Taal](https://img.shields.io/badge/Taal-Nederlands-5b21b6?style=flat-square&logo=googletranslate&logoColor=white&labelColor=0b1f2a)](#kernbestanden)
 
 ---
 
 ## Status & Metrics
 
 [![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions)
-[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&labelColor=0b1f2a)](changelog.md)
-[![Last Teams Notify](https://img.shields.io/badge/Last%20Teams%20Notify-see%20Actions-f59e0b?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/teams-notify.yml)
-[![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=github&logoColor=white&labelColor=0b1f2a)](#maintainers)
+[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
+[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/teams-notify.yml)
+[![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
+[![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
+[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](../../actions/workflows/enforce-maintainers.yml)
 
 > **Wat is dit?**  
 > Deze repository is de **centrale Source of Truth** voor alle XML/XSD berichtafspraken binnen het Integration Project. Elke koppeling — CRM, Kassa, Frontend, Planning, Facturatie en meer — is gebonden aan de contractdefinities die hier beheerd worden. Afwijkingen worden hier gemeld, besproken en vastgelegd.
@@ -70,31 +72,33 @@
 
 De contractdefinities in deze repository bepalen de structuur voor alle integrerende systemen:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              XML/XSD Contract Hub  (deze repo)                  │
-│                                                                 │
-│  XML_XSD_Contract_v2.3_Centralized 1.md  ←  Source of Truth    │
-│  instructions.md                         ←  Governance regels  │
-│  xml-expert.md                           ←  Agent/AI kader     │
-│  changelog.md                            ←  Wijzigingshistorie │
-│  issue-guide.md                          ←  Meldingsproces     │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │  contractdefinities
-          ┌────────────▼────────────┐
-          │   Integrerende Teams    │
-          │                         │
-          │  CRM · Kassa · Frontend │
-          │  Planning · Facturatie  │
-          │  Monitoring · Mailing   │
-          │  Identity               │
-          └─────────────────────────┘
-                       │
-          Problemen en vragen via:
-          GitHub Issues  +  Teams: XML - XSD Channel
+```mermaid
+flowchart TB
+    subgraph HUB["🗂️  XML/XSD Contract Hub  —  deze repository"]
+        direction TB
+        CONTRACT["📄 XML_XSD_Contract_v2.3\n─────────────────\nSource of Truth"]
+        INSTRUCTIONS["📋 instructions.md\n─────────────────\nGovernance regels"]
+        XMLEXPERT["🤖 xml-expert.md\n─────────────────\nAgent / AI kader"]
+        CHANGELOG["📝 changelog.md\n─────────────────\nWijzigingshistorie"]
+        ISSUEGUIDE["🔖 issue-guide.md\n─────────────────\nMeldingsproces"]
+    end
+
+    subgraph INTTEAMS["⚙️  Integrerende Teams"]
+        direction LR
+        CRM["CRM"]
+        KASSA["Kassa"]
+        FRONTEND["Frontend"]
+        PLANNING["Planning"]
+        FACTURATIE["Facturatie"]
+        OTHER["Monitoring · Mailing · Identity"]
+    end
+
+    CONTRACT  -->|"contractdefinities"| INTTEAMS
+    INTTEAMS  -->|"📌 GitHub Issue"| ISSUEGUIDE
+    INTTEAMS  -->|"💬 Teams: XML - XSD Channel"| HUB
 ```
 
-Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen in het contract gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
+Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
 
 ---
 
@@ -156,6 +160,22 @@ Een wijziging is pas klaar als:
 > Je mag het contract **niet** zelf wijzigen of een Pull Request openen. Dit wordt technisch geblokkeerd.  
 > Volg onderstaand twee-stappen-proces wanneer je een fout, onduidelijkheid of gewenste wijziging tegenkomt.
 
+```mermaid
+flowchart LR
+    A["❗ Probleem\nontdekt"] --> B["📌 Stap 1\nOpen GitHub Issue\nmet [XML/XSD] template"]
+    B --> C["💬 Stap 2\nStuur Teams-bericht\nin XML - XSD Channel\nmet issue-URL"]
+    C --> D["🔧 Maintainer\nbeoordeelt issue"]
+    D --> E["✅ Fix + Changelog\n+ Push naar main"]
+    E --> F["📣 Automatische\nTeams Notificatie"]
+
+    style A fill:#c53030,color:#fff,stroke:#7f1d1d
+    style B fill:#1e40af,color:#fff,stroke:#1e3a8a
+    style C fill:#6264a7,color:#fff,stroke:#4a4880
+    style D fill:#0b1f2a,color:#fff,stroke:#0a7ea4
+    style E fill:#2f855a,color:#fff,stroke:#1a5738
+    style F fill:#6264a7,color:#fff,stroke:#4a4880
+```
+
 ### Stap 1 — Open een formeel GitHub Issue
 
 1. Ga naar **[Issues → New Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose)**.
@@ -191,6 +211,20 @@ Stuur een bericht met:
 
 ### Workflow bij elke wijziging
 
+```mermaid
+flowchart LR
+    A["📖 Lees\nxml-expert.md\n+ instructions.md"] --> B["✏️ Wijziging\nuitvoeren\n(binnen scope)"]
+    B --> C["📝 Changelog\nentry toevoegen\nvóór commit"]
+    C --> D["💾 Commit & Push\nnaar main"]
+    D --> E["📣 Teams Notificatie\nverstuurd\nautomatisch"]
+
+    style A fill:#0b1f2a,color:#fff,stroke:#0a7ea4
+    style B fill:#1e40af,color:#fff,stroke:#1e3a8a
+    style C fill:#f59e0b,color:#0b1f2a,stroke:#b45309
+    style D fill:#2f855a,color:#fff,stroke:#1a5738
+    style E fill:#6264a7,color:#fff,stroke:#4a4880
+```
+
 1. Lees `xml-expert.md` en `instructions.md` — verplicht bij elke sessie.
 2. Werk in kleine, begrijpelijke stappen; pas alleen aan wat binnen scope valt.
 3. Vermijd brede bulk-wijzigingen zonder duidelijke motivatie.
@@ -210,14 +244,39 @@ Toegang wordt gecontroleerd via:
 
 ## Teams Notificaties (Automatisch)
 
-Bij elke push naar `main` of PR-event stuurt `.github/workflows/teams-notify.yml` automatisch een Adaptive Card naar het **XML - XSD Teams channel** met:
+Bij elke push naar `main` of PR-event stuurt `.github/workflows/teams-notify.yml` automatisch een Adaptive Card naar het **XML - XSD Teams channel**.
 
-- Event context (push of PR)
-- Actor (wie heeft de wijziging gedaan)
-- Betrokken teams (gedetecteerd op basis van bestandsnamen en changelog)
-- Laatste entry uit `changelog.md`
-- Lijst van gewijzigde bestanden
-- Directe link naar de commit of PR
+```mermaid
+flowchart TB
+    subgraph TRIGGER["🚀 Trigger Events"]
+        PUSH["Push → main"]
+        PR["Pull Request\nopened / sync / reopened / merged"]
+    end
+
+    subgraph WORKFLOW["⚙️  teams-notify.yml"]
+        DETECT["🔍 Detecteer\nbetrokken teams\no.b.v. bestanden + changelog"]
+        BUILD["🏗️  Bouw\nAdaptive Card payload"]
+        SEND["📤 Verstuur\nwebhook"]
+    end
+
+    subgraph CARD["📨 Adaptive Card in Teams"]
+        TITLE["Titel: XML Update"]
+        ACTOR["Actor + repository"]
+        TEAMS_LIST["Betrokken teams"]
+        CHANGELOG_ENTRY["Laatste changelog-entry"]
+        FILES["Gewijzigde bestanden"]
+        LINK["🔗 Link naar commit of PR"]
+    end
+
+    PUSH --> WORKFLOW
+    PR   --> WORKFLOW
+    DETECT --> BUILD --> SEND
+    SEND --> CARD
+
+    style TRIGGER  fill:#0b1f2a,color:#fff,stroke:#0a7ea4
+    style WORKFLOW fill:#1e3a8a,color:#fff,stroke:#1e40af
+    style CARD     fill:#6264a7,color:#fff,stroke:#4a4880
+```
 
 **Getriggerde events:**
 - `push` naar `main`
