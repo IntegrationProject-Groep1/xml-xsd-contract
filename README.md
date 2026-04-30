@@ -103,15 +103,7 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 <!-- NETWORK_MAP_START -->
 
-#### 💡 Interactieve Legende
-| Kleur / Stijl | Richting & Betekenis |
-| :--- | :--- |
-| <span style='color:#10b981; font-size: 20px;'>⬤</span> **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |
-| <span style='color:#3b82f6; font-size: 20px;'>⬤</span> **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |
-| <span style='color:#6366f1; font-size: 20px;'>⬤</span> **Indigo** | Direct bericht tussen teams (Peer-to-peer) |
-| <span style='color:#94a3b8; font-size: 20px;'>---</span> **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |
-
-*Beweeg je muis over de lijnen in het diagram om de berichttypes te zien.*
+### [![Network Map](https://img.shields.io/badge/Network%20Map-Gegenereerd-2f855a?style=flat-square&logo=mermaid&logoColor=white&labelColor=0b1f2a)](#interactieve-netwerk-map)
 
 ```mermaid
 flowchart LR

@@ -167,14 +167,14 @@ def generate_mermaid():
 
     # Construct the Legend as Markdown
     legend = [
-        "#### 💡 Interactieve Legende",
+        "### [![Network Map](https://img.shields.io/badge/Network%20Map-Gegenereerd-2f855a?style=flat-square&logo=mermaid&logoColor=white&labelColor=0b1f2a)](#interactieve-netwerk-map)",
+        "\n#### 💡 Legende",
         "| Kleur / Stijl | Richting & Betekenis |",
         "| :--- | :--- |",
-        "| <span style='color:#10b981; font-size: 20px;'>⬤</span> **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |",
-        "| <span style='color:#3b82f6; font-size: 20px;'>⬤</span> **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |",
-        "| <span style='color:#6366f1; font-size: 20px;'>⬤</span> **Indigo** | Direct bericht tussen teams (Peer-to-peer) |",
-        "| <span style='color:#94a3b8; font-size: 20px;'>---</span> **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |",
-        "\n*Beweeg je muis over de lijnen in het diagram om de berichttypes te zien.*"
+        "| ![](https://img.shields.io/badge/-%20-10b981?style=flat-square) **Groen** | Bericht **NAAR** de CRM (Inbound Hub) |",
+        "| ![](https://img.shields.io/badge/-%20-3b82f6?style=flat-square) **Blauw** | Bericht **VANAF** de CRM (Outbound Hub) |",
+        "| ![](https://img.shields.io/badge/-%20-6366f1?style=flat-square) **Indigo** | Direct bericht tussen teams (Peer-to-peer) |",
+        "| ![](https://img.shields.io/badge/-%20-94a3b8?style=flat-square) **Grijs** | Heartbeat / Status naar Monitoring (stippellijn) |",
     ]
     legend_str = "\n".join(legend)
 
