@@ -165,8 +165,8 @@ def generate_mermaid():
 
     mermaid_str = "\n".join(mermaid)
 
-    # High-Impact "For-the-Badge" Custom Badge
-    badge_url = "https://img.shields.io/badge/System_Architecture-Central_Hub_Active-0a7ea4?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a"
+    # High-Impact "For-the-Badge" Custom Badge using advanced syntax
+    badge_url = "https://img.shields.io/badge/Source_of_Truth-Live_Integration_Map-2f855a?style=for-the-badge&logo=gitbook&logoColor=white&labelColor=0b1f2a"
     
     # Construct the Legend as Markdown
     legend = [
