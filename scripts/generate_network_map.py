@@ -174,10 +174,15 @@ def generate_mermaid():
         "HUB-AND-SPOKE+ARCHITECTURE"
     )
     
-    # Pro Dashboard Layout (Static, No Collapsible)
+    # Tech Stack Icon Grid (Customized for this Repo)
+    # Icons: rabbitmq, python, mermaid, markdown
+    skill_icons = "https://skillicons.dev/icons?i=rabbitmq,py,mermaid,md&theme=dark"
+    
+    # Pro Dashboard Layout (Integrated Icon Grid)
     header_section = (
         f"<div align='center'>\n\n"
         f"![Integration Map]({typing_svg})\n\n"
+        f"[![Tech Stack]({skill_icons})](https://skillicons.dev)\n\n"
         f"</div>\n\n"
         f"---"
     )
@@ -190,7 +195,7 @@ def generate_mermaid():
         "| **INBOUND** | ![](https://img.shields.io/badge/-%20-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |",
         "| **OUTBOUND** | ![](https://img.shields.io/badge/-%20-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |",
         "| **PEER-TO-PEER** | ![](https://img.shields.io/badge/-%20-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |",
-        "| **MONITORING** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |",
+        "| **SYSTEM** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |",
         "\n---"
     ]
     legend_str = "\n".join(legend)

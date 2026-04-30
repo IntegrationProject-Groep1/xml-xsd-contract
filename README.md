@@ -107,6 +107,8 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 
 ![Integration Map](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines=INTEGRATION+NETWORK+MAP;REAL-TIME+MESSAGE+FLOWS;CONTRACT+V2.3+SOURCE+OF+TRUTH;HUB-AND-SPOKE+ARCHITECTURE)
 
+[![Tech Stack](https://skillicons.dev/icons?i=rabbitmq,py,mermaid,md&theme=dark)](https://skillicons.dev)
+
 </div>
 
 ---
@@ -117,7 +119,7 @@ Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en t
 | **INBOUND** | ![](https://img.shields.io/badge/-%20-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |
 | **OUTBOUND** | ![](https://img.shields.io/badge/-%20-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |
 | **PEER-TO-PEER** | ![](https://img.shields.io/badge/-%20-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |
-| **MONITORING** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
+| **SYSTEM** | ![](https://img.shields.io/badge/-%20-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
 
 ---
 
