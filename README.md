@@ -98,6 +98,61 @@ flowchart TB
     INTTEAMS  -->|"💬 Teams: XML - XSD Channel"| HUB
 ```
 
+### Interactieve Netwerk-Map
+Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en toont alle live berichtstromen tussen teams.
+
+<!-- NETWORK_MAP_START -->
+
+```mermaid
+flowchart LR
+    classDef team fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
+    classDef external fill:#0b1f2a,color:#fff,stroke:#2f855a,stroke-width:1px;
+    CRM(["CRM"]) -- "cancel_registration<br/>new_registration<br/>profile_update" --> Kassa(["Kassa"])
+    Kassa(["Kassa"]) -- "payment_registered" --> CRM(["CRM"])
+    Kassa(["Kassa"]) -- "payment_status<br/>wallet_balance_update" --> Frontend(["Frontend"])
+    Kassa(["Kassa"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Frontend(["Frontend"]) -- "new_registration<br/>user_checkin<br/>user_created<br/>user_deleted<br/>user_updated" --> CRM(["CRM"])
+    Planning(["Planning"]) -- "session_created<br/>session_deleted<br/>session_updated" --> CRM(["CRM"])
+    Facturatie(["Facturatie"]) -- "invoice_created_notification<br/>invoice_status" --> CRM(["CRM"])
+    Mailing(["Mailing"]) -- "mailing_status" --> CRM(["CRM"])
+    CRM(["CRM"]) -- "cancel_registration" --> Planning(["Planning"])
+    CRM(["CRM"]) -- "invoice_request<br/>new_registration" --> Facturatie(["Facturatie"])
+    CRM(["CRM"]) -- "send_mailing" --> Mailing(["Mailing"])
+    CRM(["CRM"]) -- "payment_registered" --> Frontend(["Frontend"])
+    CRM(["CRM"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Frontend(["Frontend"]) -- "calendar_invite<br/>session_create_request<br/>session_delete_request<br/>session_update_request" --> Planning(["Planning"])
+    Planning(["Planning"]) -- "calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend(["Frontend"])
+    Frontend(["Frontend"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Planning(["Planning"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    CRM_Kassa(["CRM/Kassa"]) -- "consumption_order (passthrough)" --> Facturatie(["Facturatie"])
+    Facturatie(["Facturatie"]) -- "send_mailing" --> Mailing(["Mailing"])
+    Facturatie(["Facturatie"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Heartbeat(["Heartbeat"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Alle_teams(["Alle teams"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    Monitoring(["Monitoring"]) -- "system_alert" --> Mailing(["Mailing"])
+    CRM___Facturatie(["CRM + Facturatie"]) -- "send_mailing" --> Mailing(["Mailing"])
+    Mailing(["Mailing"]) -- "heartbeat" --> Monitoring(["Monitoring"])
+    CRM__Frontend(["CRM, Frontend"]) -- "RPC request" --> Identity(["Identity"])
+    Identity(["Identity"]) -- "identity_response" --> Requestor(["Requestor"])
+    Identity(["Identity"]) -- "user_event" --> CRM(["CRM"])
+    class Kassa team;
+    class Monitoring team;
+    class Frontend team;
+    class Alle_teams team;
+    class CRM team;
+    class Requestor team;
+    class Mailing team;
+    class CRM_Kassa team;
+    class Identity team;
+    class CRM___Facturatie team;
+    class Planning team;
+    class Facturatie team;
+    class Heartbeat team;
+    class CRM__Frontend team;
+```
+
+<!-- NETWORK_MAP_END -->
+
 Elke koppeling **implementeert** de XML/XSD structuur zoals gedefinieerd in het centrale MD-bestand. Wijzigingen gaan altijd via de maintainers en worden bijgehouden in `changelog.md`. Teams ontvangen automatisch een melding via Microsoft Teams bij elke update.
 
 ---
