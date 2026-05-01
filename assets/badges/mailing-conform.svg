@@ -1,0 +1,12 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="122" height="20" role="img" aria-label="mailing: CONFORM">
+  <title>mailing: CONFORM</title>
+  <clipPath id="r"><rect width="122" height="20" rx="3" fill="#fff"/></clipPath>
+  <g clip-path="url(#r)">
+    <rect width="55" height="20" fill="#0b1f2a"/>
+    <rect x="55" width="67" height="20" fill="#2f855a"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+    <text x="28" y="14.5">mailing</text>
+    <text x="89" y="14.5">CONFORM</text>
+  </g>
+</svg>
