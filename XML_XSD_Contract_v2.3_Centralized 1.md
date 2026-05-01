@@ -14,6 +14,10 @@
 
 ##  QUICK REFERENCE — Per Team: Wat ontvang jij? Wat verstuur je?
 
+> ### 🛑 PROJECT-WIDE RULE: THE SIDECAR PRINCIPLE
+> **Geen enkel applicatie-team (CRM, Frontend, Kassa, etc.) mag zelf heartbeat-code implementeren OF de sidecar beheren.** 
+> Heartbeats worden EXCLUSIEF afgehandeld door de project-sidecar (`heartbeat/sidecar.py`). Deze wordt **automatisch gestart en beheerd door het Monitoring/Infrastructuur-team** op de VM zodra jouw containers gedeployed zijn. Applicatie-teams hebben hier 0% omkijken naar.
+
 Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groen ()** = conform, geen actie. **Rood ()** = kritieke wijzigingen nodig.
 
 ###  **Team Kassa** — Betalingen & Kassamachine (CONFORM )
@@ -50,7 +54,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `invoice_request` | → Facturatie |  bevat `<items>`, queue fout | [11.1](#111-invoice_request-crm--facturatie) |
 |  **VERZENDT** | `send_mailing` | → Mailing |  type is `mailing_status` | [12.1](#121-send_mailing-crm--mailing) |
 |  **VERZENDT** | `payment_registered` | → Frontend |  | [13.1](#131-payment_registered-crm--frontend) |
-|  **BROADCAST** | `heartbeat` | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **Kritieke fixes (src/sender.js + src/receiver.js):**
 1.  Regel line 20: `session_update` → `session_updated`
@@ -76,7 +80,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
 |  **ONTVANGT** | `payment_status` | ← Kassa |  | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  | [7](#7-planning--crm) |
-|  **BROADCAST** | `heartbeat` | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **Kritieke fixes (web/modules/custom/rabbitmq_sender/src/):**
 -  NewRegistrationSender.php: `<master_uuid>` verwijderen, `<age>` → `<date_of_birth>`, `<customer>` → `<contact>`
@@ -104,7 +108,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `calendar_invite_confirmed` | → Frontend | [17.2](#172-calendar_invite_confirmed-planning--frontend) |
 |  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | [17.1](#171-session_view_request--session_view_response-rpc) |
 |  **REST** | `Token Registration` | ← Frontend | [17.0](#170-oauth-token-registration-rest-api) |
-|  **BROADCAST** | `heartbeat` | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **XSD's referentie:**
 - `Planning/xsd/` ( bijgewerkt naar v2.0)
@@ -124,7 +128,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `invoice_status` | → CRM |  type is `send_invoice` | [8.1](#81-invoice_status) |
 |  **VERZENDT** | `payment_registered` | → CRM |  XSD bevat `<master_uuid>` | [8.2](#82-payment_registered) |
 |  **VERZENDT** | `send_mailing` | → Mailing |  | [13.1](#131-send_mailing-facturatie--mailing) |
-|  **BROADCAST** | `heartbeat` | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **Kritieke fixes (Facturatie/schemas/):**
 -  Queue listener: `crm.to.facturatie` → `facturatie.incoming`
@@ -171,7 +175,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |----------|---|---|---|---|
 |  **ONTVANGT** | `send_mailing` | ← CRM + Facturatie |  | [12.1](#121-send_mailing-crm--mailing) / [13.1](#131-send_mailing-facturatie--mailing) |
 |  **ONTVANGT** | `system_alert` | ← Monitoring |  | [4](#4-monitoring--mailing--alert) |
-|  **BROADCAST** | `heartbeat` | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **Opmerkingen:**
 - Mailing consumer moet zowel `source=crm` als `source=facturatie` verwerken
@@ -294,8 +298,10 @@ Wat goed is:
 #### Schendingen in queue-configuratie:
 -  Outbound naar Facturatie via queue `crm.to.facturatie` — moet `facturatie.incoming` zijn (sectie 11)
 
+#### Te verwijderen (Sidecar Principle):
+- [ ] **`src/heartbeat.js`**: Moet verwijderd worden. Heartbeats worden nu EXCLUSIEF afgehandeld door de project-sidecar. (zie Sectie 3.1)
+
 #### Wat al correct is:
--  `src/heartbeat.js`: gebruikt al de standaard `<message>` envelop met v2.0 header
 -  `src/sender.js` `buildMessage()`: header zonder `<receiver>` en zonder `xmlns`
 -  `crm.dead-letter` queue voor falende berichten
 
@@ -440,6 +446,8 @@ Wat nu correct is:
 ###  Heartbeat Service — `IntegrationProject-Groep1/heartbeat`
 
 **Status: VOLLEDIG ANTI-PATROON — moet herschreven worden**
+
+> **Noot:** Deze service is de eigenaar van de "Standard Sidecar" (`heartbeat/sidecar.py`). Andere teams gebruiken deze sidecar om heartbeats te versturen zonder eigen implementatie (zie [Sectie 3.1](#31-de-sidecar-principle-clarificatie)).
 
 #### Schending:
 -  Stuurt platte XML root: `<heartbeat><system>...</system><timestamp>...</timestamp><uptime>...</uptime></heartbeat>`
@@ -861,9 +869,23 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 
 ## 3. Heartbeat — Alle teams → Monitoring
 
-- **Queue:** `heartbeat`
+- **Exchange:** `kassa.exchange` (Topic Exchange)
+- **Routing Key:** `heartbeat.{source}` (bijv. `heartbeat.crm`)
+- **Queue:** `heartbeat` (Monitoring luistert op deze queue, gebonden aan de exchange)
 - **Interval:** elke 1 seconde
-- **Wie stuurt:** frontend, crm, kassa, planning, facturatie, mailing, monitoring
+- **Wie stuurt:** Wordt afgehandeld door de **Sidecar**, niet door de applicatie-logica zelf.
+
+### 3.1 De "Sidecar Principle" Clarificatie
+
+> **"Applicatie-services hoeven heartbeats NIET intern te implementeren indien ze gedeployed zijn met de standaard project-sidecar. De sidecar is de enige producent van heartbeat-berichten."**
+
+Voor een beter begrip van het contract maken we onderscheid tussen:
+*   **Logical Requirement:** Het systeem als geheel moet gemonitord worden. Elke component moet zijn aanwezigheid melden.
+*   **Technical Implementation:** Dit wordt centraal afgehandeld via `heartbeat/sidecar.py`. Applicatieteams hoeven geen code te schrijven voor heartbeats; zij moeten enkel zorgen dat de sidecar correct meedraait in hun deployment (container/pod).
+
+### 3.2 Monitoring Queue vs. Exchange
+
+Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten teams (via de sidecar) hun heartbeats **altijd naar de gedeelde Topic Exchange (`kassa.exchange`) sturen** met een specifieke routing key (bijv. `heartbeat.kassa` of `heartbeat.crm`). Dit zorgt ervoor dat de infrastructuur schaalbaar blijft en andere tools ook op de health-data kunnen inpluggen zonder de hoofd-queue leeg te trekken.
 
 ### XSD
 
@@ -3630,7 +3652,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
 | Facturatie | Mailing | `facturatie.to.mailing` | — |
 | Monitoring | Mailing | `monitoring.alerts` | — |
-| Alle teams | Monitoring | `heartbeat` | — |
+| Alle teams | Monitoring | `heartbeat` | exchange: `kassa.exchange` (topic), routing: `heartbeat.{source}` |
 | Frontend/CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `frontend.to.planning.calendar.invite` |
 | Planning | Frontend | reply_to queue (RPC) | exchange: `calendar.exchange`, routing: `planning.to.frontend.calendar.invite.confirmed` |
 | Frontend/CRM | Planning | `planning.session.events` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` (RPC) |
