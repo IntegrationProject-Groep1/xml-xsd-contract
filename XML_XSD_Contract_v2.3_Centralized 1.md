@@ -4007,7 +4007,7 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 - [x] `<age>` verwijderen — leeftijd lokaal berekenen via `date_of_birth`
 - [x] `currency="eur"` attribuut op alle bedragen
 - [x] `refund_processed`: `correlation_id` = message_id originele `payment_registered` (UUID)
-- [x] `refund_processed`: `payment_method` = `cash`, `card_reversal` of `badge_wallet`
+- [x] `refund_processed`: `method` = `cash`, `card_reversal` of `badge_wallet`
 - [x] `payment_registered` sturen na elke kassatransactie (routing: consumption/registration)
 - [x] `payment_status` sturen naar `frontend.payments` na inschrijvingsbetaling
 - [x] `wallet_balance_update` sturen naar `frontend.payments` bij badge saldo-wijziging
