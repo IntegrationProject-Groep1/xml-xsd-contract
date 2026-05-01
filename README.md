@@ -1,6 +1,13 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a7ea4,50:0b1f2a,100:6264a7&height=220&section=header&text=XML%2FXSD%20Contract%20Hub&fontSize=52&fontAlignY=38&fontColor=ffffff&desc=Source%20of%20Truth%20%E2%80%A2%20Integration%20Project%20Groep%201&descAlignY=62&descSize=18&animation=fadeIn" alt="XML/XSD Contract Hub banner" />
+# XML/XSD Contract Hub
+### The Source of Truth for Enterprise Integrations
+
+<br/>
+
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
+</a>
 
 </div>
 
@@ -20,19 +27,14 @@
   <a href="https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml"><img alt="Enforcement" src="https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a"></a>
 </p>
 
-> **Wat is dit?**
-> Deze repository is de **centrale Source of Truth** voor alle XML/XSD berichtafspraken binnen het Integration Project. Elke koppeling — CRM, Kassa, Frontend, Planning, Facturatie en meer — is gebonden aan de contractdefinities die hier beheerd worden. Afwijkingen worden hier gemeld, besproken en vastgelegd.
-
----
-
 ## Inhoudsopgave
 
-**🧑‍💻 Voor developers (start hier)**
-1. [Quickstart voor Developers](#quickstart-voor-developers)
-2. [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het)
-3. [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams)
-4. [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit)
-5. [Kernbestanden](#kernbestanden)
+[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions)
+[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
+[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/teams-notify.yml)
+[![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
+[![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
+[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml)
 
 **🛠️ Voor maintainers & beheer**
 
@@ -45,24 +47,24 @@
 
 ---
 
-## 🧑‍💻 Voor Developers
+# 🧑‍💻 Voor Developers
 
 ## Quickstart voor Developers
 
 > **Werk je aan CRM, Kassa, Frontend, Planning, Facturatie, Monitoring, Mailing of Identity?** Dan ben je een **developer** van een integrerend team. Deze sectie is jouw startpunt.
 
-| Wat wil je doen? | Ga naar |
-|---|---|
-| 📖 Het officiële XML/XSD contract lezen | [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) |
-| 🐞 Een fout, onduidelijkheid of regressie melden | [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het) |
-| 🔁 Begrijpen welke berichten jouw team raken | [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams) |
-| 🧱 Zien hoe een bericht is opgebouwd | [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit) |
-| 📋 Het issue-template stap voor stap volgen | [`issue-guide.md`](issue-guide.md) |
-| 📜 De recentste wijzigingen bekijken | [`changelog.md`](changelog.md) |
+| Wat wil je doen?                                | Ga naar                                                                        |
+|-------------------------------------------------|--------------------------------------------------------------------------------|
+| 📖 Het officiële XML/XSD contract lezen          | [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) |
+| 🐞 Een fout, onduidelijkheid of regressie melden | [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het)         |
+| 🔁 Begrijpen welke berichten jouw team raakt     | [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams)                |
+| 🧱 Zien hoe een bericht is opgebouwd             | [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit) |
+| 📋 Het issue-template stap voor stap volgen      | [`issue-guide.md`](issue-guide.md)                                             |
+| 📜 De recentste wijzigingen bekijken             | [`changelog.md`](changelog.md)                                                 |
 
 ### Drie regels die altijd gelden voor developers
 
-1. **Wijzig nooit zelf** een contractbestand of open een Pull Request — dit wordt technisch geblokkeerd door [`enforce-maintainers.yml`](.github/workflows/enforce-maintainers.yml).
+1. **Wijzig nooit zelf** een contractbestand of open een Pull Request op de contractbestanden — dit wordt technisch geblokkeerd door [`enforce-maintainers.yml`](.github/workflows/enforce-maintainers.yml).
 2. **Open altijd een GitHub Issue** met het `[XML/XSD]` template wanneer je iets ziet dat niet klopt.
 3. **Plaats daarna een bericht in Teams** in het kanaal **XML - XSD Channel** met de issue-URL, zodat de maintainers het direct zien.
 
@@ -73,13 +75,10 @@
 > Je mag het contract **niet** zelf wijzigen of een Pull Request openen. Dit wordt technisch geblokkeerd.
 > Volg onderstaand twee-stappen-proces wanneer je een fout, onduidelijkheid of gewenste wijziging tegenkomt.
 
-```mermaid
-flowchart LR
-    A["❗ Probleem<br/>ontdekt"] --> B["📌 Stap 1<br/>Open GitHub Issue<br/>met [XML/XSD] template"]
-    B --> C["💬 Stap 2<br/>Stuur Teams-bericht<br/>in XML - XSD Channel<br/>met issue-URL"]
-    C --> D["🔧 Maintainer<br/>beoordeelt issue"]
-    D --> E["✅ Fix + Changelog<br/>+ Push naar main"]
-    E --> F["📣 Automatische<br/>Teams Notificatie"]
+1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
+2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
+3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
+4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
 
     style A fill:#c53030,color:#fff,stroke:#7f1d1d
     style B fill:#1e40af,color:#fff,stroke:#1e3a8a
@@ -88,6 +87,56 @@ flowchart LR
     style E fill:#2f855a,color:#fff,stroke:#1a5738
     style F fill:#6264a7,color:#fff,stroke:#4a4880
 ```
+
+### Wanneer open je een issue?
+
+Open een issue als je een van deze situaties tegenkomt:
+
+- XML komt niet overeen met het centrale contract.
+- XSD validatie faalt.
+- Message type, header of body wijkt af van de afgesproken structuur.
+- Onzekerheid over interpretatie van een contractregel.
+- Regressie na een wijziging.
+- Een nieuwe flow of berichtveld dat in het contract zou moeten staan.
+
+### Stap 1 — Open een formeel GitHub Issue
+
+1. Ga naar **[Issues → New Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose)**.
+2. Kies het `[XML/XSD]` template.
+3. Vul het template volledig in (zie [`issue-guide.md`](issue-guide.md) voor details):
+   - Samenvatting van het probleem
+   - Verwacht vs. huidig gedrag
+   - Betrokken contractsectie (bv. `XML_XSD_Contract_v2.3 - sectie 11.1`)
+   - Reproductiestappen
+   - Voorbeeld XML/XSD of foutmelding
+   - Impact op teams/flows
+4. Label het issue correct: `xml`, `xsd`, `bug`, `contract`.
+5. Submit het issue en **kopieer de issue-URL**.
+
+### Stap 2 — Stuur direct daarna een bericht in Teams
+
+Ga naar het Microsoft Teams kanaal: **XML - XSD Channel**
+
+Stuur een bericht met:
+- De issue-URL uit stap 1
+- Een korte omschrijving van het probleem
+- Welke flow/team er impact van ondervindt
+
+> Dit zorgt ervoor dat maintainers **direct** op de hoogte zijn en de urgentie kunnen inschatten. Enkel een issue zonder Teams-bericht kan over het hoofd worden gezien.
+
+### Tips voor sterke issues
+
+- Voeg concrete voorbeelden toe (XML-snippets, foutmeldingen, log-lijnen).
+- Vermeld exact het berichttype en de flow.
+- Verwijs naar de juiste contractsectie.
+- Vermijd vage omschrijvingen zoals *"werkt niet"* zonder context.
+- Update na oplossing ook de [`changelog.md`](changelog.md) referenties in jouw eigen team-docs als jullie die bijhouden.
+
+---
+
+## Berichtenstromen tussen teams
+
+> Deze diagrammen geven jou een **overzicht in één oogopslag** van hoe RabbitMQ berichten tussen teams reizen, en welke berichten jouw team raken.
 
 ### Wanneer open je een issue?
 
@@ -280,7 +329,7 @@ flowchart TB
 
     subgraph BERICHT["📨 Eén XML bericht"]
         direction TB
-        ENV["Envelope<br/>Message"]:::msg
+        ENV["Envelope<br/>&lt;Message&gt;"]:::msg
         HDR["Header<br/>type · timestamp · sender · receiver"]:::field
         BODY["Body<br/>payload velden per message_type"]:::field
         ENV --> HDR
@@ -326,15 +375,13 @@ flowchart TB
 
 ---
 
-<div align="center">
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:0a7ea4,100:6264a7&height=4&section=header" alt="divider" />
-</div>
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:0a7ea4,100:6264a7&height=4&section=header" alt="divider" />
+</p>
 
-## 🛠️ Voor Maintainers & Beheer
+# 🛠️ Voor Maintainers & Beheer
 
-> De volgende secties zijn relevant voor **maintainers, projectmanagers en mensen die governance bewaken**. Als developer hoef je dit niet te lezen om je werk te kunnen doen.
-
----
+> De volgende secties zijn vooral relevant voor **maintainers, projectmanagers en mensen die governance bewaken**. Als developer hoef je dit niet te lezen om je werk te kunnen doen — maar het kan helpen om de context te begrijpen.
 
 ## Doelgroep en rechten
 
@@ -379,9 +426,9 @@ flowchart TB
 
 ---
 
-<a name="maintainers"></a>
-
 ## Voor Maintainers: Wijzigingen Doorvoeren
+
+<a name="maintainers"></a>
 
 **Actieve Maintainers:** @tombomeke-ehb · aangewezen developer
 
@@ -472,7 +519,7 @@ Bij elke push naar `main` of PR-event stuurt [`.github/workflows/teams-notify.ym
 ```mermaid
 flowchart TB
     subgraph TRIGGER["🚀 Trigger Events"]
-        PUSH["Push naar main"]
+        PUSH["Push → main"]
         PR["Pull Request<br/>opened / sync / reopened / merged"]
     end
 
@@ -549,8 +596,10 @@ Benodigd door: `enforce-maintainers.yml`
 
 ---
 
-<div align="center">
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:6264a7,50:0b1f2a,100:0a7ea4&height=120&section=footer" alt="footer" />
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6264a7,50:0b1f2a,100:0a7ea4&height=120&section=footer" alt="footer" />
+</p>
 
-<sub><strong>XML/XSD Contract Hub</strong> · Integration Project Groep 1 · Centraal beheer van XML/XSD berichtafspraken</sub>
-</div>
+<p align="center">
+  <sub><strong>XML/XSD Contract Hub</strong> · Integration Project Groep 1 · Centraal beheer van XML/XSD berichtafspraken</sub>
+</p>
