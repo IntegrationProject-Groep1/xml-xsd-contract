@@ -1,15 +1,11 @@
-<div align="center">
+<!-- ================================================================= -->
+<!--  XML/XSD Contract Hub · README                                  -->
+<!--  Banner generated via kyechan99/capsule-render                  -->
+<!-- ================================================================= -->
 
-# XML/XSD Contract Hub
-### The Source of Truth for Enterprise Integrations
-
-<br/>
-
-<a href="https://skillicons.dev">
-  <img src="https://skillicons.dev/icons?i=rabbitmq,python,github,markdown&theme=dark" />
-</a>
-
-</div>
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6264a7,50:0b1f2a,100:0a7ea4&height=220&section=header&text=XML%2FXSD%20Contract%20Hub&fontSize=52&fontAlignY=38&fontColor=ffffff&desc=Source%20of%20Truth%20%E2%80%A2%20RabbitMQ%20%E2%80%A2%20Integration%20Project%20Groep%201&descAlignY=62&descSize=18&animation=fadeIn" alt="XML/XSD Contract Hub banner" />
+</p>
 
 <p align="center">
   <a href="XML_XSD_Contract_v2.3_Centralized%201.md"><img alt="Contract" src="https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=for-the-badge&logo=files&logoColor=white&labelColor=0b1f2a"></a>
@@ -27,40 +23,49 @@
   <a href="https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml"><img alt="Enforcement" src="https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a"></a>
 </p>
 
-## Inhoudsopgave
-
-[![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions)
-[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/teams-notify.yml)
-[![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
-[![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
-[![Enforcement](https://img.shields.io/badge/Enforcement-Actief-c53030?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/enforce-maintainers.yml)
-
-**🛠️ Voor maintainers & beheer**
-
-6. [Doelgroep en rechten](#doelgroep-en-rechten)
-7. [Voor Maintainers: Wijzigingen Doorvoeren](#voor-maintainers-wijzigingen-doorvoeren)
-8. [Governance & Regels](#governance--regels)
-9. [Teams Notificaties (Automatisch)](#teams-notificaties-automatisch)
-10. [Secrets Configuratie](#secrets-configuratie)
-11. [Samenwerkingsafspraken](#samenwerkingsafspraken)
+<p align="center">
+  <em>Het gecentraliseerde XML/XSD berichtencontract voor <strong>IntegrationProject Groep 1</strong>.</em><br/>
+  <em>Eén bron van waarheid voor alle RabbitMQ-berichten — van heartbeat tot facturatie.</em>
+</p>
 
 ---
 
-# 🧑‍💻 Voor Developers
+## Inhoudsopgave
+
+**Voor Developers (start hier)**
+
+1. [Quickstart voor Developers](#quickstart-voor-developers)
+2. [Contract Compliance Status — v2.3](#contract-compliance-status--v23)
+3. [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het)
+4. [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams)
+5. [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit)
+6. [Kernbestanden](#kernbestanden)
+
+**Voor Maintainers & Beheer**
+
+7. [Doelgroep en rechten](#doelgroep-en-rechten)
+8. [Voor Maintainers: Wijzigingen Doorvoeren](#voor-maintainers-wijzigingen-doorvoeren)
+9. [Governance & Regels](#governance--regels)
+10. [Teams Notificaties (Automatisch)](#teams-notificaties-automatisch)
+11. [Secrets Configuratie](#secrets-configuratie)
+12. [Samenwerkingsafspraken](#samenwerkingsafspraken)
+
+---
+
+# Voor Developers
 
 ## Quickstart voor Developers
 
 > **Werk je aan CRM, Kassa, Frontend, Planning, Facturatie, Monitoring, Mailing of Identity?** Dan ben je een **developer** van een integrerend team. Deze sectie is jouw startpunt.
 
-| Wat wil je doen?                                | Ga naar                                                                        |
-|-------------------------------------------------|--------------------------------------------------------------------------------|
-| 📖 Het officiële XML/XSD contract lezen          | [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) |
-| 🐞 Een fout, onduidelijkheid of regressie melden | [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het)         |
-| 🔁 Begrijpen welke berichten jouw team raakt     | [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams)                |
-| 🧱 Zien hoe een bericht is opgebouwd             | [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit) |
-| 📋 Het issue-template stap voor stap volgen      | [`issue-guide.md`](issue-guide.md)                                             |
-| 📜 De recentste wijzigingen bekijken             | [`changelog.md`](changelog.md)                                                 |
+| Wat wil je doen? | Ga naar |
+|---|---|
+| Het officiële XML/XSD contract lezen | [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) |
+| Een fout, onduidelijkheid of regressie melden | [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het) |
+| Begrijpen welke berichten jouw team raken | [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams) |
+| Zien hoe een bericht is opgebouwd | [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit) |
+| Het issue-template stap voor stap volgen | [`issue-guide.md`](issue-guide.md) |
+| De recentste wijzigingen bekijken | [`changelog.md`](changelog.md) |
 
 ### Drie regels die altijd gelden voor developers
 
@@ -70,23 +75,43 @@
 
 ---
 
+## Contract Compliance Status — v2.3
+
+> Per-team audit status na de volledige repo-scan van April 2026.
+> Badges zijn gegenereerd via [`assets/gen-badges/main.go`](assets/gen-badges/main.go).
+
+<p align="center">
+  <img alt="kassa"       src="assets/badges/kassa-conform.svg">
+  <img alt="crm"         src="assets/badges/crm-kritiek.svg">
+  <img alt="frontend"    src="assets/badges/frontend-kritiek.svg">
+  <img alt="planning"    src="assets/badges/planning-conform.svg">
+  <img alt="facturatie"  src="assets/badges/facturatie-kritiek.svg">
+  <img alt="monitoring"  src="assets/badges/monitoring-alert.svg">
+  <img alt="mailing"     src="assets/badges/mailing-conform.svg">
+  <img alt="identity"    src="assets/badges/identity-conform.svg">
+  <img alt="heartbeat"   src="assets/badges/heartbeat-kritiek.svg">
+</p>
+
+| Team | Status | Actie vereist | Details in contract |
+|------|--------|--------------|---------------------|
+| Kassa | **CONFORM** | Geen | Referentie-implementatie voor andere teams |
+| CRM | **KRITIEK** | 6 fixes in `src/sender.js` + `src/receiver.js` | [Sectie 0.5](XML_XSD_Contract_v2.3_Centralized%201.md#05-repo-audit-bevindingen) |
+| Frontend | **KRITIEK** | Volledige header-migratie v1.0 → v2.0 in 7 senders | [Sectie 0.5](XML_XSD_Contract_v2.3_Centralized%201.md#05-repo-audit-bevindingen) |
+| Planning | **CONFORM** | Geen — bijgewerkt April 2026 | — |
+| Facturatie | **KRITIEK** | 4 XSD's vervangen + queue-naam corrigeren | [Sectie 0.5](XML_XSD_Contract_v2.3_Centralized%201.md#05-repo-audit-bevindingen) |
+| Monitoring | **ALERT** | `alert.xsd` migreren + Logstash config bijwerken | [Sectie 4](XML_XSD_Contract_v2.3_Centralized%201.md#4-monitoring--mailing--alert) |
+| Mailing | **CONFORM** | Geen — schema volledig gedocumenteerd | — |
+| Identity | **CONFORM** | Geen — gedocumenteerde uitzondering op envelop-regel | [Sectie 15](XML_XSD_Contract_v2.3_Centralized%201.md#15-identity-service--uitzondering-op-de-standaard) |
+| Heartbeat | **KRITIEK** | Volledige herwrite XML-builder | [Sectie 3](XML_XSD_Contract_v2.3_Centralized%201.md#3-heartbeat--alle-teams--monitoring) |
+
+> Zie [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) sectie 0.5 voor bronregels en concrete actiepunten per team.
+
+---
+
 ## Probleem of vraag? Zo meld je het
 
 > Je mag het contract **niet** zelf wijzigen of een Pull Request openen. Dit wordt technisch geblokkeerd.
 > Volg onderstaand twee-stappen-proces wanneer je een fout, onduidelijkheid of gewenste wijziging tegenkomt.
-
-1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
-2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
-3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
-4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
-
-    style A fill:#c53030,color:#fff,stroke:#7f1d1d
-    style B fill:#1e40af,color:#fff,stroke:#1e3a8a
-    style C fill:#6264a7,color:#fff,stroke:#4a4880
-    style D fill:#0b1f2a,color:#fff,stroke:#0a7ea4
-    style E fill:#2f855a,color:#fff,stroke:#1a5738
-    style F fill:#6264a7,color:#fff,stroke:#4a4880
-```
 
 ### Wanneer open je een issue?
 
@@ -138,87 +163,26 @@ Stuur een bericht met:
 
 > Deze diagrammen geven jou een **overzicht in één oogopslag** van hoe RabbitMQ berichten tussen teams reizen, en welke berichten jouw team raken.
 
-### Wanneer open je een issue?
-
-Open een issue als je een van deze situaties tegenkomt:
-
-- XML komt niet overeen met het centrale contract.
-- XSD validatie faalt.
-- Message type, header of body wijkt af van de afgesproken structuur.
-- Onzekerheid over interpretatie van een contractregel.
-- Regressie na een wijziging.
-- Een nieuwe flow of berichtveld dat in het contract zou moeten staan.
-
-### Stap 1 — Open een formeel GitHub Issue
-
-1. Ga naar **[Issues → New Issue](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/issues/new/choose)**.
-2. Kies het `[XML/XSD]` template.
-3. Vul het template volledig in (zie [`issue-guide.md`](issue-guide.md) voor details):
-   - Samenvatting van het probleem
-   - Verwacht vs. huidig gedrag
-   - Betrokken contractsectie (bv. `XML_XSD_Contract_v2.3 - sectie 11.1`)
-   - Reproductiestappen
-   - Voorbeeld XML/XSD of foutmelding
-   - Impact op teams/flows
-4. Label het issue correct: `xml`, `xsd`, `bug`, `contract`.
-5. Submit het issue en **kopieer de issue-URL**.
-
-### Stap 2 — Stuur direct daarna een bericht in Teams
-
-Ga naar het Microsoft Teams kanaal: **XML - XSD Channel**
-
-Stuur een bericht met:
-- De issue-URL uit stap 1
-- Een korte omschrijving van het probleem
-- Welke flow/team er impact van ondervindt
-
-> Dit zorgt ervoor dat maintainers **direct** op de hoogte zijn en de urgentie kunnen inschatten. Enkel een issue zonder Teams-bericht kan over het hoofd worden gezien.
-
-### Tips voor sterke issues
-
-- Voeg concrete voorbeelden toe (XML-snippets, foutmeldingen, log-lijnen).
-- Vermeld exact het berichttype en de flow.
-- Verwijs naar de juiste contractsectie.
-- Vermijd vage omschrijvingen zoals *"werkt niet"* zonder context.
-
----
-
-## Berichtenstromen tussen teams
-
-> Deze diagrammen geven jou een **overzicht in één oogopslag** van hoe RabbitMQ berichten tussen teams reizen, en welke berichten jouw team raken.
-
 ### Interactieve Netwerk-Map
 
-Deze kaart wordt automatisch gegenereerd op basis van de contractdefinities en toont alle live berichtstromen tussen teams.
+#### System Integration Key
 
-<!-- NETWORK_MAP_START -->
-
-<div align='center'>
-
-![Integration Map](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=600&lines=INTEGRATION+NETWORK+MAP;REAL-TIME+MESSAGE+FLOWS;CONTRACT+V2.3+SOURCE+OF+TRUTH;HUB-AND-SPOKE+ARCHITECTURE)
-
-</div>
-
----
-
-#### 🧭 System Integration Key
-| Integration Flow | Architectural Path Description |
+| Integration Flow | Architecturele beschrijving |
 | :--- | :--- |
 | ![](https://img.shields.io/badge/INBOUND-10b981?style=for-the-badge) | Functioneel bericht **NAAR** de CRM (Hub Entrance) |
 | ![](https://img.shields.io/badge/OUTBOUND-3b82f6?style=for-the-badge) | Functioneel bericht **VANAF** de CRM (Hub Exit) |
 | ![](https://img.shields.io/badge/PEER--TO--PEER-6366f1?style=for-the-badge) | Direct bericht **TUSSEN TEAMS** (Bypass Hub) |
 | ![](https://img.shields.io/badge/SYSTEM-94a3b8?style=for-the-badge) | **HEARTBEATS** / Status updates naar Monitoring |
 
----
+<!-- NETWORK_MAP_START -->
 
 ```mermaid
 flowchart LR
-    %% Style Definitions
     classDef core fill:#0b1f2a,color:#fff,stroke:#0a7ea4,stroke-width:4px;
     classDef ops fill:#1e3a8a,color:#fff,stroke:#0a7ea4,stroke-width:2px;
     classDef support fill:#2d3748,color:#fff,stroke:#718096,stroke-width:1px;
 
-    subgraph CORE ["🔑 Core & Routing"]
+    subgraph CORE ["Core & Routing"]
         CRM(["CRM"])
         class CRM core;
         Identity(["Identity"])
@@ -227,7 +191,7 @@ flowchart LR
         class Requestor core;
     end
 
-    subgraph OPS ["⚙️ Operational Teams"]
+    subgraph OPS ["Operational Teams"]
         Facturatie(["Facturatie"])
         class Facturatie ops;
         Frontend(["Frontend"])
@@ -238,7 +202,7 @@ flowchart LR
         class Planning ops;
     end
 
-    subgraph SUPPORT ["📢 Support & Alerts"]
+    subgraph SUPPORT ["Support & Alerts"]
         Alle_teams(["Alle teams"])
         class Alle_teams support;
         Heartbeat(["Heartbeat"])
@@ -249,7 +213,6 @@ flowchart LR
         class Monitoring support;
     end
 
-    %% Functional Flows
     Alle_teams -. "heartbeat" .-> Monitoring
     CRM -- "invoice_request<br/>new_registration" --> Facturatie
     CRM -- "payment_registered" --> Frontend
@@ -278,7 +241,6 @@ flowchart LR
     Planning -- "Token Registration<br/>calendar_invite_confirmed<br/>session_created<br/>session_updated" --> Frontend
     Planning -. "heartbeat" .-> Monitoring
 
-    %% Edge Styles
     linkStyle 0 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
     linkStyle 1 stroke:#3b82f6,stroke-width:2px;
     linkStyle 2 stroke:#3b82f6,stroke-width:2px;
@@ -325,18 +287,18 @@ flowchart TB
     classDef field   fill:#2f855a,color:#fff,stroke:#1a5738,stroke-width:2px;
     classDef teamcl  fill:#6264a7,color:#fff,stroke:#4a4880,stroke-width:2px;
 
-    SOT["📄 XML_XSD_Contract_v2.3<br/>(Source of Truth)"]:::truth
+    SOT["XML_XSD_Contract_v2.3<br/>(Source of Truth)"]:::truth
 
-    subgraph BERICHT["📨 Eén XML bericht"]
+    subgraph BERICHT["Een XML bericht"]
         direction TB
-        ENV["Envelope<br/>&lt;Message&gt;"]:::msg
-        HDR["Header<br/>type · timestamp · sender · receiver"]:::field
+        ENV["Envelope<br/>&lt;message&gt;"]:::msg
+        HDR["Header<br/>type · timestamp · source · version"]:::field
         BODY["Body<br/>payload velden per message_type"]:::field
         ENV --> HDR
         ENV --> BODY
     end
 
-    subgraph CONSUMERS["🧩 Implementaties per team"]
+    subgraph CONSUMERS["Implementaties per team"]
         direction LR
         CRM2["CRM"]:::teamcl
         KAS2["Kassa"]:::teamcl
@@ -351,7 +313,7 @@ flowchart TB
     SOT --> BERICHT
     BERICHT --> CONSUMERS
 
-    SOT -. "wijziging gemeld via issue" .-> ISSUE["GitHub Issue<br/>(door dev-team)"]:::field
+    SOT -. "wijziging gemeld via issue" .-> ISSUE["GitHub Issue (door dev-team)"]:::field
     ISSUE -. "fix door maintainer" .-> SOT
 ```
 
@@ -376,10 +338,10 @@ flowchart TB
 ---
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:0a7ea4,100:6264a7&height=4&section=header" alt="divider" />
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:6264a7,50:0b1f2a,100:0a7ea4&height=4" alt="" />
 </p>
 
-# 🛠️ Voor Maintainers & Beheer
+# Voor Maintainers & Beheer
 
 > De volgende secties zijn vooral relevant voor **maintainers, projectmanagers en mensen die governance bewaken**. Als developer hoef je dit niet te lezen om je werk te kunnen doen — maar het kan helpen om de context te begrijpen.
 
@@ -388,9 +350,9 @@ flowchart TB
 | Rol | Teams | Rechten |
 |---|---|---|
 | **Maintainer** | @tombomeke-ehb + aangewezen developer | Lezen · Wijzigen · Pushen naar `main` · PR mergen |
-| **Niet-Admin User (developer)** | CRM · Kassa · Frontend · Planning · Facturatie · Monitoring · Mailing · Identity | Lezen · Issues openen · Teams-bericht sturen |
+| **Developer** | CRM · Kassa · Frontend · Planning · Facturatie · Monitoring · Mailing · Identity | Lezen · Issues openen · Teams-bericht sturen |
 
-> ⚠️ **Niet-Admin Users mogen GEEN directe wijzigingen of Pull Requests doen aan de contractbestanden.**
+> **Developers mogen GEEN directe wijzigingen of Pull Requests doen aan de contractbestanden.**
 > Dit is technisch afgedwongen via [`.github/workflows/enforce-maintainers.yml`](.github/workflows/enforce-maintainers.yml).
 > Bij problemen of vragen volg je het proces onder [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het).
 
@@ -400,16 +362,16 @@ De contractdefinities in deze repository bepalen de structuur voor alle integrer
 
 ```mermaid
 flowchart TB
-    subgraph HUB["🗂️  XML/XSD Contract Hub  —  deze repository"]
+    subgraph HUB["XML/XSD Contract Hub — deze repository"]
         direction TB
-        CONTRACT["📄 XML_XSD_Contract_v2.3<br/>─────────────────<br/>Source of Truth"]
-        INSTRUCTIONS["📋 instructions.md<br/>─────────────────<br/>Governance regels"]
-        XMLEXPERT["🤖 xml-expert.md<br/>─────────────────<br/>Agent / AI kader"]
-        CHANGELOG["📝 changelog.md<br/>─────────────────<br/>Wijzigingshistorie"]
-        ISSUEGUIDE["🔖 issue-guide.md<br/>─────────────────<br/>Meldingsproces"]
+        CONTRACT["XML_XSD_Contract_v2.3<br/>─────────────────<br/>Source of Truth"]
+        INSTRUCTIONS["instructions.md<br/>─────────────────<br/>Governance regels"]
+        XMLEXPERT["xml-expert.md<br/>─────────────────<br/>Agent / AI kader"]
+        CHANGELOG["changelog.md<br/>─────────────────<br/>Wijzigingshistorie"]
+        ISSUEGUIDE["issue-guide.md<br/>─────────────────<br/>Meldingsproces"]
     end
 
-    subgraph INTTEAMS["⚙️  Integrerende Teams"]
+    subgraph INTTEAMS["Integrerende Teams"]
         direction LR
         CRM["CRM"]
         KASSA["Kassa"]
@@ -420,8 +382,8 @@ flowchart TB
     end
 
     CONTRACT  -->|"contractdefinities"| INTTEAMS
-    INTTEAMS  -->|"📌 GitHub Issue"| ISSUEGUIDE
-    INTTEAMS  -->|"💬 Teams: XML - XSD Channel"| HUB
+    INTTEAMS  -->|"GitHub Issue"| ISSUEGUIDE
+    INTTEAMS  -->|"Teams: XML - XSD Channel"| HUB
 ```
 
 ---
@@ -436,10 +398,10 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    A["📖 Lees<br/>xml-expert.md<br/>+ instructions.md"] --> B["✏️ Wijziging<br/>uitvoeren<br/>(binnen scope)"]
-    B --> C["📝 Changelog<br/>entry toevoegen<br/>vóór commit"]
-    C --> D["💾 Commit & Push<br/>naar main"]
-    D --> E["📣 Teams Notificatie<br/>verstuurd<br/>automatisch"]
+    A["Lees<br/>xml-expert.md<br/>+ instructions.md"] --> B["Wijziging<br/>uitvoeren<br/>(binnen scope)"]
+    B --> C["Changelog<br/>entry toevoegen<br/>vóór commit"]
+    C --> D["Commit & Push<br/>naar main"]
+    D --> E["Teams Notificatie<br/>verstuurd<br/>automatisch"]
 
     style A fill:#0b1f2a,color:#fff,stroke:#0a7ea4
     style B fill:#1e40af,color:#fff,stroke:#1e3a8a
@@ -518,24 +480,24 @@ Bij elke push naar `main` of PR-event stuurt [`.github/workflows/teams-notify.ym
 
 ```mermaid
 flowchart TB
-    subgraph TRIGGER["🚀 Trigger Events"]
-        PUSH["Push → main"]
+    subgraph TRIGGER["Trigger Events"]
+        PUSH["Push naar main"]
         PR["Pull Request<br/>opened / sync / reopened / merged"]
     end
 
-    subgraph WORKFLOW["⚙️  teams-notify.yml"]
-        DETECT["🔍 Detecteer<br/>betrokken teams<br/>o.b.v. bestanden + changelog"]
-        BUILD["🏗️  Bouw<br/>Adaptive Card payload"]
-        SEND["📤 Verstuur<br/>webhook"]
+    subgraph WORKFLOW["teams-notify.yml"]
+        DETECT["Detecteer<br/>betrokken teams<br/>o.b.v. bestanden + changelog"]
+        BUILD["Bouw<br/>Adaptive Card payload"]
+        SEND["Verstuur<br/>webhook"]
     end
 
-    subgraph CARD["📨 Adaptive Card in Teams"]
+    subgraph CARD["Adaptive Card in Teams"]
         TITLE["Titel: XML Update"]
         ACTOR["Actor + repository"]
         TEAMS_LIST["Betrokken teams"]
         CHANGELOG_ENTRY["Laatste changelog-entry"]
         FILES["Gewijzigde bestanden"]
-        LINK["🔗 Link naar commit of PR"]
+        LINK["Link naar commit of PR"]
     end
 
     PUSH --> WORKFLOW
