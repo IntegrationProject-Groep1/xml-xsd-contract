@@ -11,8 +11,8 @@
 
 </div>
 
-[![Contract Version](https://img.shields.io/badge/Contract-v2.3-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
-[![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.3_Centralized%201.md)
+[![Contract Version](https://img.shields.io/badge/Contract-v2.4-0a7ea4?style=flat-square&logo=files&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.4_Centralized.md)
+[![Source of Truth](https://img.shields.io/badge/Source%20of%20Truth-MD%20%E2%86%92%20XML%2FXSD-2f855a?style=flat-square&logo=checkmarx&logoColor=white&labelColor=0b1f2a)](XML_XSD_Contract_v2.4_Centralized.md)
 [![Governance](https://img.shields.io/badge/Governance-Maintainers%20Only-c53030?style=flat-square&logo=shield&logoColor=white&labelColor=0b1f2a)](instructions.md)
 [![Taal](https://img.shields.io/badge/Taal-Nederlands-5b21b6?style=flat-square&logo=googletranslate&logoColor=white&labelColor=0b1f2a)](#kernbestanden)
 
@@ -21,7 +21,7 @@
 ## Inhoudsopgave
 
 [![Build Status](https://img.shields.io/badge/Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions)
-[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.3-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
+[![Contract Version](https://img.shields.io/badge/Contract%20Version-v2.4-0a7ea4?style=flat-square&logo=semanticversioning&logoColor=white&labelColor=0b1f2a)](changelog.md)
 [![Last Teams Notify](https://img.shields.io/badge/Teams%20Notify-Actief-6264a7?style=flat-square&logo=microsoftteams&logoColor=white&labelColor=0b1f2a)](https://github.com/IntegrationProject-Groep1/xml-xsd-contract/actions/workflows/teams-notify.yml)
 [![Maintainer Status](https://img.shields.io/badge/Maintainers-Active-2f855a?style=flat-square&logo=githubsponsors&logoColor=white&labelColor=0b1f2a)](#maintainers)
 [![Changelog](https://img.shields.io/badge/Changelog-Bijgewerkt-f59e0b?style=flat-square&logo=keepachangelog&logoColor=white&labelColor=0b1f2a)](changelog.md)
@@ -46,7 +46,7 @@
 
 | Wat wil je doen?                                | Ga naar                                                                        |
 |-------------------------------------------------|--------------------------------------------------------------------------------|
-| 📖 Het officiële XML/XSD contract lezen          | [`XML_XSD_Contract_v2.3_Centralized 1.md`](XML_XSD_Contract_v2.3_Centralized%201.md) |
+| 📖 Het officiële XML/XSD contract lezen          | [`XML_XSD_Contract_v2.4_Centralized.md`](XML_XSD_Contract_v2.4_Centralized.md) |
 | 🐞 Een fout, onduidelijkheid of regressie melden | [Probleem of vraag? Zo meld je het](#probleem-of-vraag-zo-meld-je-het)         |
 | 🔁 Begrijpen welke berichten jouw team raakt     | [Berichtenstromen tussen teams](#berichtenstromen-tussen-teams)                |
 | 🧱 Zien hoe een bericht is opgebouwd             | [Hoe het XML/XSD contract in elkaar zit](#hoe-het-xmlxsd-contract-in-elkaar-zit) |
@@ -66,7 +66,7 @@
 > Je mag het contract **niet** zelf wijzigen of een Pull Request openen. Dit wordt technisch geblokkeerd.
 > Volg onderstaand twee-stappen-proces wanneer je een fout, onduidelijkheid of gewenste wijziging tegenkomt.
 
-1. Lees het officiële contract: [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md).
+1. Lees het officiële contract: [`XML_XSD_Contract_v2.4_Centralized.md`](XML_XSD_Contract_v2.4_Centralized.md).
 2. Lees [`issue-guide.md`](issue-guide.md) zodat je weet hoe je fouten correct meldt.
 3. Sluit je aan bij het Teams-kanaal **XML - XSD Channel** voor directe communicatie.
 4. Wijzig **nooit** contractbestanden rechtstreeks — open altijd een issue.
@@ -97,7 +97,7 @@ Open een issue als je een van deze situaties tegenkomt:
 3. Vul het template volledig in (zie [`issue-guide.md`](issue-guide.md) voor details):
    - Samenvatting van het probleem
    - Verwacht vs. huidig gedrag
-   - Betrokken contractsectie (bv. `XML_XSD_Contract_v2.3 - sectie 11.1`)
+   - Betrokken contractsectie (bv. `XML_XSD_Contract_v2.4 - sectie 11.1`)
    - Reproductiestappen
    - Voorbeeld XML/XSD of foutmelding
    - Impact op teams/flows
@@ -267,7 +267,7 @@ flowchart TB
     classDef field   fill:#2f855a,color:#fff,stroke:#1a5738,stroke-width:2px;
     classDef teamcl  fill:#6264a7,color:#fff,stroke:#4a4880,stroke-width:2px;
 
-    SOT["📄 XML_XSD_Contract_v2.3<br/>(Source of Truth)"]:::truth
+    SOT["📄 XML_XSD_Contract_v2.4<br/>(Source of Truth)"]:::truth
 
     subgraph BERICHT["📨 Eén XML bericht"]
         direction TB
@@ -309,7 +309,7 @@ flowchart TB
 
 | Bestand | Doel |
 |---|---|
-| [`XML_XSD_Contract_v2.3_Centralized%201.md`](XML_XSD_Contract_v2.3_Centralized%201.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
+| [`XML_XSD_Contract_v2.4_Centralized.md`](XML_XSD_Contract_v2.4_Centralized.md) | Officieel, gecentraliseerd XML/XSD contract — de functionele waarheid |
 | [`xml-expert.md`](xml-expert.md) | Agent-definitie en strikte werkmodus voor contractwijzigingen |
 | [`instructions.md`](instructions.md) | Bindende werkinstructies voor alle bijdragers (mens en AI) |
 | [`issue-guide.md`](issue-guide.md) | Stap-voor-stap handleiding voor het openen van XML/XSD issues |
@@ -344,7 +344,7 @@ De contractdefinities in deze repository bepalen de structuur voor alle integrer
 flowchart TB
     subgraph HUB["🗂️  XML/XSD Contract Hub  —  deze repository"]
         direction TB
-        CONTRACT["📄 XML_XSD_Contract_v2.3<br/>─────────────────<br/>Source of Truth"]
+        CONTRACT["📄 XML_XSD_Contract_v2.4<br/>─────────────────<br/>Source of Truth"]
         INSTRUCTIONS["📋 instructions.md<br/>─────────────────<br/>Governance regels"]
         XMLEXPERT["🤖 xml-expert.md<br/>─────────────────<br/>Agent / AI kader"]
         CHANGELOG["📝 changelog.md<br/>─────────────────<br/>Wijzigingshistorie"]

@@ -2,6 +2,13 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-01 10:00 (+02:00)
+- Auteur: Gemini CLI
+- Betrokken teams: CRM, Kassa, Facturatie, Monitoring
+- Bestanden: XML_XSD_Contract_v2.4_Centralized.md, README.md, xml-expert.md, changelog.md
+- Wijziging: Contract geüpdatet naar v2.4. Top-up identificatie (vat_rate=0 + wallet_topup), operational flow voor badge_not_found (Anonymous Flow), synchronisatie van payment_method en item_type enums, en toevoeging van iot_gateway source voor check-ins.
+- Reden: Synchronisatie met Kassa v2.5 logica en verbetering van monitoring/audit mogelijkheden.
+
 ## 2026-04-30 14:27 (+02:00)
 - Auteur: GitHub Copilot (GPT-5.3-Codex)
 - Bestanden: README.md, instructions.md, issue-guide.md, changelog.md

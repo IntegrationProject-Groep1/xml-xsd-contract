@@ -1,8 +1,8 @@
-# XML / XSD Contract v2.3 — Integration Project Groep 1
+# XML / XSD Contract v2.4 — Integration Project Groep 1
 
 > **Dit document is het officiële en GECENTRALISEERDE berichtencontract voor alle teams.**  
 > Elk bericht dat over RabbitMQ gaat, moet voldoen aan de structuur en XSD's in dit document. Dit is de enige 'Source of Truth' voor alle XML en XSD schema's in het project.
-> Versie: **2.3** — Gecentraliseerd na volledige repo-audit (April 2026).
+> Versie: **2.4** — Bijgewerkt met Kassa v2.5 Top-up & Sad Path logic (Mei 2026).
 >
 >  **Dit is het ENIGE geldige contract.** Alle teams moeten hun code hieraan aanpassen — afwijkingen die nog in code zitten zijn een **contractbreuk** en moeten dringend worden weggewerkt. Zie sectie 0.5 voor de exacte audit-bevindingen per team.
 
@@ -1255,7 +1255,14 @@ Wanneer een account volledig wordt verwijderd.
 
 ### 6.1 `consumption_order`
 
-Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en `total_amount` per lijn.
+Klant bestelt consumpties aan de bar. Schema v2.4 — bevat `sku`, `vat_rate`, `total_amount` en `item_type`.
+
+> **💡 Identificatie van Top-ups (Saldo Opladen):**
+> Producten die het saldo van de badge verhogen worden herkend aan:
+> 1. `<vat_rate>` is altijd `0`.
+> 2. `<item_type>` is altijd `wallet_topup`.
+>
+> **Gedrag voor CRM:** Indien `item_type=wallet_topup`, mag er **geen** stock-mutatie gebeuren in Salesforce. Enkel de financiële transactie wordt geregistreerd.
 
 > **� Koppeling met factuur:** De `message_id` van dit bericht wordt de `correlation_id` in het bijhorende `invoice_request` (zie 6.5). Zo koppelt Facturatie de juiste orderlijnen aan de factuur.
 
@@ -1327,7 +1334,13 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
           </xs:simpleContent>
         </xs:complexType>
       </xs:element>
-      <xs:element name="item_type" type="xs:string" minOccurs="0"/>
+      <xs:element name="item_type" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="wallet_topup"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
 
@@ -2081,11 +2094,16 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 
 **Kassa-specifieke Error Codes:**
 
-| Code | Wanneer |
-|------|---------|
-| `badge_not_found` | badge_id niet gevonden in Odoo |
-| `odoo_api_error` | Odoo XML-RPC niet bereikbaar |
-| `offline_queue_full` | outbox.json heeft limiet van 500 berichten bereikt |
+| Code | Wanneer | Gevolg / Actie |
+|------|---------|----------------|
+| `badge_not_found` | badge_id niet gevonden in Odoo | **Anonymous Flow:** Kassa gaat direct door naar een anonieme aankoop (`is_anonymous=true`). Geen factuur mogelijk. |
+| `odoo_api_error` | Odoo XML-RPC niet bereikbaar | **Offline Flow:** Bericht wordt gebufferd in `outbox.json` tot Odoo herstelt. |
+| `offline_queue_full` | outbox.json heeft limiet van 500 berichten bereikt | **Blokkade:** Kassa weigert nieuwe transacties tot de buffer is geleegd. |
+
+> **💡 Operational Flow na badge_not_found:**
+> Wanneer Kassa dit bericht stuurt, stopt de transactie niet. De kassamedewerker zal in 90% van de gevallen de knop "Anoniem Verder" gebruiken.
+>
+> **Gevolg voor Monitoring:** Een `system_error` met code `badge_not_found` wordt direct gevolgd door een `consumption_order` waarbij `<is_anonymous>` op `true` staat. Dit is verwacht gedrag en vereist geen menselijke interventie tenzij dezelfde badge meer dan 3x per 5 minuten faalt.
 
 *(Voor algemene codes zoals `invalid_xml_format`, zie sectie 2.6)*
 
@@ -2500,9 +2518,9 @@ Een betaling werd verwerkt in FossBilling.
           </xs:element>
           <xs:element name="payment_method">
             <xs:simpleType><xs:restriction base="xs:string">
-              <xs:enumeration value="cash"/>
-              <xs:enumeration value="card"/>
-              <xs:enumeration value="bank_transfer"/>
+              <xs:enumeration value="company_link"/>
+              <xs:enumeration value="on_site"/>
+              <xs:enumeration value="online"/>
             </xs:restriction></xs:simpleType>
           </xs:element>
           <xs:element name="paid_at" type="xs:dateTime"/>
@@ -4594,6 +4612,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="frontend"/>
                   <xs:enumeration value="kassa"/>
+                  <xs:enumeration value="iot_gateway"/> <!-- Toegevoegd voor v2.4 -->
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="type">
@@ -4895,6 +4914,6 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 ---
 
-*Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
+*Document v2.4 — Bijgewerkt met Kassa v2.5 logica — Mei 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
 
