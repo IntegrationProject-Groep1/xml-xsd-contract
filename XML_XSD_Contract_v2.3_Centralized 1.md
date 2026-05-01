@@ -1643,9 +1643,9 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
 </xs:schema>
 ```
 
-#### Business Logic Rules (Mandatory)
-*   **Rule 1 (Top-ups):** For wallet recharges, `item_type` must be `wallet_topup` and `vat_rate` must be `0`. This is a non-taxable financial transaction.
-*   **Rule 2 (Anonymous):** If `is_anonymous` is `true`, the `<customer>` block is omitted. In this case, no invoice can be requested later; the customer only receives a physical receipt.
+#### Business Logic Rules (Verplicht)
+*   **Regel 1 (Top-ups):** Voor wallet-herladingen moet `item_type` de waarde `wallet_topup` hebben en `vat_rate` moet `0` zijn. Dit is een niet-belastbare financiële transactie.
+*   **Regel 2 (Anoniem):** Als `is_anonymous` op `true` staat, wordt het `<customer>` blok weggelaten. In dit geval kan er later geen factuur worden aangevraagd; de klant ontvangt enkel een fysiek kasticket.
 
 #### Voorbeeld XML
 
@@ -1905,7 +1905,7 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
 ```
 
 #### Business Logic Rules
-*   **Rule 1 (Balance Update):** If `method` is `badge_wallet`, Kassa will also broadcast a `wallet_balance_update` message to the Frontend.
+*   **Regel 1 (Saldo Update):** Als de `method` gelijk is aan `badge_wallet`, zal Kassa ook een `wallet_balance_update` bericht broadcasten naar de Frontend.
 
 #### Voorbeeld XML — badge_wallet refund
 
@@ -2018,9 +2018,7 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
           <xs:complexType>
             <xs:sequence>
               <xs:element name="user_id"      type="xs:string"/>
-              <xs:sequence>
-                <xs:element name="invoice_data" type="InvoiceDataType"/>
-              </xs:sequence>
+              <xs:element name="invoice_data" type="InvoiceDataType"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -2028,6 +2026,7 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
     </xs:complexType>
   </xs:element>
 </xs:schema>
+```
 
 #### Voorbeeld XML
 
@@ -2370,8 +2369,8 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 | Code | Wanneer |
 |------|---------|
 | `badge_not_found` | badge_id niet gevonden in Odoo |
-| `odoo_api_error` | The Kassa Integration cannot reach the Odoo XML-RPC API. |
-| `offline_queue_full` | The local outbox buffer has reached its limit (500 messages). |
+| `odoo_api_error` | De Kassa-integratie kan de Odoo XML-RPC API niet bereiken. |
+| `offline_queue_full` | De lokale outbox-buffer heeft de limiet (500 berichten) bereikt. |
 
 *(Voor algemene codes zoals `invalid_xml_format`, zie sectie 2.6)*
 
