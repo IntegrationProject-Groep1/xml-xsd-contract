@@ -41,8 +41,8 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `new_registration` | ← Frontend | v2.0  | [5.1](#51-new_registration-frontend--crm) |
 |  **ONTVANGT** | `user_created`, `user_updated`, `user_deleted` | ← Frontend |  dotted type | [5.2-5.4](#52-user_created) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  `session_update` (fout) | [7.1-7.2](#71-session_created-planning--crm) |
-|  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.1](#61-payment_registered-kassa--crm) |
-|  **ONTVANGT** | `invoice_created_notification` | ← Facturatie |  | [8.1](#81-invoice_created_notification-facturatie--crm) |
+|  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.6](#66-payment_registered-kassa--rabbitmq) |
+|  **ONTVANGT** | `invoice_created_notification` | ← Facturatie |  | [8.1](#81-invoice_status) |
 |  **ONTVANGT** | `mailing_status` | ← Mailing |  (moet `send_mailing` zijn) | [9.1](#91-mailing_status-mailing--crm) |
 |  **VERZENDT** | `new_registration` | → Kassa |  bevat `<age>` | [10.1](#101-new_registration-crm--kassa) |
 |  **VERZENDT** | `profile_update` | → Kassa |  bevat `<age>` | [10.2](#102-profile_update-crm--kassa) |
@@ -81,7 +81,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 **Kritieke fixes (web/modules/custom/rabbitmq_sender/src/):**
 -  NewRegistrationSender.php: `<master_uuid>` verwijderen, `<age>` → `<date_of_birth>`, `<customer>` → `<contact>`
 -  UserCreatedSender.php: v1.0 header → v2.0, type `user.created` → `user_created`
--  UserRegisteredSender.php: v1.0 header → v2.0, type `user.registered` → `user_registered`
+-  UserRegisteredSender.php: **deprecated** — semantisch equivalent aan `new_registration` (§5.1). Verwijder deze sender en gebruik `NewRegistrationSender.php`
 -  UserUpdatedSender.php: v1.0 header → v2.0, type `user.updated` → `user_updated`
 -  UserUnregisteredSender.php: v1.0 header → v2.0, type `user.unregistered` → `user_deleted`
 -  UserCheckinSender.php: v1.0 header → v2.0, type `user.checkin` → `user_checkin`
@@ -228,7 +228,7 @@ Dit addendum overschrijft alle eerdere audituitspraken die niet met bronregel ko
 - CRM bouwt outbound type `mailing_status` i.p.v. `send_mailing` (`CRM/src/sender.js:85`).
 - CRM bouwt nog `<age>` in Kassa-flows (`CRM/src/sender.js:191`, `CRM/src/sender.js:245`).
 - Frontend `UserCreatedSender` gebruikt nog namespace + receiver + version 1.0 + dotted type (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:49`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:54`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:55`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:56`).
-- Frontend `UserRegisteredSender` gebruikt nog dotted type `user.registered` en version 1.0 (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:64`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:65`).
+- Frontend `UserRegisteredSender` is **deprecated** — semantisch equivalent aan `new_registration` (§5.1). Verwijder en vervang door `NewRegistrationSender` (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:64`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:65`).
 - Frontend `UserUnregisteredSender` gebruikt nog type `user.unregistered` en receiver-list in header (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:67`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:68`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:69`).
 - Frontend `UserCheckinSender` gebruikt nog type `user.checkin`, receiver en version 1.0 (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:57`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:58`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:59`).
 - Frontend `CalendarInviteSender` gebruikt nog dotted `calendar.invite` (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/CalendarInviteSender.php:25`) en zet geen `version` in header.
@@ -3797,7 +3797,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 PHP senders die volledig moeten gemigreerd worden naar de v2.0 header:
 - [ ] `UserUnregisteredSender.php` — type `user.unregistered` → `user_deleted`, xmlns weg, `<receiver>` weg, `version=2.0`, geen `<master_uuid>`
 - [ ] `UserCreatedSender.php` — type `user.created` → `user_created`, idem header-migratie
-- [ ] `UserRegisteredSender.php` — type `user.registered` → `user_registered`, idem header-migratie
+- [ ] `UserRegisteredSender.php` — **deprecated**: verwijder en vervang door `NewRegistrationSender.php` (`user_registered` bestaat niet in het contract — zie §5.1)
 - [ ] `UserUpdatedSender.php` — type `user.updated` → `user_updated`, idem header-migratie
 - [ ] `UserCheckinSender.php` — type `user.checkin` → `user_checkin`, idem + voeg `<session_id>` body toe (sectie 21.1)
 - [ ] `CalendarInviteSender.php` — type `calendar.invite` → `calendar_invite`, voeg `<version>2.0</version>` toe (was afwezig!), voeg `<attendee_email>` toe in body (sectie 17.2)
