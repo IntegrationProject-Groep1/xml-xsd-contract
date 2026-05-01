@@ -39,6 +39,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **ONTVANGT** | `new_registration` | ← Frontend | v2.0  | [5.1](#51-new_registration-frontend--crm) |
+|  **ONTVANGT** | `user_registered` | ← Frontend |  v1.0 header + verkeerde queue | [5.5](#55-user_registered) |
 |  **ONTVANGT** | `user_created`, `user_updated`, `user_deleted` | ← Frontend |  dotted type | [5.2-5.4](#52-user_created) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  `session_update` (fout) | [7.1-7.2](#71-session_created-planning--crm) |
 |  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.6](#66-payment_registered-kassa--rabbitmq) |
@@ -71,6 +72,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | [5.2](#52-user_created) |
 |  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.3](#53-user_updated) |
 |  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.4](#54-user_deleted) |
+|  **VERZENDT** | `user_registered` | → CRM |  v1.0 header + dotted type + verkeerde queue | [5.5](#55-user_registered) |
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [21.1](#211-user_checkin-frontend--crm) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
@@ -81,7 +83,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 **Kritieke fixes (web/modules/custom/rabbitmq_sender/src/):**
 -  NewRegistrationSender.php: `<master_uuid>` verwijderen, `<age>` → `<date_of_birth>`, `<customer>` → `<contact>`
 -  UserCreatedSender.php: v1.0 header → v2.0, type `user.created` → `user_created`
--  UserRegisteredSender.php: **deprecated** — semantisch equivalent aan `new_registration` (§5.1). Verwijder deze sender en gebruik `NewRegistrationSender.php`
+-  UserRegisteredSender.php: v1.0 header → v2.0, type `user.registered` → `user_registered`, queue `frontend.user.registered` → `crm.incoming`, `is_company` boolean → `<type>private|company</type>` (zie §5.5)
 -  UserUpdatedSender.php: v1.0 header → v2.0, type `user.updated` → `user_updated`
 -  UserUnregisteredSender.php: v1.0 header → v2.0, type `user.unregistered` → `user_deleted`
 -  UserCheckinSender.php: v1.0 header → v2.0, type `user.checkin` → `user_checkin`
@@ -228,7 +230,7 @@ Dit addendum overschrijft alle eerdere audituitspraken die niet met bronregel ko
 - CRM bouwt outbound type `mailing_status` i.p.v. `send_mailing` (`CRM/src/sender.js:85`).
 - CRM bouwt nog `<age>` in Kassa-flows (`CRM/src/sender.js:191`, `CRM/src/sender.js:245`).
 - Frontend `UserCreatedSender` gebruikt nog namespace + receiver + version 1.0 + dotted type (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:49`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:54`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:55`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCreatedSender.php:56`).
-- Frontend `UserRegisteredSender` is **deprecated** — semantisch equivalent aan `new_registration` (§5.1). Verwijder en vervang door `NewRegistrationSender` (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:64`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:65`).
+- Frontend `UserRegisteredSender` gebruikt nog dotted type `user.registered`, version 1.0, xmlns en verkeerde queue `frontend.user.registered` (moet `crm.incoming` zijn). Tevens moet `is_company` boolean vervangen worden door `<type>private|company</type>` per contract §5.5 (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:64`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserRegisteredSender.php:65`).
 - Frontend `UserUnregisteredSender` gebruikt nog type `user.unregistered` en receiver-list in header (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:67`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:68`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:69`).
 - Frontend `UserCheckinSender` gebruikt nog type `user.checkin`, receiver en version 1.0 (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:57`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:58`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:59`).
 - Frontend `CalendarInviteSender` gebruikt nog dotted `calendar.invite` (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/CalendarInviteSender.php:25`) en zet geen `version` in header.
@@ -1361,6 +1363,138 @@ Wanneer een account volledig wordt verwijderd.
     <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
     <email>jan.peeters@ehb.be</email>
     <reason>Account op verzoek van gebruiker verwijderd</reason>
+  </body>
+</message>
+```
+
+---
+
+### 5.5 `user_registered`
+
+Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat sessie-details en initiële betaalstatus.  
+> **Naamwijziging:** was `user.registered` → nu `user_registered` (snake_case, v2.0 standaard).  
+> **Queue-correctie:** was `frontend.user.registered` → nu `crm.incoming`.
+
+**Queue:** `crm.incoming`  
+**Richting:** Frontend → CRM
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="xs:string"/>
+          <xs:element name="correlation_id" type="xs:string"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="user_registered"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="user">
+            <xs:complexType><xs:sequence>
+              <xs:element name="email"      type="xs:string"/>
+              <xs:element name="first_name" type="xs:string"/>
+              <xs:element name="last_name"  type="xs:string"/>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <!-- Verplicht wanneer type=company -->
+              <xs:element name="company" minOccurs="0">
+                <xs:complexType><xs:sequence>
+                  <xs:element name="name"       type="xs:string"/>
+                  <xs:element name="vat_number" type="xs:string"/>
+                </xs:sequence></xs:complexType>
+              </xs:element>
+            </xs:sequence></xs:complexType>
+          </xs:element>
+          <xs:element name="session">
+            <xs:complexType><xs:sequence>
+              <xs:element name="id"   type="xs:string"/>
+              <xs:element name="name" type="xs:string"/>
+            </xs:sequence></xs:complexType>
+          </xs:element>
+          <xs:element name="payment_status">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="pending"/>
+              <xs:enumeration value="paid"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML (particulier)
+
+```xml
+<message>
+  <header>
+    <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</message_id>
+    <correlation_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</correlation_id>
+    <timestamp>2026-05-01T10:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>user_registered</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <user>
+      <email>jan.peeters@ehb.be</email>
+      <first_name>Jan</first_name>
+      <last_name>Peeters</last_name>
+      <type>private</type>
+    </user>
+    <session>
+      <id>sess-2026-mainstage-01</id>
+      <name>Main Stage Opening</name>
+    </session>
+    <payment_status>pending</payment_status>
+  </body>
+</message>
+```
+
+#### Voorbeeld XML (bedrijf)
+
+```xml
+<message>
+  <header>
+    <message_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</message_id>
+    <correlation_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</correlation_id>
+    <timestamp>2026-05-01T10:05:00Z</timestamp>
+    <source>frontend</source>
+    <type>user_registered</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <user>
+      <email>marie.desmet@acme.be</email>
+      <first_name>Marie</first_name>
+      <last_name>Desmet</last_name>
+      <type>company</type>
+      <company>
+        <name>Acme NV</name>
+        <vat_number>BE0123456789</vat_number>
+      </company>
+    </user>
+    <session>
+      <id>sess-2026-workshop-04</id>
+      <name>Tech Workshop: Cloud Integrations</name>
+    </session>
+    <payment_status>pending</payment_status>
   </body>
 </message>
 ```
@@ -3781,6 +3915,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | ← Planning | `session_created` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.created` |
 | ← Planning | `session_updated` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.updated` |
 | ← Planning | `session_deleted` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.deleted` |
+| → CRM | `user_registered` | `crm.incoming` |
 | → CRM | `user_deleted` | `crm.incoming` |
 | → CRM | `cancel_registration` | `crm.incoming` |
 | → CRM | `user_checkin` | `crm.incoming` |
@@ -3797,7 +3932,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 PHP senders die volledig moeten gemigreerd worden naar de v2.0 header:
 - [ ] `UserUnregisteredSender.php` — type `user.unregistered` → `user_deleted`, xmlns weg, `<receiver>` weg, `version=2.0`, geen `<master_uuid>`
 - [ ] `UserCreatedSender.php` — type `user.created` → `user_created`, idem header-migratie
-- [ ] `UserRegisteredSender.php` — **deprecated**: verwijder en vervang door `NewRegistrationSender.php` (`user_registered` bestaat niet in het contract — zie §5.1)
+- [ ] `UserRegisteredSender.php` — type `user.registered` → `user_registered`, v2.0 header (xmlns weg, `<receiver>` weg, `<version>2.0</version>`), queue → `crm.incoming`, `is_company` boolean → `<type>private|company</type>` (zie §5.5)
 - [ ] `UserUpdatedSender.php` — type `user.updated` → `user_updated`, idem header-migratie
 - [ ] `UserCheckinSender.php` — type `user.checkin` → `user_checkin`, idem + voeg `<session_id>` body toe (sectie 21.1)
 - [ ] `CalendarInviteSender.php` — type `calendar.invite` → `calendar_invite`, voeg `<version>2.0</version>` toe (was afwezig!), voeg `<attendee_email>` toe in body (sectie 17.2)
@@ -3970,6 +4105,7 @@ CRM is technisch goed opgezet (Node.js + jsforce + amqplib + fast-xml-parser + x
 `src/receiver.js`:
 - [ ] Hernoem case `'session_update'` → `'session_updated'` in de switch-statement (sectie 7.2)
 - [ ] Bind `planning.session.events` queue correct aan `planning.exchange` topic exchange
+- [ ] `user_registered` handler implementeren (sectie 5.5) — sessie-inschrijving verwerken, `user_registered` toevoegen aan `MESSAGE_TYPES`
 - [ ] `user_checkin` handler implementeren (sectie 21.1) — opslaan als aanwezigheid in Salesforce
 
 `src/sender.js`:
