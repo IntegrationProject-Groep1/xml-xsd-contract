@@ -2,7 +2,7 @@
 
 > **Dit document is het officiële en GECENTRALISEERDE berichtencontract voor alle teams.**  
 > Elk bericht dat over RabbitMQ gaat, moet voldoen aan de structuur en XSD's in dit document. Dit is de enige 'Source of Truth' voor alle XML en XSD schema's in het project.
-> Versie: **2.3** — Gecentraliseerd na volledige repo-audit (April 2026).
+> Versie: **2.3** — Gesynchroniseerd met Kassa Team v2.5 implementatie (April 2026).
 >
 >  **Dit is het ENIGE geldige contract.** Alle teams moeten hun code hieraan aanpassen — afwijkingen die nog in code zitten zijn een **contractbreuk** en moeten dringend worden weggewerkt. Zie sectie 0.5 voor de exacte audit-bevindingen per team.
 
@@ -21,11 +21,12 @@
 Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groen ()** = conform, geen actie. **Rood ()** = kritieke wijzigingen nodig.
 
 ###  **Team Kassa** — Betalingen & Kassamachine (CONFORM )
-**Audit Status:** Volledig conform — geen wijzigingen nodig
+**Audit Status:** Volledig conform (v2.4 sync) — gesynchroniseerd met productie v2.5
 
 | Richting | Berichttype | Van/Naar | Sectie |
 |----------|---|---|---|
 |  **ONTVANGT** | `new_registration`, `profile_update`, `cancel_registration` | ← CRM | [10. CRM → Kassa](#10-crm--kassa) |
+|  **ONTVANGT** | `badge_scanned` | ← IoT (Raspberry Pi) | [6.3](#63-badge_scanned) |
 |  **VERZENDT** | `payment_registered` | → CRM | [6.6 Kassa → CRM](#66-payment_registered-kassa--rabbitmq) |
 |  **VERZENDT** | `payment_status`, `wallet_balance_update` | → Frontend | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **BROADCAST** | `heartbeat` | → Monitoring | [3. Heartbeat](#3-heartbeat--alle-teams--monitoring) |
@@ -96,7 +97,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 ---
 
 ###  **Team Planning** — Sessies & agenda (CONFORM )
-**Audit Status:** Volledig conform (April 2026 update). **OPMERKING:** Gecentraliseerde session management RPC handlers verplicht volgens Sectie 17.
+**Audit Status:** Volledig conform (Mei 2026 update). **OPMERKING:** Gecentraliseerde session management RPC handlers verplicht volgens Sectie 17.
 
 
 | Richting | Berichttype | Van/Naar | Sectie |
@@ -213,7 +214,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-## 0. Repo Audit Bevindingen (April 2026) — Wat staat er NU in de code?
+## 0. Repo Audit Bevindingen (Mei 2026) — Wat staat er NU in de code?
 
 > Deze sectie documenteert exact welke afwijkingen er nog in elke repo zitten ten opzichte van dit contract. Elk punt is een **harde actie** — geen interpretatie, geen onderhandeling.
 
@@ -238,14 +239,14 @@ Dit addendum overschrijft alle eerdere audituitspraken die niet met bronregel ko
 - Frontend `UserUnregisteredSender` gebruikt nog type `user.unregistered` en receiver-list in header (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:67`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:68`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserUnregisteredSender.php:69`).
 - Frontend `UserCheckinSender` gebruikt nog type `user.checkin`, receiver en version 1.0 (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:57`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:58`, `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/UserCheckinSender.php:59`).
 - Frontend `CalendarInviteSender` gebruikt nog dotted `calendar.invite` (`IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/CalendarInviteSender.php:25`) en zet geen `version` in header.
-- Planning producer/test gemigreerd naar v2.0 (April 2026 update).
+- Planning producer/test gemigreerd naar v2.0 (Mei 2026 update).
 - Heartbeat service publiceert platte `<heartbeat>` root (`heartbeat/sidecar.py:50`).
 - Monitoring test-producer publiceert platte `<heartbeat>` root (`monitoring/test/producer.py:30`).
 - Identity-service gebruikt platte uitzonderingsberichten `identity_response` en `user_event` (`identity-service/rabbitmq_service.py:55`, `identity-service/rabbitmq_service.py:68`, `identity-service/rabbitmq_service.py:157`).
 - Facturatie bevat momenteel geen actieve XML builder-code (`Facturatie/src/main.py` is leeg).
 - Kassa integratiecode bevat momenteel geen XML message-builder (alleen keep-alive/XML-RPC utility).
 
-### 0.5.2 Integrity Check Addendum — flow-voor-flow validatie (April 2026)
+### 0.5.2 Integrity Check Addendum — flow-voor-flow validatie (Mei 2026)
 
 Resultaat van een extra inhoudscontrole op datacompleetheid + XSD-integriteit per kritieke flow.
 
@@ -434,7 +435,7 @@ De repo heeft TWEE header-stijlen door elkaar:
 
 **Status: VOLLEDIG CONFORM **
 
-Planning heeft in de update van April 2026 alle kritieke afwijkingen weggewerkt.
+Planning heeft in de update van Mei 2026 alle kritieke afwijkingen weggewerkt.
 
 Wat nu correct is:
 -  **XSD's**: Alle 7 XSD's in `/xsd/` folder zijn gemigreerd naar v2.0 (geen namespaces, `xs:dateTime` voor datums, snake_case types).
@@ -553,7 +554,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 
 ## Inhoudsopgave
 
-0.5. [**Repo Audit Bevindingen (NIEUW v2.3)**](#05-repo-audit-bevindingen-april-2026--wat-staat-er-nu-in-de-code)
+0.5. [**Repo Audit Bevindingen (NIEUW v2.4)**](#05-repo-audit-bevindingen-april-2026--wat-staat-er-nu-in-de-code)
 1. [De 4 Globale Regels](#1-de-4-globale-regels)
 2. [Standaard Berichtstructuur](#2-standaard-berichtstructuur)
 2.5 [Error Handling & Resilience Strategy](#25-error-handling--resilience-strategy)
@@ -793,11 +794,13 @@ De Master UUID is verplicht voor registraties. Als de Identity Service niet bere
 4.  **Reporting:** Stuur een `system_error` met code `identity_service_unavailable`.
 
 ### 2.5.3 Dead Letter Queues (DLQ)
-Gebruik DLQ's alleen voor **infrastructurele fouten** (bijv. database verbinding verbroken). 
+Gebruik DLQ's alleen voor **infrastructurele fouten** (bijv. database verbinding verbroken).
 *   **Logische fouten** (ongeldige data, UUID niet gevonden) horen **niet** in de DLQ maar moeten worden afgehandeld via `system_error` en een ACK op het originele bericht.
 
----
+### 2.5.4 Kassa Specifieke Regels (ACK/NACK)
+*   **Badge Not Found:** Voor `badge_not_found` stuurt het Kassa-systeem een **ACK** (geen NACK) om oneindige lussen te voorkomen. Dit gaat vergezeld van een `system_error` bericht naar de `kassa.errors` queue voor monitoring.
 
+---
 ## 2.6 Global `system_error` Format
 
 Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun eigen error queue.
@@ -1529,11 +1532,11 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
 
 ### 6.1 `consumption_order`
 
-Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en `total_amount` per lijn.
+Klant bestelt consumpties aan de bar. Schema v2.4 — bevat `sku`, `vat_rate` en `total_amount` per lijn.
 
 > **� Koppeling met factuur:** De `message_id` van dit bericht wordt de `correlation_id` in het bijhorende `invoice_request` (zie 6.5). Zo koppelt Facturatie de juiste orderlijnen aan de factuur.
 
-#### XSD (v2.3)
+#### XSD (v2.4)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1571,8 +1574,8 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
       <xs:element name="id"          type="xs:string"/>
       <xs:element name="sku"         type="xs:string"/>
       <xs:element name="description" type="xs:string"/>
-      <!-- xs:integer: laat negatieve waarden toe voor kortingen/retouren -->
-      <xs:element name="quantity"    type="xs:integer"/>
+      <!-- xs:positiveInteger: Kassa production requires positive values for inventory sync -->
+      <xs:element name="quantity"    type="xs:positiveInteger"/>
       <xs:element name="unit_price">
         <xs:complexType>
           <xs:simpleContent>
@@ -1639,6 +1642,10 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
   </xs:element>
 </xs:schema>
 ```
+
+#### Business Logic Rules (Mandatory)
+*   **Rule 1 (Top-ups):** For wallet recharges, `item_type` must be `wallet_topup` and `vat_rate` must be `0`. This is a non-taxable financial transaction.
+*   **Rule 2 (Anonymous):** If `is_anonymous` is `true`, the `<customer>` block is omitted. In this case, no invoice can be requested later; the customer only receives a physical receipt.
 
 #### Voorbeeld XML
 
@@ -1708,8 +1715,8 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="user_id" type="xs:string"/>
           <xs:element name="badge_id"    type="xs:string"/>
+          <xs:element name="user_id"     type="xs:string"/>
           <xs:element name="assigned_at" type="xs:dateTime"/>
         </xs:sequence></xs:complexType>
       </xs:element>
@@ -1730,8 +1737,8 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
     <badge_id>BADGE-0042</badge_id>
+    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
     <assigned_at>2026-05-15T18:05:00Z</assigned_at>
   </body>
 </message>
@@ -1741,7 +1748,9 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
 
 ### 6.3 `badge_scanned`
 
-Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
+Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).  
+**Flow:** IoT (Raspberry Pi) → Kassa  
+**Routing Key:** `kassa.incoming`
 
 #### XSD
 
@@ -1755,7 +1764,6 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
           <xs:element name="message_id" type="xs:string"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="kassa"/>
             <xs:enumeration value="iot_gateway"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="badge_scanned"/></xs:restriction></xs:simpleType></xs:element>
@@ -1896,6 +1904,9 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
 </xs:schema>
 ```
 
+#### Business Logic Rules
+*   **Rule 1 (Balance Update):** If `method` is `badge_wallet`, Kassa will also broadcast a `wallet_balance_update` message to the Frontend.
+
 #### Voorbeeld XML — badge_wallet refund
 
 ```xml
@@ -2007,7 +2018,9 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
           <xs:complexType>
             <xs:sequence>
               <xs:element name="user_id"      type="xs:string"/>
-              <xs:element name="invoice_data" type="InvoiceDataType"/>
+              <xs:sequence>
+                <xs:element name="invoice_data" type="InvoiceDataType"/>
+              </xs:sequence>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -2015,7 +2028,6 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
     </xs:complexType>
   </xs:element>
 </xs:schema>
-```
 
 #### Voorbeeld XML
 
@@ -2358,8 +2370,8 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 | Code | Wanneer |
 |------|---------|
 | `badge_not_found` | badge_id niet gevonden in Odoo |
-| `odoo_api_error` | Odoo XML-RPC niet bereikbaar |
-| `offline_queue_full` | outbox.json heeft limiet van 500 berichten bereikt |
+| `odoo_api_error` | The Kassa Integration cannot reach the Odoo XML-RPC API. |
+| `offline_queue_full` | The local outbox buffer has reached its limit (500 messages). |
 
 *(Voor algemene codes zoals `invalid_xml_format`, zie sectie 2.6)*
 
@@ -3330,7 +3342,7 @@ CRM stuurt de `consumption_order` **1-op-1 door** naar Facturatie zodra het die 
 >
 > Facturatie matcht beide berichten via `correlation_id` == `message_id` van de `consumption_order` en bouwt de factuur op.
 
-**XSD & XML:** Exact identiek aan Sectie 6.1. Zie aldaar voor het volledige schema (v2.3) met `sku`, `vat_rate`, `total_amount` en `CustomerType`.
+**XSD & XML:** Exact identiek aan Sectie 6.1. Zie aldaar voor het volledige schema (v2.4) met `sku`, `vat_rate`, `total_amount` en `CustomerType`.
 
 **Flow diagram:**
 
@@ -3895,6 +3907,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 |-----|------|-------|-------------------|
 | Frontend | CRM | `crm.incoming` | — |
 | Kassa | CRM | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.payments.consumption` / `registration` / `refund` / `invoice` / `badge` |
+| IoT (Raspberry Pi) | Kassa | `kassa.incoming` | exchange: `kassa.exchange`, routing: `kassa.incoming` |
 | Planning | CRM | `planning.session.events` | exchange: `planning.exchange`, routing: `planning.session.*` |
 | Facturatie | CRM | `facturatie.to.crm` | — |
 | Mailing | CRM | `crm.incoming` | — |
@@ -3947,7 +3960,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 2. Wacht op `identity_response` → haal `master_uuid` op
 3. Pas dán stuur je `new_registration` naar CRM met die `master_uuid`
 
-**Actiepunten (v2.3 audit — KRITIEK):**
+**Actiepunten (v2.4 audit — KRITIEK):**
 
 >  Deze hele lijst is een directe consequentie van de scan. Niets is "optioneel" — alles is fout in de huidige code.
 
@@ -3977,7 +3990,7 @@ Nieuwe functionaliteit (uit v2.0):
 | → CRM | `consumption_order` | `kassa.payments.consumption` |
 | → CRM | `payment_registered` | `kassa.payments.consumption` of `kassa.payments.registration` |
 | → CRM | `badge_assigned` | `kassa.payments.badge` |
-| → CRM | `badge_scanned` | `kassa.payments.consumption` |
+| ← IoT (Raspberry Pi) | `badge_scanned` | `kassa.incoming` |
 | → CRM | `refund_processed` | `kassa.payments.refund` |
 | → CRM | `invoice_request` | `kassa.payments.invoice` |
 | → Frontend | `payment_status` | `frontend.payments` (routing: `kassa.frontend.payment`) |
@@ -3987,7 +4000,7 @@ Nieuwe functionaliteit (uit v2.0):
 | ← CRM | `profile_update` | `kassa.incoming` |
 | ← CRM | `cancel_registration` | `kassa.incoming` |
 
-**Status v2.3 audit:  CONFORM — Geen wijzigingen vereist!**
+**Status v2.4 audit:  CONFORM (v2.5 sync) — Geen wijzigingen vereist!**
 
 Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hieronder vermelde actiepunten zijn historische items uit v2.0 die ondertussen allemaal zijn afgewerkt — ze blijven hier voor referentie.
 
@@ -3995,7 +4008,7 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 - [x] `<age>` verwijderen — leeftijd lokaal berekenen via `date_of_birth`
 - [x] `currency="eur"` attribuut op alle bedragen
 - [x] `refund_processed`: `correlation_id` = message_id originele `payment_registered` (UUID)
-- [x] `refund_processed`: `payment_method` = `cash` of `card_reversal` (nooit `badge_wallet`)
+- [x] `refund_processed`: `payment_method` = `cash`, `card_reversal` of `badge_wallet`
 - [x] `payment_registered` sturen na elke kassatransactie (routing: consumption/registration)
 - [x] `payment_status` sturen naar `frontend.payments` na inschrijvingsbetaling
 - [x] `wallet_balance_update` sturen naar `frontend.payments` bij badge saldo-wijziging
@@ -4027,7 +4040,7 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 | ← Frontend | `session_delete_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.delete` |
 | ← CRM | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
 
-**Status v2.3 audit:  VOLLEDIG CONFORM (Mei 2026 update) **
+**Status v2.4 audit:  VOLLEDIG CONFORM (Mei 2026 update) **
 
 Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volledig conform v2.0 gemaakt. Tevens is de gap in de annulatie-flow gedicht via Option A (forwarding door CRM).
 
@@ -4054,11 +4067,11 @@ Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volled
 | → CRM | `payment_registered` | `facturatie.to.crm` |
 | → Mailing | `send_mailing` | `facturatie.to.mailing` |
 
-**Status v2.3 audit:  KRITIEKE XSD'S MOETEN VERVANGEN WORDEN**
+**Status v2.4 audit:  KRITIEKE XSD'S MOETEN VERVANGEN WORDEN**
 
 Meerdere XSD's bevatten verboden velden of fundamenteel verkeerde structuur. Dit blokkeert een correcte data-uitwisseling met CRM en Mailing.
 
-**Actiepunten (v2.3 audit — KRITIEK):**
+**Actiepunten (v2.4 audit — KRITIEK):**
 
 XSD-bestanden volledig vervangen:
 - [ ] **`invoice_request.xsd`**: vervang volledig met de XSD uit sectie 11.1 — verwijder `<items>`, `<customer>` body, `<master_uuid>` header. Gebruik `<invoice_data>` body en maak `<correlation_id>` verplicht in header.
@@ -4100,9 +4113,9 @@ Queue & validatie:
 | ← Alle teams | `heartbeat` | `heartbeat` |
 | → Mailing | `system_alert` | `monitoring.alerts` |
 
-**Status v2.3 audit:  ALERT-FORMAAT MIGREREN + Heartbeat-service herwerken**
+**Status v2.4 audit:  ALERT-FORMAAT MIGREREN + Heartbeat-service herwerken**
 
-**Actiepunten (v2.3 audit):**
+**Actiepunten (v2.4 audit):**
 - [ ] **VERVANG `alert.xsd`** met de XSD uit sectie 4 (`type=system_alert`, standaard `<message>` envelop)
 - [ ] Logstash heartbeat-parser bijwerken: bron lezen uit `header.source` i.p.v. body `<system>`
 - [ ] **`heartbeat`-service repo** (`IntegrationProject-Groep1/heartbeat`): volledige herwrite van XML-builder — zie sectie 3 (vervang platte `<heartbeat>` root door `<message>` envelop)
@@ -4113,7 +4126,7 @@ Queue & validatie:
 ### Team CRM (Salesforce)
 CRM is de centrale data-hub. Zie secties 5–13 voor alle flows.
 
-**Status v2.3 audit:  KRITIEKE AFWIJKINGEN — directe actie vereist**
+**Status v2.4 audit:  KRITIEKE AFWIJKINGEN — directe actie vereist**
 
 CRM is technisch goed opgezet (Node.js + jsforce + amqplib + fast-xml-parser + xmlbuilder2) maar heeft enkele duidelijke afwijkingen van het contract die nu opgelost moeten worden.
 
@@ -4122,7 +4135,7 @@ CRM is technisch goed opgezet (Node.js + jsforce + amqplib + fast-xml-parser + x
 -  XSD-validatie en `crm.dead-letter` voor falende berichten
 -  Header zonder `<receiver>` en `xmlns`
 
-**Actiepunten (v2.3 audit — KRITIEK):**
+**Actiepunten (v2.4 audit — KRITIEK):**
 
 `src/receiver.js`:
 - [ ] Hernoem case `'session_update'` → `'session_updated'` in de switch-statement (sectie 7.2)
@@ -4929,7 +4942,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 
 ## 22. Migratie Roadmap
 
-> Op basis van de v2.3 audit. Volg deze volgorde om DLQ-verkeer en breekkoppelingen tijdens de migratie te minimaliseren.
+> Op basis van de v2.4 audit. Volg deze volgorde om DLQ-verkeer en breekkoppelingen tijdens de migratie te minimaliseren.
 
 ### Fase 1: Infrastructuur & Monitoring (laagrisico — 1-2 dagen)
 
@@ -4939,7 +4952,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 
 ### Fase 2: Planning XSD's (DONE )
 
-4. **Planning**: alle 7 XSD's in `/xsd/` folder gecorrigeerd (April 2026)
+4. **Planning**: alle 7 XSD's in `/xsd/` folder gecorrigeerd (Mei 2026)
 5. Test: `producer.py` valideert correct, CRM ontvangt sessions zonder DLQ-fouten
 
 ### Fase 3: Facturatie XSD's (1-2 dagen)
@@ -5153,7 +5166,7 @@ IntegrationProject-Groep1/
         invoice_request_crm_facturatie.xsd
         session_created.xsd
         ... (één bestand per berichttype)
-     XML_XSD_Contract_v2.3.md   ← dit document
+     XML_XSD_Contract_v2.4_Centralized.md   ← dit document
 ```
 
 Elk team voegt dan dit als git-submodule toe en valideert inkomende berichten tegen de shared XSD. Zo is het contract machine-leesbaar én mensleesbaar.
@@ -5171,6 +5184,7 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 ---
 
-*Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
+*Document v2.4 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — Mei 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
+
 

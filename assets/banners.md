@@ -39,7 +39,7 @@ De badges in de README delen één donkere `labelColor` (`0b1f2a`) zodat alles a
 
 | Type           | Stijl              | Voorbeeld                                                                          |
 |----------------|--------------------|------------------------------------------------------------------------------------|
-| Hero / kernrol | `for-the-badge`    | `Contract-v2.3-0a7ea4?style=for-the-badge&logo=files&logoColor=white&labelColor=0b1f2a` |
+| Hero / kernrol | `for-the-badge`    | `Contract-v2.4-0a7ea4?style=for-the-badge&logo=files&logoColor=white&labelColor=0b1f2a` |
 | Status         | `flat-square`      | `Build-passing-2f855a?style=flat-square&logo=githubactions&logoColor=white&labelColor=0b1f2a` |
 | Legende-kleur  | `flat-square` (leeg) | `-%20-10b981?style=flat-square` (groen vlakje voor de mermaid-legende)             |
 
