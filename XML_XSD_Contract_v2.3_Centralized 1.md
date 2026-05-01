@@ -1797,7 +1797,7 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
   <header>
     <message_id>18b9c0d1-e2f3-4567-bcde-567890100007</message_id>
     <timestamp>2026-05-15T18:06:30Z</timestamp>
-    <source>kassa</source>
+    <source>iot_gateway</source>
     <type>badge_scanned</type>
     <version>2.0</version>
   </header>
