@@ -5,6 +5,13 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 ## 2026-05-02 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
 - Betrokken teams: Geen (interne workflow)
+- Bestanden: `.github/workflows/teams-notify.yml`
+- Wijziging: `awk`-commando gecorrigeerd dat de laatste changelog-entry uitlaast. Het script itereerde het volledige bestand en pakte de onderste sectie — maar de nieuwste entries staan bovenaan. Fix: stop bij de tweede `## `-header zodat alleen de eerste (nieuwste) entry wordt gepakt.
+- Reden: Teams-notificaties toonden altijd de oudste changelog-entry in plaats van de recentste.
+
+## 2026-05-02 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Geen (interne workflow)
 - Bestanden: `.github/workflows/update-network-map.yml`
 - Wijziging: Workflow aangepast zodat hij een PR opent in plaats van rechtstreeks naar `main` te pushen. Gebruikt nu `peter-evans/create-pull-request@v6` op branch `chore/auto-update-network-map`.
 - Reden: De directe `git push` naar `main` werd geblokkeerd door de branch protection rule (wijzigingen moeten via een PR). De workflow crashte daardoor bij elke contractwijziging.

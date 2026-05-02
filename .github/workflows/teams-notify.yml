@@ -88,8 +88,8 @@ jobs:
           done <<< "$changed_files"
 
           if [[ -f changelog.md ]]; then
-            # Pak de LAATSTE entry (onderaan het bestand)
-            latest_changelog="$(awk '/^## / { entry = ""; found = 1 } found { entry = entry $0 "\n" } END { printf "%s", entry }' changelog.md)"
+            # Pak de EERSTE entry (bovenaan het bestand = nieuwste)
+            latest_changelog="$(awk '/^## / { if (found) exit; found = 1 } found { entry = entry $0 "\n" } END { printf "%s", entry }' changelog.md)"
           else
             latest_changelog="changelog.md niet gevonden"
           fi
