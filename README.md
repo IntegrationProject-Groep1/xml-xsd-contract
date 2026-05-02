@@ -88,7 +88,7 @@
   <img alt="facturatie"  src="assets/badges/facturatie-kritiek.svg">
   <img alt="monitoring"  src="assets/badges/monitoring-alert.svg">
   <img alt="mailing"     src="assets/badges/mailing-conform.svg">
-  <img alt="identity"    src="assets/badges/identity-conform.svg">
+  <img alt="identity-service" src="assets/badges/identity-service-conform.svg">
   <img alt="heartbeat"   src="assets/badges/heartbeat-kritiek.svg">
 </p>
 
