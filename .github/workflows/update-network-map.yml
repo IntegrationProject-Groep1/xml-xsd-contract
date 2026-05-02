@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -27,9 +28,11 @@ jobs:
       - name: Generate Network Map
         run: python scripts/generate_network_map.py
 
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add README.md
-          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: auto-update network map in README.md" && git push)
+      - name: Create pull request with updated network map
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "docs: auto-update network map in README.md"
+          branch: chore/auto-update-network-map
+          title: "docs: auto-update network map"
+          body: "Automated update of the network map diagram in README.md triggered by a change to the contract or map script."
+          labels: documentation
