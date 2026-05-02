@@ -92,7 +92,7 @@ var teamBadges = []struct {
 	{"facturatie", "KRITIEK", colorKritiek},
 	{"monitoring", "ALERT", colorAlert},
 	{"mailing", "CONFORM", colorConform},
-	{"identity", "CONFORM", colorExcept},
+	{"identity-service", "CONFORM", colorExcept},
 	{"heartbeat", "KRITIEK", colorKritiek},
 }
 
