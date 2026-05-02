@@ -79,6 +79,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.4](#54-user_deleted) |
 |  **VERZENDT** | `user_registered` | → CRM |  v1.0 header + dotted type + verkeerde queue | [5.5](#55-user_registered) |
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [21.1](#211-user_checkin-frontend--crm) |
+|  **VERZENDT** | `cancel_registration` | → CRM |  | [5.6](#56-cancel_registration-frontend--crm) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
 |  **ONTVANGT** | `payment_status` | ← Kassa |  | [16](#16-rabbitmq-queue--exchange-overzicht) |
@@ -561,7 +562,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 2.6 [Global system_error Format](#26-global-system_error-format)
 3. [Heartbeat — Alle teams → Monitoring](#3-heartbeat--alle-teams--monitoring)
 4. [Monitoring → Mailing — Alert](#4-monitoring--mailing--alert)
-5. [Frontend → CRM](#5-frontend--crm)
+5. [Frontend → CRM](#5-frontend--crm) *(5.1 new_registration, 5.2 user_created, 5.3 user_updated, 5.4 user_deleted, 5.5 user_registered, 5.6 cancel_registration)*
 6. [Kassa → CRM](#6-kassa--crm)
 7. [Planning → CRM](#7-planning--crm)
 8. [Facturatie → CRM](#8-facturatie--crm)
@@ -575,8 +576,8 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 16. [RabbitMQ Queue & Exchange Overzicht](#16-rabbitmq-queue--exchange-overzicht)
 17. [Per-Team Samenvatting](#17-per-team-samenvatting)
 18. [Frontend ← Kassa (Direct flows)](#18-frontend--kassa-direct-flows)
-19. [Frontend ↔ Planning (Directe flows)](#19-frontend--planning-directe-flows)
-20. [CRM / Facturatie → Frontend: BTW Validatiefout](#20-crm--facturatie--frontend-btw-validatiefout)
+19. [Frontend ↔ Planning (Directe flows)](#19-frontend--planning-directe-flows) *(19.0 OAuth, 19.1 session_view RPC, 19.2 calendar_invite, 19.3 session_create_request, 19.4 session_update_request, 19.5 session_delete_request)*
+20. [CRM / Facturatie → Frontend: BTW Validatiefout](#20-crm--facturatie--frontend-btw-validatiefout) *(20.1 vat_validation_error)*
 21. [Frontend / Kassa → CRM + Monitoring: Check-in](#21-frontend--kassa--crm--monitoring-check-in)
 22. [Migratie Roadmap (NIEUW v2.3)](#22-migratie-roadmap)
 23. [Validatie Checklist](#23-validatie-checklist-per-bericht)
@@ -747,6 +748,7 @@ Elk bericht heeft de volgende structuur:
       <xs:enumeration value="facturatie"/>
       <xs:enumeration value="mailing"/>
       <xs:enumeration value="monitoring"/>
+      <xs:enumeration value="iot_gateway"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -1526,6 +1528,69 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
 
 ---
 
+### 5.6 `cancel_registration` (Frontend → CRM)
+
+Wanneer een gebruiker zijn eigen sessie-inschrijving annuleert via de website.  
+CRM verwerkt de annulatie en stuurt het bericht door naar Kassa en Planning (zie §10.3).
+
+**Queue:** `crm.incoming`  
+**Richting:** Frontend → CRM
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="xs:string"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="cancel_registration"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <!-- user_id: de master_uuid van de Identity Service -->
+          <xs:element name="user_id"    type="xs:string"/>
+          <xs:element name="session_id" type="xs:string"/>
+          <xs:element name="reason"     type="xs:string" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<message>
+  <header>
+    <message_id>a9b8c7d6-e5f4-3210-abcd-ef1234567890</message_id>
+    <timestamp>2026-05-10T13:45:00Z</timestamp>
+    <source>frontend</source>
+    <type>cancel_registration</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <session_id>sess-keynote-001</session_id>
+    <reason>Gebruiker heeft zelf annulatie gevraagd via website</reason>
+  </body>
+</message>
+```
+
+> **Voor CRM:** Verwerk de annulatie in Salesforce en stuur daarna `cancel_registration` door naar Kassa (`kassa.incoming`) én Planning (`calendar.exchange`, routing: `crm.to.planning.cancel_registration`) conform §10.3.
+
+---
+
 ## 6. Kassa → CRM
 
 - **Queue:** `crm.incoming`
@@ -1616,9 +1681,9 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
             <xs:sequence>
               <xs:element name="message_id" type="xs:string"/>
               <xs:element name="type"       type="xs:string" fixed="consumption_order"/>
-              <xs:element name="source"     type="xs:string"/>
+              <xs:element name="source"     type="xs:string" fixed="kassa"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="version"    type="xs:string"/>
+              <xs:element name="version"    type="xs:string" fixed="2.0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -1764,7 +1829,8 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
           <xs:element name="message_id" type="xs:string"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="iot_gateway"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:enumeration value="iot_gateway"/>
+            <xs:enumeration value="kassa"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="badge_scanned"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
@@ -2690,9 +2756,9 @@ Facturatie meldt de nieuwe status van een factuur.
             <xs:sequence>
               <xs:element name="message_id" type="xs:string"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="source"     type="xs:string"/>
-              <xs:element name="type"       type="xs:string"/>
-              <xs:element name="version"    type="xs:string"/>
+              <xs:element name="source"     type="xs:string" fixed="facturatie"/>
+              <xs:element name="type"       type="xs:string" fixed="invoice_status"/>
+              <xs:element name="version"    type="xs:string" fixed="2.0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -3076,7 +3142,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
               </xs:element>
               <xs:element name="status">
                 <xs:simpleType><xs:restriction base="xs:string">
-                  <xs:enumeration value="pending"/>
+                  <xs:enumeration value="unpaid"/>
                   <xs:enumeration value="paid"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
@@ -3389,7 +3455,8 @@ CRM vraagt Mailing om een e-mail te versturen.
           <xs:element name="message_id" type="xs:string"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:enumeration value="crm"/>
+            <xs:enumeration value="facturatie"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="send_mailing"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
@@ -3486,7 +3553,7 @@ CRM vraagt Mailing om een e-mail te versturen.
 
 ## 13. Facturatie → Mailing
 
-- **Queue:** `crm.to.mailing` (zelfde queue als CRM, Mailing behandelt beide)
+- **Queue:** `facturatie.to.mailing`
 - Facturatie gebruikt **hetzelfde `send_mailing` formaat** als CRM, met `source: facturatie`
 
 ### 13.1 `send_mailing` (Facturatie → Mailing)
@@ -3971,6 +4038,7 @@ PHP senders die volledig moeten gemigreerd worden naar de v2.0 header:
 - [ ] `UserCheckinSender.php` — type `user.checkin` → `user_checkin`, idem + voeg `<session_id>` body toe (sectie 21.1)
 - [ ] `CalendarInviteSender.php` — type `calendar.invite` → `calendar_invite`, voeg `<version>2.0</version>` toe (was afwezig!), voeg `<attendee_email>` toe in body (sectie 17.2)
 - [ ] `NewRegistrationSender.php` — verwijder `<master_uuid>` uit header, vervang `<age>` door `<date_of_birth>`, namen in `<contact>` wrapper (sectie 5.1)
+- [ ] `CancelRegistrationSender.php` — implementeer nieuwe sender voor `cancel_registration` (sectie 5.6), source=`frontend`, queue `crm.incoming`
 
 Receivers:
 - [ ] `SessionUpdateReceiver.php` — accepteer `session_updated` als type-waarde (niet `session_update`)
@@ -4197,7 +4265,7 @@ Salesforce / data:
 
 ---
 
-### 17.0 OAuth Token Registration (REST API)
+### 19.0 OAuth Token Registration (REST API)
 
 Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registreren bij de Planning Service.
 
@@ -4231,7 +4299,7 @@ Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na he
 
 ---
 
-### 17.1 `session_view_request` / `session_view_response` (RPC)
+### 19.1 `session_view_request` / `session_view_response` (RPC)
 
 Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via het RPC-patroon.
 
@@ -4339,7 +4407,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
                           <xs:element name="speaker" minOccurs="0">
                             <xs:complexType>
                               <xs:sequence>
-                                <xs:element name="user_id"      type="xs:string"/>
+                                <xs:element name="user_id"      type="xs:string" minOccurs="0"/>
                                 <xs:element name="contact">
                                   <xs:complexType>
                                     <xs:sequence>
@@ -4433,7 +4501,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
 
 ---
 
-### 17.2 `calendar_invite` / `calendar_invite_confirmed`
+### 19.2 `calendar_invite` / `calendar_invite_confirmed`
 
 Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken voor een ingeschreven gebruiker.
 
@@ -4598,7 +4666,7 @@ Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken 
 
 ---
 
-### 17.3 `session_create_request` (Frontend → Planning)
+### 19.3 `session_create_request` (Frontend → Planning)
 
 Wanneer een administrator in Drupal een nieuwe sessie aanmaakt.
 
@@ -4659,7 +4727,7 @@ Wanneer een administrator in Drupal een nieuwe sessie aanmaakt.
 
 ---
 
-### 17.4 `session_update_request` (Frontend → Planning)
+### 19.4 `session_update_request` (Frontend → Planning)
 
 Wanneer een administrator in Drupal een bestaande sessie wijzigt.
 
@@ -4720,7 +4788,7 @@ Wanneer een administrator in Drupal een bestaande sessie wijzigt.
 
 ---
 
-### 17.5 `session_delete_request` (Frontend → Planning)
+### 19.5 `session_delete_request` (Frontend → Planning)
 
 Wanneer een administrator in Drupal een sessie verwijdert.
 
@@ -4781,7 +4849,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 > Dit is een **anti-pattern dat Regel 1 breekt**. De header is nu **verplicht**.
 > CRM en Facturatie moeten de header altijd meesturen — ze kenden dit schema al.
 
-### 18.1 `vat_validation_error`
+### 20.1 `vat_validation_error`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

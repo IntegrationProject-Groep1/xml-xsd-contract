@@ -2,6 +2,23 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-01 (lokale tijd +02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: CRM, Frontend, Kassa, Facturatie, Mailing, Planning, Monitoring, Identity
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Volledige sweep en audit van het contract — 10 fouten gevonden en gefixed:
+  1. **§2 SourceType**: `iot_gateway` toegevoegd aan globale source enum (was inconsistent met §6.3 `badge_scanned`).
+  2. **§6.1 consumption_order header XSD**: `source` en `version` kregen `fixed=` constraints (waren plain `xs:string`).
+  3. **§6.3 badge_scanned XSD**: `kassa` toegevoegd als geldige source-waarde naast `iot_gateway` (conform §0.5.2).
+  4. **§8.1 invoice_status header XSD**: `source`, `type`, `version` kregen `fixed=` constraints (waren plain `xs:string` zonder validatie).
+  5. **§10.2 profile_update**: `payment_due.status` enum gecorrigeerd van `pending|paid` naar `unpaid|paid` (inconsistentie met §10.1).
+  6. **§12.1 send_mailing XSD**: `facturatie` toegevoegd aan source enum (Facturatie stuurt ook `send_mailing` maar stond niet in de enum — zou XSD-validatie breken bij Mailing).
+  7. **§13 Facturatie → Mailing**: Queue gecorrigeerd van `crm.to.mailing` naar `facturatie.to.mailing` (inconsistentie met §16 en §17).
+  8. **§17.1 session_view_response**: `speaker.user_id` gemarkeerd als `minOccurs="0"` (was verplicht, maar §7.1/7.2 maken het optioneel — sessies zonder speaker-UUID konden niet via RPC worden teruggegeven).
+  9. **§5.6 Nieuw**: XSD toegevoegd voor `cancel_registration` (Frontend → CRM) — stond vermeld in §17 team-tabel maar miste volledig een XSD-sectie.
+  10. **Sectie-nummering**: Subsecties in §19 hernummerd van 17.x naar 19.x; §20 subsectie hernummerd van 18.1 naar 20.1.
+- Reden: Volledige contractaudit op verzoek van maintainer. Alle gevonden contract-inconsistenties en XSD-fouten worden door dit team (contract-maintainers) gefixed — andere teams passen hun code aan op basis van dit bijgewerkte contract.
+
 ## 2026-04-30 14:27 (+02:00)
 - Auteur: GitHub Copilot (GPT-5.3-Codex)
 - Bestanden: README.md, instructions.md, issue-guide.md, changelog.md
