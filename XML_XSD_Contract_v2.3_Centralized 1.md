@@ -1153,7 +1153,6 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
-      <phone>+32477123456</phone>
       <company_id>ehb-001</company_id>
       <session_id>sess-keynote-001</session_id>
       <payment_due>
@@ -1215,7 +1214,6 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
                   <xs:enumeration value="company"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
-              <xs:element name="phone"        type="xs:string" minOccurs="0"/>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
               <xs:element name="company_id"   type="xs:string" minOccurs="0"/>

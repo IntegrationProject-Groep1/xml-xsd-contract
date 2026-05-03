@@ -5,23 +5,16 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 ## 2026-05-03 (+02:00)
 - Auteur: Gemini CLI (AI-assistent)
 - Betrokken teams: Kassa, CRM, Facturatie, Frontend, Planning
-- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `PLAN_CONTRACT_SYNC.md`
-- Wijzigingen:
-    - **Lean Architecture (Phone):** Besloten om het `<phone>` veld NIET toe te voegen aan het centrale contract na feedback van Team Kassa (veld bleek overbodig voor POS-operaties).
-    - **Strikte Valuta-validatie:** Alle `currency` attributen in het hele document voorzien van `fixed="eur"` conform de globale regel in §1.
-    - **Target Architecture Markering:** `UUIDType` geactiveerd en toegepast op `message_id` en `correlation_id` in de gedeelde header.
-    - **Verplichte Correlation ID:** `correlation_id` verplicht gemaakt (`minOccurs="1"`) in kritieke business flows: `invoice_request` en `refund_processed`.
-    - **Adres-harmonisatie:** Nieuwe regel 6 toegevoegd voor verplichte splitsing van straat en huisnummer, inclusief gedocumenteerd splitting-algoritme voor legacy integraties (Odoo).
-- Reden: Synchronisatie van het centraal contract met de realiteit in de Kassa-repo en het verhogen van de globale consistentie en betrouwbaarheid van het contract.
-
-## 2026-05-03 (+02:00)
-- Auteur: Gemini CLI (AI-assistent)
-- Betrokken teams: Facturatie, CRM, Kassa
 - Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
 - Wijzigingen:
-    - **Nieuwe Regel 6 toegevoegd:** Verplichte splitsing van adres in `<street>` en `<number>`.
-    - **Splitting-algoritme gedocumenteerd:** Beschrijving van hoe een gecombineerde straat-string (bijv. uit Odoo) gesplitst moet worden voor de XML.
-- Reden: Oplossen van XSD-mismatch waarbij Odoo-data als één veld werd gestuurd, wat leidde tot validatiefouten bij Team Facturatie. De XSD-definities zijn clean gehouden zonder extra annotaties.
+    - **Lean Architecture (Phone):** Alle sporen van het `<phone>` veld (XSD en XML voorbeelden) verwijderd uit het hele document (o.a. §5.1 en §5.2).
+    - **Strikte Valuta-validatie:** Alle `currency` attributen in het hele document voorzien van `fixed="eur"` conform de globale regel in §1.
+    - **Target Architecture Markering:** `UUIDType` geactiveerd en toegepast op `message_id` en `correlation_id` in de gedeelde header. Standalone schema-blokken (§6.4, §6.5, §10.2, §10.3) nu technisch valide door inclusie van benodigde types.
+    - **Verplichte Correlation ID:** `correlation_id` verplicht gemaakt (`minOccurs="1"`) in kritieke business flows: `invoice_request` en `refund_processed`.
+    - **Adres-harmonisatie:** Nieuwe regel 6 toegevoegd voor verplichte splitsing van straat en huisnummer, inclusief gedocumenteerd splitting-algoritme voor legacy integraties (Odoo).
+    - **Profile Update Verbeteringen (§10.2):** Veld `<type>` toegevoegd (private/company) en `<date_of_birth>` optioneel gemaakt om de update-flow te optimaliseren.
+    - **Cleanup:** `PLAN_CONTRACT_SYNC.md` verwijderd na succesvolle synchronisatie. Dubbele tekstfragmenten en opmaakfouten in de XSD-blokken gecorrigeerd.
+- Reden: Volledige synchronisatie van het centraal contract met de technische realiteit en stakeholder-behoeften (Kassa, CRM, Frontend). Verhoging van de globale consistentie en betrouwbaarheid van het contract.
 
 ## 2026-05-02 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
