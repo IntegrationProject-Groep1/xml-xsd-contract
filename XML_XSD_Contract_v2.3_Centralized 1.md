@@ -798,8 +798,9 @@ Elk bericht heeft de volgende structuur:
     <xs:simpleContent>
       <xs:extension base="xs:decimal">
         <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
-        </xs:extension></xs:simpleContent></xs:complexType>
-
+      </xs:extension>
+      </xs:simpleContent>
+      </xs:complexType>
 </xs:schema>
 ```
 
@@ -1248,7 +1249,6 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
         <last_name>Peeters</last_name>
       </contact>
       <type>private</type>
-      <phone>+32477123456</phone>
     </customer>
   </body>
 </message>
@@ -3143,6 +3143,12 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
               <xs:element name="last_name"  type="xs:string"/>
             </xs:sequence></xs:complexType>
           </xs:element>
+          <xs:element name="type" minOccurs="0">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="private"/>
+              <xs:enumeration value="company"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
           <xs:element name="company_name" type="xs:string" minOccurs="0"/>
           <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
           <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
@@ -3186,6 +3192,8 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
       <first_name>Jan</first_name>
       <last_name>Peeters</last_name>
     </contact>
+    <type>company</type>
+    <company_name>Erasmushogeschool Brussel</company_name>
   </body>
 </message>
 ```
@@ -3201,11 +3209,18 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
+          <xs:element name="message_id" type="UUIDType"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
@@ -3436,9 +3451,7 @@ Facturatie ontvangt beide, matcht op correlation_id = f47ac10b, bouwt factuur.
 
 ### 11.4 `payment_registered` (CRM → Facturatie) — Passthrough
 
-Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kassa.payments.registration`), geeft CRM dit **1-op-1 door** naar `facturatie.incoming`. Facturatie zet de factuurstatus in FossBilling op `paid`.
-
-> **Bewijs:** Facturatie user story 8: *"betalingsbericht ontvangen van CRM wanneer deelnemer inschrijving aan kassa betaalt → factuurstatus onmiddellijk op 'betaald'"*
+Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kassa.payments.registration`), geeft CRM dit **1-op-1 door** naar `facturatie.incoming`. Facturatie zet deetalingsbericht ontvangen van CRM wanneer deelnemer inschrijving aan kassa betaalt → factuurstatus onmiddellijk op 'betaald'"*
 >
 > **transaction_id in FossBilling:** FossBilling kan vragen om een `transaction_id`. Dit is de `message_id` van het doorgestuurde `payment_registered` bericht (Facturatie user story 10 noot).
 
@@ -3639,6 +3652,7 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
             <xs:sequence>
               <xs:element name="message_id" type="xs:string"/>
               <xs:element name="type"       type="xs:string" fixed="payment_registered"/>
+              <xs:element="type"       type="xs:string" fixed="payment_registered"/>
               <xs:element name="source"     type="xs:string" fixed="crm"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
               <xs:element name="version"    type="xs:string" fixed="2.0"/>
@@ -3743,8 +3757,7 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
   <!--
     TYPE   : identity_request (create)
     FLOW   : Elk systeem → Identity Service  (queue: identity.user.create.request)
-    LET OP : Geen <message><header> wrapper — dit is een platte RPC structuur
-    AMQP   : Stel reply_to, correlation_id, message_id en timestamp in als message properties
+    LET OP : Geen <messcorrelation_id, message_id en timestamp in als message properties
   -->
   <xs:element name="identity_request">
     <xs:complexType>
@@ -4116,6 +4129,7 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 | ← Frontend/CRM | `session_view_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` (RPC) |
 | → Frontend | `session_view_response` | reply_to queue, routing: `planning.to.frontend.session.view.response` |
 | ← Frontend | `session_create_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.create` |
+| ← Frontend | `session_update_request` | exchange: `planning.exchange`, routing: 
 | ← Frontend | `session_update_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.update` |
 | ← Frontend | `session_delete_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.delete` |
 | ← CRM | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
@@ -4134,11 +4148,7 @@ Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volled
 - [x] Session events worden nu gepubliceerd op beide routing keys: `planning.session.*` (CRM) én `planning.to.frontend.session.*` (Frontend).
 - [x] Luistert op `planning.calendar.invite` queue voor inkomende kalenderverzoeken.
 - [x] Luistert op `calendar.exchange` voor `cancel_registration` berichten geforward door CRM.
----
-
-### Team Facturatie (FossBilling)
-| Richting | Type | Queue |
-|----------|------|-------|
+---|-------|
 | ← CRM | `invoice_request` | `facturatie.incoming` |
 | ← CRM | `invoice_cancelled` | `facturatie.incoming` |
 | ← CRM | `consumption_order` (passthrough) | `facturatie.incoming` |
@@ -4166,7 +4176,7 @@ Queue & validatie:
 - [ ] Listener queue `crm.to.facturatie` → `facturatie.incoming` (sectie 11)
 - [ ] `currency="eur"` attribuut op ALLE bedragen waar dat nog ontbreekt
 - [ ] Eigen XSD-validatie in receiver: faal → `crm.dead-letter` queue
-- [ ] `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog volledig (sectie 13)
+- [ ] `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog v `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog volledig (sectie 13)
 - [ ] Bind queue aan `user.events` exchange voor Identity fanout (sectie 15.5)
 
 ---
@@ -4238,12 +4248,7 @@ Tests:
 - [ ] `tests/sender.test.js` bijwerken zodat alle nieuwe schema's correct gevalideerd worden
 
 Salesforce / data:
-- [ ] `master_uuid` opslaan als extern veld in Salesforce Contact (van Identity fanout, sectie 15.5)
-- [ ] Bind queue aan `user.events` fanout exchange
-
----
-
-## 18. Frontend ← Kassa (Direct flows)
+- [ ] `master_uuid` opslaan als extern veld in Salesforce Contact (van Identity 18. Frontend ← Kassa (Direct flows)
 
 > **Let op:** Deze berichten gaan **niet** via CRM. Kassa stuurt deze direct naar de `frontend.payments` queue.
 > Frontend moet luisteren op deze queue voor betaal- en saldo-updates.
@@ -4280,7 +4285,7 @@ Salesforce / data:
 
 ### 19.0 OAuth Token Registration (REST API)
 
-Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registreren bij de Planning Service.
+Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registrernchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registreren bij de Planning Service.
 
 - **Endpoint:** `POST http://<planning-service-host>:30050/api/tokens`
 - **Auth:** `Authorization: Bearer <API_TOKEN_SECRET>`
@@ -4341,8 +4346,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="type">
-                <xs:simpleType><xs:restriction base="xs:string">
-                  <xs:enumeration value="session_view_request"/>
+    umeration value="session_view_request"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="version">
@@ -4483,6 +4487,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
   </header>
   <body>
     <request_message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</request_message_id>
+    <requested_session__id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</request_message_id>
     <requested_session_id>sess-keynote-001</requested_session_id>
     <status>ok</status>   <!-- ok | not_found -->
     <session_count>1</session_count>
@@ -4495,8 +4500,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
         <location>Aula A - Campus Jette</location>
         <session_type>keynote</session_type>
         <status>published</status>
-        <max_attendees>120</max_attendees>
-        <current_attendees>87</current_attendees>
+        <max_attendees>120</max       <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
         <speaker>
           <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
           <contact>
@@ -4879,8 +4883,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
               <xs:element name="source">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="crm"/>
-                  <xs:enumeration value="facturatie"/>
-                </xs:restriction></xs:simpleType>
+                  >
               </xs:element>
               <xs:element name="type">
                 <xs:simpleType><xs:restriction base="xs:string">
@@ -5185,14 +5188,15 @@ Gebruik deze checklist bij het bouwen of reviewen van elke nieuwe sender of XSD:
   xs:dateTime in XML                xs:dateTime veld               
   geen namespace in bericht                  geen namespace vereist         
                                                                               
+    
+                                                                              
   INTERN: XSD's in /xsd/                    INTERN: case "session_update"   
   targetNamespace aanwezig                  → "session_updated" fix       
   xs:string i.p.v. dateTime                                                 
           
 ```
 
-**Gevolg:** Berichten worden correct verstuurd en ontvangen. Interne XSD-fouten bij Planning breken enkel Planning's eigen pre-publish validatie (niet de communicatie). CRM `receiver.js` heeft één case-fix nodig (`session_update` → `session_updated`).  
-**Fix:** Planning past intern `/xsd/` aan. CRM past één case in `receiver.js` aan. Onafhankelijk van elkaar.
+**Gevolg:** Berichten worden correct verstuurd en ontvangen. Interne XSD-fouten bij Planning breken enkel Planning's eigen pre-publish validatie (niet de communicatie). CRM `*Fix:** Planning past intern `/xsd/` aan. CRM past één case in `receiver.js` aan. Onafhankelijk van elkaar.
 
 ---
 
@@ -5265,6 +5269,16 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 ---
 
 *Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
+*Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
+
+
+olgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
+
+
+ of aanpassen via Pull Request*
+
+
+April 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
 
 
