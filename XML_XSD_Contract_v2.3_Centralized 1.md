@@ -797,16 +797,8 @@ Elk bericht heeft de volgende structuur:
   <xs:complexType name="AmountType">
     <xs:simpleContent>
       <xs:extension base="xs:decimal">
-        <xs:attribute name="currency" use="required">
-          <xs:simpleType>
-            <xs:restriction base="xs:string">
-              <xs:enumeration value="eur"/>
-            </xs:restriction>
-          </xs:simpleType>
-        </xs:attribute>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
+        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+        </xs:extension></xs:simpleContent></xs:complexType>
 
 </xs:schema>
 ```
@@ -1118,14 +1110,13 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="phone"      type="xs:string" minOccurs="0"/>
               <xs:element name="company_id" type="xs:string" minOccurs="0"/>
               <xs:element name="session_id" type="xs:string"/>
               <xs:element name="payment_due">
                 <xs:complexType><xs:sequence>
                   <xs:element name="amount">
                     <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
-                      <xs:attribute name="currency" type="xs:string" use="required"/>
+                      <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
                     </xs:extension></xs:simpleContent></xs:complexType>
                   </xs:element>
                   <xs:element name="status" type="xs:string" fixed="unpaid"/>
@@ -1333,7 +1324,6 @@ Wanneer een gebruiker zijn profiel wijzigt.
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="phone"      type="xs:string" minOccurs="0"/>
               <xs:element name="company_id" type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
@@ -1363,7 +1353,6 @@ Wanneer een gebruiker zijn profiel wijzigt.
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
-      <phone>+32477999888</phone>
     </customer>
   </body>
 </message>
@@ -1678,7 +1667,7 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
         <xs:complexType>
           <xs:simpleContent>
             <xs:extension base="xs:decimal">
-              <xs:attribute name="currency" type="xs:string" use="required"/>
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
             </xs:extension>
           </xs:simpleContent>
         </xs:complexType>
@@ -1697,7 +1686,7 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
         <xs:complexType>
           <xs:simpleContent>
             <xs:extension base="xs:decimal">
-              <xs:attribute name="currency" type="xs:string" use="required"/>
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
             </xs:extension>
           </xs:simpleContent>
         </xs:complexType>
@@ -1929,7 +1918,7 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
   <xs:complexType name="CurrencyAmountType">
     <xs:simpleContent>
       <xs:extension base="xs:decimal">
-        <xs:attribute name="currency" type="xs:string" use="required"/>
+        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -2185,7 +2174,7 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
   <xs:complexType name="CurrencyAmountType">
     <xs:simpleContent>
       <xs:extension base="xs:decimal">
-        <xs:attribute name="currency" type="xs:string" use="required"/>
+        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -2810,11 +2799,8 @@ Facturatie meldt de nieuwe status van een factuur.
           </xs:element>
           <xs:element name="amount">
             <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
-              <xs:attribute name="currency" use="required">
-                <xs:simpleType><xs:restriction base="xs:string">
-                  <xs:enumeration value="eur"/></xs:restriction></xs:simpleType>
-              </xs:attribute>
-            </xs:extension></xs:simpleContent></xs:complexType>
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+              </xs:extension></xs:simpleContent></xs:complexType>
           </xs:element>
           <xs:element name="due_date" type="xs:date" minOccurs="0"/>
         </xs:sequence></xs:complexType>
@@ -2876,11 +2862,8 @@ Een betaling werd verwerkt in FossBilling.
           <xs:element name="user_id"       type="xs:string"/>
           <xs:element name="amount_paid">
             <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
-              <xs:attribute name="currency" use="required">
-                <xs:simpleType><xs:restriction base="xs:string">
-                  <xs:enumeration value="eur"/></xs:restriction></xs:simpleType>
-              </xs:attribute>
-            </xs:extension></xs:simpleContent></xs:complexType>
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+              </xs:extension></xs:simpleContent></xs:complexType>
           </xs:element>
           <xs:element name="payment_method">
             <xs:simpleType><xs:restriction base="xs:string">
@@ -3070,11 +3053,8 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
                 <xs:complexType><xs:sequence>
                   <xs:element name="amount">
                     <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
-                      <xs:attribute name="currency" use="required">
-                        <xs:simpleType><xs:restriction base="xs:string">
-                          <xs:enumeration value="eur"/></xs:restriction></xs:simpleType>
-                      </xs:attribute>
-                    </xs:extension></xs:simpleContent></xs:complexType>
+                      <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+                      </xs:extension></xs:simpleContent></xs:complexType>
                   </xs:element>
                   <xs:element name="status">
                     <xs:simpleType><xs:restriction base="xs:string">
@@ -3170,7 +3150,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
             <xs:complexType><xs:sequence>
               <xs:element name="amount">
                 <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
-                  <xs:attribute name="currency" type="xs:string" use="required"/>
+                  <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
                 </xs:extension></xs:simpleContent></xs:complexType>
               </xs:element>
               <xs:element name="status">
@@ -3677,7 +3657,7 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:decimal">
-                            <xs:attribute name="currency" type="xs:string" use="required"/>
+                            <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
