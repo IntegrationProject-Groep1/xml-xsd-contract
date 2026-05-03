@@ -689,6 +689,37 @@ Deze regels gelden voor **elk** bericht zonder uitzondering.
 
 ---
 
+### Regel 6 — Adres splitsing (Straat vs Huisnummer)
+
+```xml
+<!--  CORRECT — Straat en nummer zijn strikt gescheiden -->
+<address>
+  <street>Kiekenmarkt</street>
+  <number>42</number>
+  <postal_code>1000</postal_code>
+  <city>Brussel</city>
+</address>
+
+<!--  FOUT — Alles in de straat tag, nummer leeg -->
+<address>
+  <street>Kiekenmarkt 42</street>
+  <number></number>
+  <postal_code>1000</postal_code>
+  <city>Brussel</city>
+</address>
+```
+
+**Waarom:** Systemen zoals Odoo slaan de straat vaak op als één vrije tekstveld. Echter, voor de layout van facturen (Team Facturatie) en database-integriteit is een strikte scheiding tussen de straatnaam en het huisnummer verplicht. Berichten met een leeg `<number>` veld kunnen door de XSD-validatie van de ontvanger worden geweigerd.
+
+**Splitting-algoritme (voor Odoo/Integratie):**
+Indien de bron-data slechts één veld bevat, moet de integratie-laag (bijv. `order_poller.py`) de tekst splitsen:
+1. Scan de string van achter naar voren.
+2. Identificeer het eerste getal (en eventuele bus-toevoegingen zoals "bus B" of "A").
+3. Isoleer dit deel als `<number>`.
+4. Alles wat vóór dit getal staat is de `<street>`.
+
+---
+
 ## 2. Standaard Berichtstructuur
 
 Elk bericht heeft de volgende structuur:

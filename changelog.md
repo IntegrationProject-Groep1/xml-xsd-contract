@@ -2,6 +2,15 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-03 (+02:00)
+- Auteur: Gemini CLI (AI-assistent)
+- Betrokken teams: Facturatie, CRM, Kassa
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijzigingen:
+    - **Nieuwe Regel 6 toegevoegd:** Verplichte splitsing van adres in `<street>` en `<number>`.
+    - **Splitting-algoritme gedocumenteerd:** Beschrijving van hoe een gecombineerde straat-string (bijv. uit Odoo) gesplitst moet worden voor de XML.
+- Reden: Oplossen van XSD-mismatch waarbij Odoo-data als één veld werd gestuurd, wat leidde tot validatiefouten bij Team Facturatie. De XSD-definities zijn clean gehouden zonder extra annotaties.
+
 ## 2026-05-02 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
 - Betrokken teams: Geen (interne workflow)
