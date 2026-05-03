@@ -4246,7 +4246,13 @@ Tests:
 - [ ] `tests/sender.test.js` bijwerken zodat alle nieuwe schema's correct gevalideerd worden
 
 Salesforce / data:
-- [ ] `master_uuid` opslaan als extern veld in Salesforce Contact (van Identity 18. Frontend ← Kassa (Direct flows)
+- [ ] `master_uuid` opslaan als extern veld in Salesforce Contact (van Identity fanout, sectie 15.5)
+- [ ] Bind queue aan `user.events` fanout exchange
+
+---
+
+## 18. Frontend ← Kassa (Direct flows)
+
 
 > **Let op:** Deze berichten gaan **niet** via CRM. Kassa stuurt deze direct naar de `frontend.payments` queue.
 > Frontend moet luisteren op deze queue voor betaal- en saldo-updates.
@@ -4881,7 +4887,8 @@ Wanneer een administrator in Drupal een sessie verwijdert.
               <xs:element name="source">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="crm"/>
-                  >
+                  <xs:enumeration value="facturatie"/>
+                </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="type">
                 <xs:simpleType><xs:restriction base="xs:string">
@@ -5268,21 +5275,5 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 *Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-
-olgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-
-olgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-
- of aanpassen via Pull Request*
-
-
-April 2026*
-*Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-
- of aanpassen via Pull Request*
 
 
