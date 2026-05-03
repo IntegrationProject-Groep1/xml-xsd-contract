@@ -698,6 +698,7 @@ Deze regels gelden voor **elk** bericht zonder uitzondering.
   <number>42</number>
   <postal_code>1000</postal_code>
   <city>Brussel</city>
+  <country>be</country>
 </address>
 
 <!--  FOUT — Alles in de straat tag, nummer leeg -->
@@ -706,6 +707,7 @@ Deze regels gelden voor **elk** bericht zonder uitzondering.
   <number></number>
   <postal_code>1000</postal_code>
   <city>Brussel</city>
+  <country>be</country>
 </address>
 ```
 
@@ -716,7 +718,7 @@ Indien de bron-data slechts één veld bevat, moet de integratie-laag (bijv. `or
 1. Scan de string van achter naar voren.
 2. Identificeer het eerste getal (en eventuele bus-toevoegingen zoals "bus B" of "A").
 3. Isoleer dit deel als `<number>`.
-4. Alles wat vóór dit getal staat is de `<street>`.
+4. Alles wat vóór dit getal staat is de `<street>` (verwijder eventuele spaties aan het begin of einde).
 
 ---
 
