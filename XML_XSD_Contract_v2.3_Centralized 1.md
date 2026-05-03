@@ -848,6 +848,12 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -925,6 +931,12 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -1000,6 +1012,12 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -1081,6 +1099,12 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
 
@@ -1180,6 +1204,12 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1294,6 +1324,12 @@ Wanneer een gebruiker zijn profiel wijzigt.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1368,6 +1404,12 @@ Wanneer een account volledig wordt verwijderd.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1430,6 +1472,12 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1561,6 +1609,12 @@ CRM verwerkt de annulatie en stuurt het bericht door naar Kassa en Planning (zie
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1693,6 +1747,12 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -1784,6 +1844,12 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1842,6 +1908,12 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -1920,6 +1992,12 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:element name="message">
     <xs:complexType>
@@ -2084,6 +2162,12 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -2176,6 +2260,12 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:element name="message">
     <xs:complexType>
@@ -2320,6 +2410,12 @@ Kassa stuurt dit naar Drupal nadat een **inschrijvingsbetaling** aan de kassa is
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -2391,6 +2487,12 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -2501,6 +2603,12 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -2605,6 +2713,12 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -2709,6 +2823,12 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -2769,6 +2889,12 @@ Facturatie meldt de nieuwe status van een factuur.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
         <xs:element name="header">
@@ -2840,6 +2966,12 @@ Een betaling werd verwerkt in FossBilling.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -2914,6 +3046,12 @@ Mailing rapporteert het resultaat van een verzonden campagne.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3005,6 +3143,12 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3115,6 +3259,12 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3214,6 +3364,12 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3301,6 +3457,12 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -3376,6 +3538,12 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3472,6 +3640,12 @@ CRM vraagt Mailing om een e-mail te versturen.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -3642,6 +3816,12 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
     Frontend's PaymentRegisteredReceiver.php luistert op deze queue
     en updatet de betaalstatus van de gebruiker in Drupal.
   -->
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4174,7 +4354,7 @@ Queue & validatie:
 - [ ] Listener queue `crm.to.facturatie` → `facturatie.incoming` (sectie 11)
 - [ ] `currency="eur"` attribuut op ALLE bedragen waar dat nog ontbreekt
 - [ ] Eigen XSD-validatie in receiver: faal → `crm.dead-letter` queue
-- [ ] `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog v `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog volledig (sectie 13)
+- [ ] `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog volledig (sectie 13)
 - [ ] Bind queue aan `user.events` exchange voor Identity fanout (sectie 15.5)
 
 ---
@@ -4289,7 +4469,7 @@ Salesforce / data:
 
 ### 19.0 OAuth Token Registration (REST API)
 
-Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registrernchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registreren bij de Planning Service.
+Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na het inloggen eenmalig zijn OAuth-tokens registreren bij de Planning Service.
 
 - **Endpoint:** `POST http://<planning-service-host>:30050/api/tokens`
 - **Auth:** `Authorization: Bearer <API_TOKEN_SECRET>`
@@ -4335,6 +4515,12 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4381,6 +4567,12 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4491,7 +4683,6 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
   </header>
   <body>
     <request_message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</request_message_id>
-    <requested_session__id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</request_message_id>
     <requested_session_id>sess-keynote-001</requested_session_id>
     <status>ok</status>   <!-- ok | not_found -->
     <session_count>1</session_count>
@@ -4504,7 +4695,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
         <location>Aula A - Campus Jette</location>
         <session_type>keynote</session_type>
         <status>published</status>
-        <max_attendees>120</max       <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+        <max_attendees>120</max_attendees>
         <speaker>
           <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
           <contact>
@@ -4536,6 +4727,12 @@ Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4590,6 +4787,12 @@ Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4696,6 +4899,12 @@ Wanneer een administrator in Drupal een nieuwe sessie aanmaakt.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -4757,6 +4966,12 @@ Wanneer een administrator in Drupal een bestaande sessie wijzigt.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -4818,6 +5033,12 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -4875,6 +5096,12 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -4959,6 +5186,12 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -5201,7 +5434,8 @@ Gebruik deze checklist bij het bouwen of reviewen van elke nieuwe sender of XSD:
           
 ```
 
-**Gevolg:** Berichten worden correct verstuurd en ontvangen. Interne XSD-fouten bij Planning breken enkel Planning's eigen pre-publish validatie (niet de communicatie). CRM `*Fix:** Planning past intern `/xsd/` aan. CRM past één case in `receiver.js` aan. Onafhankelijk van elkaar.
+**Gevolg:** Berichten worden correct verstuurd en ontvangen. Interne XSD-fouten bij Planning breken enkel Planning's eigen pre-publish validatie (niet de communicatie). CRM `receiver.js` heeft één case-fix nodig (`session_update` → `session_updated`).  
+**Fix:** Planning past intern `/xsd/` aan. CRM past één case in `receiver.js` aan. Onafhankelijk van elkaar.
 
 ---
 
@@ -5275,5 +5509,9 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 *Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
+
+
+
+
 
 
