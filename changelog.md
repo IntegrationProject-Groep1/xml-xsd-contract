@@ -4,21 +4,14 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
 ## 2026-05-03 (+02:00)
 - Auteur: Gemini CLI (AI-assistent)
-- Betrokken teams: Kassa, CRM, Facturatie
-- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
-- Wijzigingen:
-    - **Revert phone-toevoegingen:** Alle ~15 toevoegingen van het `<phone>` veld in `ContactType`, `CustomerType` en diverse inline sequenties/voorbeelden ongedaan gemaakt.
-- Reden: **Lean Architecture Principle**. Na feedback van Team Kassa bleek het `phone` veld ongebruikt en overbodig voor POS-operaties. Om schema-bloat te voorkomen en het contract strikt te houden bij bevestigde behoeften (producents én consumenten), is besloten dit veld te schrappen uit het globale contract.
-
-## 2026-05-03 (+02:00)
-- Auteur: Gemini CLI (AI-assistent)
 - Betrokken teams: Kassa, CRM, Facturatie, Frontend, Planning
-- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `PLAN_CONTRACT_SYNC.md`
 - Wijzigingen:
-    - **Globale phone-harmonisatie:** Veld `<phone>` (optioneel) toegevoegd aan `ContactType`, `CustomerType` en alle inline contactdefinities in het hele document (§5, §6, §7, §10, §11, §17).
+    - **Lean Architecture (Phone):** Besloten om het `<phone>` veld NIET toe te voegen aan het centrale contract na feedback van Team Kassa (veld bleek overbodig voor POS-operaties).
     - **Strikte Valuta-validatie:** Alle `currency` attributen in het hele document voorzien van `fixed="eur"` conform de globale regel in §1.
-    - **Target Architecture Markering:** `UUIDType` gemarkeerd als de Target Architecture voor alle teams om migratie naar striktere validatie aan te moedigen.
-    - **Verplichte Correlation ID:** `correlation_id` verplicht gemaakt (`minOccurs="1"`) in kritieke flows zoals `invoice_request` en `refund_processed` om business logica koppelingen te garanderen.
+    - **Target Architecture Markering:** `UUIDType` geactiveerd en toegepast op `message_id` en `correlation_id` in de gedeelde header.
+    - **Verplichte Correlation ID:** `correlation_id` verplicht gemaakt (`minOccurs="1"`) in kritieke business flows: `invoice_request` en `refund_processed`.
+    - **Adres-harmonisatie:** Nieuwe regel 6 toegevoegd voor verplichte splitsing van straat en huisnummer, inclusief gedocumenteerd splitting-algoritme voor legacy integraties (Odoo).
 - Reden: Synchronisatie van het centraal contract met de realiteit in de Kassa-repo en het verhogen van de globale consistentie en betrouwbaarheid van het contract.
 
 ## 2026-05-03 (+02:00)

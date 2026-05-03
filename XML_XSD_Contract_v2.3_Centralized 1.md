@@ -2092,13 +2092,13 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id"    type="xs:string"/>
+              <xs:element name="message_id"    type="UUIDType"/>
               <xs:element name="type"          type="xs:string" fixed="invoice_request"/>
               <xs:element name="source"        type="xs:string"/>
               <xs:element name="timestamp"     type="xs:dateTime"/>
               <xs:element name="version"       type="xs:string"/>
               <!-- correlation_id = message_id van het consumption_order bericht -->
-              <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="correlation_id" type="UUIDType"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -5266,5 +5266,8 @@ Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update gewees
 
 *Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
 *Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
+
+
+ of aanpassen via Pull Request*
 
 
