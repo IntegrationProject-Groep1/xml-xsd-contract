@@ -23,6 +23,19 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 - Wijziging: Sectie 3.5 uitgebreid met voorbeelden per action-categorie (alle 13 actions, meerdere levels). Elk voorbeeld bevat XML-comments die expliciet aangeven welke velden runtime gegenereerd moeten worden (`message_id`, `timestamp`, `message`-inhoud). Prominente waarschuwing toegevoegd dat voorbeeldwaarden nooit hardcoded mogen worden.
 - Reden: Teams hebben concrete voorbeelden nodig per action om te weten welke runtime-informatie in het `<message>`-veld thuishoort.
 
+## 2026-05-03 (+02:00)
+- Auteur: Gemini CLI (AI-assistent)
+- Betrokken teams: Kassa, CRM, Facturatie, Frontend, Planning
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijzigingen:
+    - **Lean Architecture (Phone):** Alle sporen van het `<phone>` veld (XSD en XML voorbeelden) verwijderd uit het hele document (o.a. §5.1 en §5.2).
+    - **Strikte Valuta-validatie:** Alle `currency` attributen in het hele document voorzien van `fixed="eur"` conform de globale regel in §1.
+    - **Target Architecture Markering:** `UUIDType` geactiveerd en toegepast op `message_id` en `correlation_id` in de gedeelde header. Standalone schema-blokken (§6.4, §6.5, §10.2, §10.3) nu technisch valide door inclusie van benodigde types.
+    - **Verplichte Correlation ID:** `correlation_id` verplicht gemaakt (`minOccurs="1"`) in kritieke business flows: `invoice_request` en `refund_processed`.
+    - **Adres-harmonisatie:** Nieuwe regel 6 toegevoegd voor verplichte splitsing van straat en huisnummer, inclusief gedocumenteerd splitting-algoritme voor legacy integraties (Odoo).
+    - **Profile Update Verbeteringen (§10.2):** Veld `<type>` toegevoegd (private/company) en `<date_of_birth>` optioneel gemaakt om de update-flow te optimaliseren.
+    - **Cleanup:** `PLAN_CONTRACT_SYNC.md` verwijderd na succesvolle synchronisatie. Dubbele tekstfragmenten en opmaakfouten in de XSD-blokken gecorrigeerd.
+- Reden: Volledige synchronisatie van het centraal contract met de technische realiteit en stakeholder-behoeften (Kassa, CRM, Frontend). Verhoging van de globale consistentie en betrouwbaarheid van het contract.
 ## 2026-05-04 14:15 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
 - Betrokken teams: Identity
