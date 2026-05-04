@@ -158,7 +158,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 **Kritieke fix (heartbeat/sidecar.py):**
 -  XML builder: `<heartbeat>` platte root → standaard `<message><header><body>` envelope
 -  Header: voeg `version=2.0`, `type=heartbeat`, `source={systeem}`, unieke `message_id` toe
--  Body: `<status>online|degraded|offline</status>` (in plaats van `<system>`, `<uptime>`, etc.)
+-  Body: `<status>online|offline</status>` + `<uptime>{seconden}</uptime>` (in plaats van `<system>`, platte velden, etc.)
 
 ---
 
@@ -936,10 +936,10 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
               <xs:element name="status">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="online"/>
-                  <xs:enumeration value="degraded"/>
                   <xs:enumeration value="offline"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
+              <xs:element name="uptime" type="xs:integer"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -962,9 +962,12 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
   </header>
   <body>
     <status>online</status>
+    <uptime>3600</uptime>
   </body>
 </message>
 ```
+
+> **`uptime`** = aantal seconden dat de service ononderbroken draait (integer). Intern probleem? Stuur een `log` bericht met `level=error` en `action=system_error` — heartbeat blijft gewoon `online` zolang de container zelf draait.
 
 > ** Let op voor Monitoring-team:** Het veld `source` in de header komt overeen met het `system`-veld dat jullie intern gebruiken voor de Logstash-mapping. Toegestane waarden: `frontend`, `crm`, `kassa`, `planning`, `facturatie`, `mailing`, `monitoring`.
 
@@ -1119,6 +1122,593 @@ Logs zijn korte statusberichten die een afgesloten flow of fout beschrijven. Stu
   </body>
 </message>
 ```
+
+> **Let op voor Monitoring-team:** Logstash leest `header.source`, `header.timestamp`, `body.level`, `body.action` en `body.message`. Berichten met een onbekend `level` of `source` gaan naar de `logs-quarantine` index. Logs worden automatisch verwijderd na een configureerbare periode (standaard 7 dagen).
+
+### Voorbeelden per action-categorie
+
+> ⚠️ **De XML-voorbeelden hieronder zijn SJABLONEN — geen letterlijke strings om te kopiëren.**
+>
+> **Wat nooit hardcoded mag zijn:**
+> - `<message_id>` — moet een unieke UUID zijn, gegenereerd op het moment van versturen
+> - `<timestamp>` — moet het actuele tijdstip in UTC zijn op het moment van versturen
+> - `<message>` — moet een beschrijvende tekst zijn met werkelijke runtime-waarden (het echte master UUID, bedrag, e-mailadres, enz.)
+>
+> **Over de `{placeholder}`-notatie in de voorbeelden:**  
+> Placeholders zoals `{master_uuid}` of `{bedrag}` zijn aanduidingen van wat er op dat moment in de code beschikbaar moet zijn. Dit is **geen voorgeschreven syntax** — gebruik de string-opmaak van jouw taal:
+> - Python: `f"Payment of {amount} EUR registered for master_uuid {uuid}"`
+> - JavaScript/TypeScript: `` `Payment of ${amount} EUR registered for master_uuid ${uuid}` ``
+> - PHP: `sprintf("Payment of %s EUR registered for master_uuid %s", $amount, $uuid)`
+> - Java: `String.format("Payment of %s EUR registered for master_uuid %s", amount, uuid)`
+>
+> **De exacte berichttekst mag per team verschillen** zolang de relevante runtime-info erin zit (UUIDs, bedragen, queue-namen, foutmeldingen, enz.). De voorbeelden zijn een richtlijn, geen verplichting.
+
+---
+
+#### `registration`
+
+```xml
+<!-- level: info — inschrijving succesvol verwerkt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>frontend</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>registration</action>
+    <message>Registration completed for master_uuid {master_uuid}</message>
+    <!-- Vervang {master_uuid} door het werkelijke UUID van de registratie -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — registratie kon niet worden verwerkt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>registration</action>
+    <message>Failed to process registration for master_uuid {master_uuid}: {reden}</message>
+    <!-- Vervang {master_uuid} en {reden} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `user`
+
+```xml
+<!-- level: info — user aangemaakt of ontvangen -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>user</action>
+    <message>User created with master_uuid {master_uuid}</message>
+    <!-- Vervang {master_uuid} door het werkelijke UUID -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: warning — ontbrekend optioneel veld bij user-update -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>warning</level>
+    <action>user</action>
+    <message>user_updated received for master_uuid {master_uuid}: optional field {veldnaam} missing</message>
+    <!-- Vervang {master_uuid} en {veldnaam} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `payment`
+
+```xml
+<!-- level: info — betaling succesvol verwerkt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>payment</action>
+    <message>Payment of {bedrag} EUR registered for master_uuid {master_uuid}</message>
+    <!-- Vervang {bedrag} en {master_uuid} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — betaling mislukt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>facturatie</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>payment</action>
+    <message>Payment processing failed for correlation_id {correlation_id}: {reden}</message>
+    <!-- Vervang {correlation_id} en {reden} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `invoice`
+
+```xml
+<!-- level: info — factuur aangemaakt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>facturatie</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>invoice</action>
+    <message>Invoice {invoice_id} created for master_uuid {master_uuid}, amount {bedrag} EUR</message>
+    <!-- Vervang {invoice_id}, {master_uuid} en {bedrag} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — factuur kon niet worden aangemaakt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>facturatie</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>invoice</action>
+    <message>Invoice creation failed for correlation_id {correlation_id}: {reden}</message>
+    <!-- Vervang {correlation_id} en {reden} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `session`
+
+```xml
+<!-- level: info — sessie succesvol aangemaakt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>planning</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>session</action>
+    <message>Session {session_id} created: {session_naam} on {datum}</message>
+    <!-- Vervang {session_id}, {session_naam} en {datum} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — sessie niet gevonden bij update -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>planning</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>session</action>
+    <message>Session update failed: session_id {session_id} not found</message>
+    <!-- Vervang {session_id} door de werkelijke sessie-ID -->
+  </body>
+</message>
+```
+
+---
+
+#### `calendar`
+
+```xml
+<!-- level: info — kalenderuitnodiging verstuurd -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>planning</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>calendar</action>
+    <message>Calendar invite sent for session {session_id} to {attendee_email}</message>
+    <!-- Vervang {session_id} en {attendee_email} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: warning — bevestiging nog niet ontvangen -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>frontend</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>warning</level>
+    <action>calendar</action>
+    <message>No calendar confirmation received for session {session_id} after {timeout}s, retrying</message>
+    <!-- Vervang {session_id} en {timeout} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `email`
+
+```xml
+<!-- level: info — e-mail succesvol verstuurd -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>mailing</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>email</action>
+    <message>Email sent to {email_adres} for correlation_id {correlation_id}</message>
+    <!-- Vervang {email_adres} en {correlation_id} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: warning — SendGrid rate limit nadert -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>mailing</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>warning</level>
+    <action>email</action>
+    <message>SendGrid rate limit at {percentage}% of daily quota</message>
+    <!-- Vervang {percentage} door het werkelijke gebruikspercentage -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — e-mail kon niet worden verstuurd -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>mailing</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>email</action>
+    <message>Failed to send email to {email_adres} for correlation_id {correlation_id}: {reden}</message>
+    <!-- Vervang {email_adres}, {correlation_id} en {reden} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `wallet`
+
+```xml
+<!-- level: info — wallet saldo bijgewerkt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>wallet</action>
+    <message>Wallet topped up for master_uuid {master_uuid}: +{bedrag} EUR, new balance {nieuw_saldo} EUR</message>
+    <!-- Vervang {master_uuid}, {bedrag} en {nieuw_saldo} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `refund`
+
+```xml
+<!-- level: info — terugbetaling verwerkt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>refund</action>
+    <message>Refund of {bedrag} EUR processed for master_uuid {master_uuid}, correlation_id {correlation_id}</message>
+    <!-- Vervang {bedrag}, {master_uuid} en {correlation_id} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — terugbetaling mislukt -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>refund</action>
+    <message>Refund failed for correlation_id {correlation_id}: {reden}</message>
+    <!-- Vervang {correlation_id} en {reden} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `identity`
+
+```xml
+<!-- level: info — UUID lookup succesvol -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>identity</action>
+    <message>Identity lookup successful for email {email_adres}, resolved master_uuid {master_uuid}</message>
+    <!-- Vervang {email_adres} en {master_uuid} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: info — UUID aangemaakt door identity-service -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>identity-service</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>identity</action>
+    <message>Master UUID {master_uuid} created for email {email_adres}</message>
+    <!-- Vervang {master_uuid} en {email_adres} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — master UUID niet gevonden -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>identity</action>
+    <message>Identity lookup failed: no master_uuid found for email {email_adres}</message>
+    <!-- Vervang {email_adres} door het werkelijke e-mailadres -->
+  </body>
+</message>
+```
+
+---
+
+#### `xml_validation`
+
+```xml
+<!-- level: error — ongeldig of malformed XML ontvangen -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>xml_validation</action>
+    <message>XML validation failed on queue {queue_naam}: {validatiefout}</message>
+    <!-- Vervang {queue_naam} door de queue waarop het bericht ontvangen werd, {validatiefout} door de XSD-foutmelding -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: warning — deprecated veld ontvangen -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>warning</level>
+    <action>xml_validation</action>
+    <message>Deprecated field {veldnaam} received in {berichttype} from queue {queue_naam}</message>
+    <!-- Vervang {veldnaam}, {berichttype} en {queue_naam} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+---
+
+#### `system_error`
+
+```xml
+<!-- level: error — externe dienst onbereikbaar -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>system_error</action>
+    <message>{dienst_naam} returned {http_status}: {foutmelding}</message>
+    <!-- Vervang {dienst_naam} (bv. "Salesforce API"), {http_status} (bv. "503") en {foutmelding} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — database onbereikbaar -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>facturatie</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>system_error</action>
+    <message>Database connection failed: {foutmelding}</message>
+    <!-- Vervang {foutmelding} door de werkelijke exception of foutmelding -->
+  </body>
+</message>
+```
+
+---
+
+#### `badge`
+
+```xml
+<!-- level: info — badge succesvol gescand -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>badge</action>
+    <message>Badge {badge_id} scanned and validated for master_uuid {master_uuid}</message>
+    <!-- Vervang {badge_id} en {master_uuid} door werkelijke waarden -->
+  </body>
+</message>
+```
+
+```xml
+<!-- level: error — badge niet gevonden -->
+<message>
+  <header>
+    <message_id><!-- nieuw UUID genereren --></message_id>
+    <timestamp><!-- UTC timestamp --></timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>badge</action>
+    <message>Badge {badge_id} not found in registry</message>
+    <!-- Vervang {badge_id} door de werkelijke badge-ID uit het gescande bericht -->
+  </body>
+</message>
+```
+
+---
 
 > **Let op voor Monitoring-team:** Logstash leest `header.source`, `header.timestamp`, `body.level`, `body.action` en `body.message`. Berichten met een onbekend `level` of `source` gaan naar de `logs-quarantine` index. Logs worden automatisch verwijderd na een configureerbare periode (standaard 7 dagen).
 
