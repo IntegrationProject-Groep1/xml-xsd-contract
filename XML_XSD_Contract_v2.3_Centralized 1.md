@@ -869,7 +869,7 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
+              <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="type"       type="xs:string" fixed="system_error"/>
               <xs:element name="source"     type="xs:string"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
@@ -917,9 +917,8 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 
 ## 3. Heartbeat — Alle teams → Monitoring
 
-- **Exchange:** `kassa.exchange` (Topic Exchange)
-- **Routing Key:** `heartbeat.{source}` (bijv. `heartbeat.crm`)
-- **Queue:** `heartbeat` (Monitoring luistert op deze queue, gebonden aan de exchange)
+- **Exchange:** `""` (AMQP default exchange — geen named exchange)
+- **Queue:** `heartbeat` (durable — direct adresseerbaar via default exchange)
 - **Interval:** elke 1 seconde
 - **Wie stuurt:** Wordt afgehandeld door de **Sidecar**, niet door de applicatie-logica zelf.
 
@@ -931,9 +930,9 @@ Voor een beter begrip van het contract maken we onderscheid tussen:
 *   **Logical Requirement:** Het systeem als geheel moet gemonitord worden. Elke component moet zijn aanwezigheid melden.
 *   **Technical Implementation:** Dit wordt centraal afgehandeld via `heartbeat/sidecar.py`. Applicatieteams hoeven geen code te schrijven voor heartbeats; zij moeten enkel zorgen dat de sidecar correct meedraait in hun deployment (container/pod).
 
-### 3.2 Monitoring Queue vs. Exchange
+### 3.2 Routing
 
-Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten teams (via de sidecar) hun heartbeats **altijd naar de gedeelde Topic Exchange (`kassa.exchange`) sturen** met een specifieke routing key (bijv. `heartbeat.kassa` of `heartbeat.crm`). Dit zorgt ervoor dat de infrastructuur schaalbaar blijft en andere tools ook op de health-data kunnen inpluggen zonder de hoofd-queue leeg te trekken.
+De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` — dit stuurt het bericht rechtstreeks naar de `heartbeat` queue via de AMQP default exchange. Logstash (Monitoring) luistert direct op die queue. Er is geen named exchange nodig.
 
 ### XSD
 
@@ -952,7 +951,7 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
+              <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
               <xs:element name="source"     type="xs:string"/>
               <xs:element name="type">
@@ -1052,13 +1051,19 @@ Logs zijn korte statusberichten die een afgesloten flow of fout beschrijven. Stu
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
+              <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
               <xs:element name="source">
                 <xs:simpleType><xs:restriction base="xs:string">
@@ -4940,7 +4945,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
 | Facturatie | Mailing | `facturatie.to.mailing` | — |
 | Monitoring | Mailing | `monitoring.alerts` | — |
-| Alle teams | Monitoring | `heartbeat` | exchange: `kassa.exchange` (topic), routing: `heartbeat.{source}` |
+| Alle teams | Monitoring | `heartbeat` | default exchange (`""`), routing_key: `heartbeat` (direct naar queue) |
 | Alle teams (excl. Monitoring) + Identity | Monitoring | `logs` | direct naar queue, geen exchange |
 | Frontend/CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `frontend.to.planning.calendar.invite` |
 | Planning | Frontend | reply_to queue (RPC) | exchange: `calendar.exchange`, routing: `planning.to.frontend.calendar.invite.confirmed` |

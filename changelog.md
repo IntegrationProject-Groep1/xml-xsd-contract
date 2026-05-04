@@ -2,6 +2,20 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-04 15:45 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Alle teams, Monitoring, Heartbeat (sidecar)
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Heartbeat routing definitief gecorrigeerd in §3, §3.2 en §16: exchange = `""` (AMQP default), routing_key = `"heartbeat"`, direct naar queue. Eerdere vermeldingen van `kassa.exchange` en `heartbeat` exchange verwijderd. Geverifieerd aan de hand van `test/producer.py` op `hotfix/logging-pipeline` (`exchange=""`, `routing_key=HEARTBEAT_QUEUE`) en logstash config (luistert direct op queue `heartbeat`).
+- Reden: Monitoring-implementatie gebruikt de AMQP default exchange — geen named exchange. Contract was incorrect en inconsistent met de werkende implementatie.
+
+## 2026-05-04 15:15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Alle teams
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: `message_id` type gecorrigeerd van `xs:string` naar `UUIDType` in §3 (heartbeat), §3.5 (logging) en §2.6 (system_error). UUIDType-definitie toegevoegd aan §3.5 logging XSD (ontbrak). Routing heartbeat (§3.2: kassa.exchange + routing key) was al correct in contract — geen wijziging nodig.
+- Reden: Inconsistentie gesignaleerd door implementerende agent: globale HeaderType (§2) gebruikt al UUIDType, maar standalone per-sectie XSDs gebruikten nog xs:string. Resterende ~34 standalone XSDs in het contract hebben hetzelfde patroon — bulk-fix beschikbaar op aanvraag.
+
 ## 2026-05-04 15:00 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
 - Betrokken teams: Monitoring, Heartbeat (sidecar)
