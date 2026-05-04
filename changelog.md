@@ -2,6 +2,27 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-04 15:00 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Monitoring, Heartbeat (sidecar)
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Heartbeat XSD (§3) aangepast: `degraded` verwijderd uit `status`-enum, `<uptime>` (xs:integer, seconden) toegevoegd aan body. Voorbeeldxml bijgewerkt. Toelichting toegevoegd dat interne fouten via `log` (level=error, action=system_error) gerapporteerd worden — niet via heartbeat status.
+- Reden: `degraded` is overbodig nu het logging-systeem (§3.5) beschikbaar is. Interne problemen horen thuis als error-log, niet als heartbeat-status. `uptime` geeft Monitoring nuttige runtime-info zonder extra berichten.
+
+## 2026-05-04 14:45 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Alle teams
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Waarschuwingstekst boven de action-voorbeelden in §3.5 uitgebreid. Verduidelijkt dat `{placeholder}`-syntax geen voorgeschreven formaat is maar een aanduiding — teams gebruiken de string-opmaak van hun eigen taal (f-string, template literal, sprintf, String.format). Taalspecifieke codepatronen toegevoegd als richtlijn. Vermeld dat de exacte berichttekst per team mag verschillen.
+- Reden: Risico dat teams de placeholder-notatie letterlijk interpreteren of de voorbeeldteksten hardcoderen.
+
+## 2026-05-04 14:30 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Alle teams
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Sectie 3.5 uitgebreid met voorbeelden per action-categorie (alle 13 actions, meerdere levels). Elk voorbeeld bevat XML-comments die expliciet aangeven welke velden runtime gegenereerd moeten worden (`message_id`, `timestamp`, `message`-inhoud). Prominente waarschuwing toegevoegd dat voorbeeldwaarden nooit hardcoded mogen worden.
+- Reden: Teams hebben concrete voorbeelden nodig per action om te weten welke runtime-informatie in het `<message>`-veld thuishoort.
+
 ## 2026-05-03 (+02:00)
 - Auteur: Gemini CLI (AI-assistent)
 - Betrokken teams: Kassa, CRM, Facturatie, Frontend, Planning
