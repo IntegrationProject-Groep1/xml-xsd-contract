@@ -15,6 +15,26 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
     - **Profile Update Verbeteringen (§10.2):** Veld `<type>` toegevoegd (private/company) en `<date_of_birth>` optioneel gemaakt om de update-flow te optimaliseren.
     - **Cleanup:** `PLAN_CONTRACT_SYNC.md` verwijderd na succesvolle synchronisatie. Dubbele tekstfragmenten en opmaakfouten in de XSD-blokken gecorrigeerd.
 - Reden: Volledige synchronisatie van het centraal contract met de technische realiteit en stakeholder-behoeften (Kassa, CRM, Frontend). Verhoging van de globale consistentie en betrouwbaarheid van het contract.
+## 2026-05-04 14:15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Identity
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: `identity-service` toegevoegd aan `source`-enum in §3.5 logging XSD. Quick Reference Identity-team bijgewerkt met `VERZENDT log` rij. Queue-overzicht §16 bijgewerkt.
+- Reden: Identity-service voert acties uit (UUID aanmaken, lookups) die gelogd moeten worden. Monitoring ontvangt alleen logs en verstuurt ze niet.
+
+## 2026-05-04 14:00 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: CRM, Kassa, Facturatie, Frontend, Planning, Mailing, Monitoring
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Nieuw berichttype `log` toegevoegd — sectie 3.5 "Logging — Alle teams → Monitoring":
+  - Queue `logs` (durable, geen exchange, geen team-prefix) — conform implementatie op `origin/hotfix/logging-pipeline` in Monitoring-repo.
+  - XSD met `source` enum (crm/kassa/facturatie/frontend/planning/mailing), `type=log`, `body`: `level` (info/warning/error), `action` (13 categorieën), vrij tekstveld `message`.
+  - ToC bijgewerkt (sectie 3.5 toegevoegd).
+  - Queue-overzicht (§16) bijgewerkt met `logs`-rij.
+  - Quick Reference bovenaan bijgewerkt: VERZENDT `log` rij toegevoegd aan Kassa, CRM, Frontend, Planning, Facturatie en Mailing.
+  - Quick Reference Monitoring bijgewerkt: ONTVANGT `log` toegevoegd.
+  - §17 Monitoring-samenvatting bijgewerkt: `log`-queue toegevoegd + actiepunt voor Logstash `logs`-pipeline.
+- Reden: Voorstel van team Planning/Monitoring om gestructureerde logging via RabbitMQ te standardiseren. Implementatie al aanwezig op `hotfix/logging-pipeline` in de Monitoring-repo — contract was nog niet bijgewerkt.
 
 ## 2026-05-02 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
