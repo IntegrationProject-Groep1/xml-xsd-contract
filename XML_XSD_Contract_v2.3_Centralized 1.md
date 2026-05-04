@@ -30,6 +30,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `payment_registered` | → CRM | [6.6 Kassa → CRM](#66-payment_registered-kassa--rabbitmq) |
 |  **VERZENDT** | `payment_status`, `wallet_balance_update` | → Frontend | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **BROADCAST** | `heartbeat` | → Monitoring | [3. Heartbeat](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring | [3.5](#35-logging--alle-teams--monitoring) |
 
 **XSD's referentie:**
 - `Kassa/integratie/schemas/` ( compleet — wordt als voorbeeld gebruikt)
@@ -57,6 +58,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `send_mailing` | → Mailing |  type is `mailing_status` | [12.1](#121-send_mailing-crm--mailing) |
 |  **VERZENDT** | `payment_registered` | → Frontend |  | [13.1](#131-payment_registered-crm--frontend) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring |  | [3.5](#35-logging--alle-teams--monitoring) |
 
 **Kritieke fixes (src/sender.js + src/receiver.js):**
 1.  Regel line 20: `session_update` → `session_updated`
@@ -85,6 +87,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `payment_status` | ← Kassa |  | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  | [7](#7-planning--crm) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring |  | [3.5](#35-logging--alle-teams--monitoring) |
 
 **Kritieke fixes (web/modules/custom/rabbitmq_sender/src/):**
 -  NewRegistrationSender.php: `<master_uuid>` verwijderen, `<age>` → `<date_of_birth>`, `<customer>` → `<contact>`
@@ -113,6 +116,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | [17.1](#171-session_view_request--session_view_response-rpc) |
 |  **REST** | `Token Registration` | ← Frontend | [17.0](#170-oauth-token-registration-rest-api) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring | [3.5](#35-logging--alle-teams--monitoring) |
 
 **XSD's referentie:**
 - `Planning/xsd/` ( bijgewerkt naar v2.0)
@@ -133,6 +137,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `payment_registered` | → CRM |  XSD bevat `<master_uuid>` | [8.2](#82-payment_registered) |
 |  **VERZENDT** | `send_mailing` | → Mailing |  | [13.1](#131-send_mailing-facturatie--mailing) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring |  | [3.5](#35-logging--alle-teams--monitoring) |
 
 **Kritieke fixes (Facturatie/schemas/):**
 -  Queue listener: `crm.to.facturatie` → `facturatie.incoming`
@@ -163,6 +168,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **ONTVANGT** | `heartbeat` | ← Alle teams |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **ONTVANGT** | `log` | ← Alle teams |  | [3.5](#35-logging--alle-teams--monitoring) |
 |  **VERZENDT** | `system_alert` | → Mailing |  platte `<alert>` root | [4](#4-monitoring--mailing--alert) |
 
 **Kritieke fixes (monitoring/):**
@@ -180,6 +186,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `send_mailing` | ← CRM + Facturatie |  | [12.1](#121-send_mailing-crm--mailing) / [13.1](#131-send_mailing-facturatie--mailing) |
 |  **ONTVANGT** | `system_alert` | ← Monitoring |  | [4](#4-monitoring--mailing--alert) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `log` | → Monitoring |  | [3.5](#35-logging--alle-teams--monitoring) |
 
 **Opmerkingen:**
 - Mailing consumer moet zowel `source=crm` als `source=facturatie` verwerken
@@ -195,6 +202,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | RPC request | ← CRM, Frontend |  platte XML (OK) | [15](#15-identity-service--uitzondering-op-de-standaard) |
 |  **VERZENDT** | `identity_response` | → Requestor |  platte XML (OK) | [15.4](#154-rpc-response--identity-antwoord-alle-3-de-requests) |
 |  **BROADCAST** | `user_event` | → CRM |  platte XML (OK) | [15.5](#155-fanout-event--usercreated) |
+|  **VERZENDT** | `log` | → Monitoring | [3.5](#35-logging--alle-teams--monitoring) |
 
 **Opmerkingen:**
 - Identity Service is **bewust uitzondering** — uses RPC pattern met platte XML
@@ -561,6 +569,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 2.5 [Error Handling & Resilience Strategy](#25-error-handling--resilience-strategy)
 2.6 [Global system_error Format](#26-global-system_error-format)
 3. [Heartbeat — Alle teams → Monitoring](#3-heartbeat--alle-teams--monitoring)
+3.5 [Logging — Alle teams → Monitoring](#35-logging--alle-teams--monitoring)
 4. [Monitoring → Mailing — Alert](#4-monitoring--mailing--alert)
 5. [Frontend → CRM](#5-frontend--crm) *(5.1 new_registration, 5.2 user_created, 5.3 user_updated, 5.4 user_deleted, 5.5 user_registered, 5.6 cancel_registration)*
 6. [Kassa → CRM](#6-kassa--crm)
@@ -958,6 +967,160 @@ Hoewel de Monitoring service luistert op een queue genaamd `heartbeat`, moeten t
 ```
 
 > ** Let op voor Monitoring-team:** Het veld `source` in de header komt overeen met het `system`-veld dat jullie intern gebruiken voor de Logstash-mapping. Toegestane waarden: `frontend`, `crm`, `kassa`, `planning`, `facturatie`, `mailing`, `monitoring`.
+
+---
+
+## 3.5 Logging — Alle teams → Monitoring
+
+- **Queue:** `logs` (durable, geen team-prefix — net als `heartbeat`)
+- **Exchange:** direct naar queue (geen exchange, geen routing key)
+- **Wie stuurt:** Elk applicatieteam stuurt zelf log-berichten via eigen publisher — dit is **geen** sidecar-taak.
+
+Logs zijn korte statusberichten die een afgesloten flow of fout beschrijven. Stuur niet bij elke tussenstap — enkel eindstatus en fouten.
+
+### Wanneer loggen
+
+| Level | Wanneer | Voorbeeld |
+|-------|---------|-----------|
+| `info` | Flow succesvol afgerond, geldig XML ontvangen, externe API-call geslaagd | Bestelling verwerkt, user aangemaakt |
+| `warning` | Verdacht maar niet kritiek: rate limit nadert, retry geslaagd, deprecated veld ontvangen | Rate limit 90% bereikt |
+| `error` | Iets is misgelopen: DB down, API 5xx, XML-validatiefout, onbekend berichttype, verplicht veld ontbreekt | Salesforce 503, XML parsing failed |
+
+**Niet loggen:** elke tussenstap binnen één flow, debug-info, heartbeats (die hebben hun eigen kanaal).
+
+### Action-categorieën
+
+| Action | Beschrijving | Relevante teams |
+|--------|--------------|-----------------|
+| `registration` | Inschrijvingen: aanmaken, annuleren, verwerken | Frontend, CRM, Kassa |
+| `user` | Users: aanmaken, bijwerken, verwijderen, ontvangen | Frontend, CRM, Kassa, Facturatie |
+| `payment` | Betalingen: verwerkt, ontvangen, mislukt | CRM, Kassa, Facturatie |
+| `invoice` | Facturen: aangemaakt, geannuleerd, status bijgewerkt | CRM, Kassa, Facturatie |
+| `session` | Sessies: aangemaakt, bijgewerkt, verwijderd | Planning, Frontend, CRM |
+| `calendar` | Kalenderuitnodigingen en bevestigingen | Planning, Frontend |
+| `email` | E-mails: verstuurd, mislukt, rate limit | Mailing |
+| `wallet` | Wallet saldo updates en top-ups | Kassa |
+| `refund` | Terugbetalingen verwerkt | Kassa |
+| `identity` | Identity service lookups | CRM |
+| `xml_validation` | Ongeldig of malformed XML ontvangen | Alle teams |
+| `system_error` | Externe dienst down of onverwachte systeemfout | Alle teams |
+| `badge` | Badge toewijzing en scans | Kassa, Frontend |
+
+### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="message_id" type="xs:string"/>
+              <xs:element name="timestamp"  type="xs:dateTime"/>
+              <xs:element name="source">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="crm"/>
+                  <xs:enumeration value="kassa"/>
+                  <xs:enumeration value="facturatie"/>
+                  <xs:enumeration value="frontend"/>
+                  <xs:enumeration value="planning"/>
+                  <xs:enumeration value="mailing"/>
+                  <xs:enumeration value="identity-service"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="log"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="version">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="2.0"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="body">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="level">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="info"/>
+                  <xs:enumeration value="warning"/>
+                  <xs:enumeration value="error"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="action">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="registration"/>
+                  <xs:enumeration value="user"/>
+                  <xs:enumeration value="payment"/>
+                  <xs:enumeration value="invoice"/>
+                  <xs:enumeration value="session"/>
+                  <xs:enumeration value="calendar"/>
+                  <xs:enumeration value="email"/>
+                  <xs:enumeration value="wallet"/>
+                  <xs:enumeration value="refund"/>
+                  <xs:enumeration value="identity"/>
+                  <xs:enumeration value="xml_validation"/>
+                  <xs:enumeration value="system_error"/>
+                  <xs:enumeration value="badge"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+### Voorbeeld XML — info
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>b2c3d4e5-f6a7-8901-bcde-f12345678901</message_id>
+    <timestamp>2026-03-15T10:42:03Z</timestamp>
+    <source>kassa</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>info</level>
+    <action>payment</action>
+    <message>Payment registered for user e8b27c1d-4f2a-4b3e-9c5f-123456789abc, amount 75.00 EUR</message>
+  </body>
+</message>
+```
+
+### Voorbeeld XML — error
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</message_id>
+    <timestamp>2026-03-15T10:35:12Z</timestamp>
+    <source>crm</source>
+    <type>log</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <level>error</level>
+    <action>system_error</action>
+    <message>Salesforce API returned 503 Service Unavailable</message>
+  </body>
+</message>
+```
+
+> **Let op voor Monitoring-team:** Logstash leest `header.source`, `header.timestamp`, `body.level`, `body.action` en `body.message`. Berichten met een onbekend `level` of `source` gaan naar de `logs-quarantine` index. Logs worden automatisch verwijderd na een configureerbare periode (standaard 7 dagen).
 
 ---
 
@@ -3984,6 +4147,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Facturatie | Mailing | `facturatie.to.mailing` | — |
 | Monitoring | Mailing | `monitoring.alerts` | — |
 | Alle teams | Monitoring | `heartbeat` | exchange: `kassa.exchange` (topic), routing: `heartbeat.{source}` |
+| Alle teams (excl. Monitoring) + Identity | Monitoring | `logs` | direct naar queue, geen exchange |
 | Frontend/CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `frontend.to.planning.calendar.invite` |
 | Planning | Frontend | reply_to queue (RPC) | exchange: `calendar.exchange`, routing: `planning.to.frontend.calendar.invite.confirmed` |
 | Frontend/CRM | Planning | `planning.session.events` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` (RPC) |
@@ -4178,6 +4342,7 @@ Queue & validatie:
 | Richting | Type | Queue |
 |----------|------|-------|
 | ← Alle teams | `heartbeat` | `heartbeat` |
+| ← Alle teams (excl. Monitoring) | `log` | `logs` |
 | → Mailing | `system_alert` | `monitoring.alerts` |
 
 **Status v2.3 audit:  ALERT-FORMAAT MIGREREN + Heartbeat-service herwerken**
@@ -4187,6 +4352,7 @@ Queue & validatie:
 - [ ] Logstash heartbeat-parser bijwerken: bron lezen uit `header.source` i.p.v. body `<system>`
 - [ ] **`heartbeat`-service repo** (`IntegrationProject-Groep1/heartbeat`): volledige herwrite van XML-builder — zie sectie 3 (vervang platte `<heartbeat>` root door `<message>` envelop)
 - [ ] Heartbeat consumer aanpassen aan nieuwe envelop-structuur
+- [ ] Logstash `logs`-pipeline toevoegen: consumer op queue `logs`, XSD-structuur per sectie 3.5
 
 ---
 
