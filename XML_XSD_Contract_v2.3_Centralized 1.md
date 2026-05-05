@@ -1006,7 +1006,7 @@ De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` 
 
 > **`uptime`** = aantal seconden dat de service ononderbroken draait (integer). Intern probleem? Stuur een `log` bericht met `level=error` en `action=system_error` — heartbeat blijft gewoon `online` zolang de container zelf draait.
 
-> ** Let op voor Monitoring-team:** Het veld `source` in de header komt overeen met het `system`-veld dat jullie intern gebruiken voor de Logstash-mapping. Toegestane waarden: `frontend`, `crm`, `kassa`, `planning`, `facturatie`, `mailing`, `monitoring`.
+> ** Let op voor Monitoring-team:** Het veld `source` in de header komt overeen met het `system`-veld dat jullie intern gebruiken voor de Logstash-mapping. Toegestane waarden: `frontend`, `crm`, `kassa`, `planning`, `facturatie`, `mailing`, `monitoring`, `identity-service`.
 
 ---
 
