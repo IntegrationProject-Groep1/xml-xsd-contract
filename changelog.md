@@ -2,6 +2,13 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-06 10:00 (+02:00)
+- Auteur: Gemini CLI (Lead Integratie Agent)
+- Betrokken teams: Alle teams, Monitoring, Facturatie, CRM, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Diverse contract-correcties op basis van code review: `SourceType` hersteld (o.a. `iot_gateway`), header-structuur gestandaardiseerd (`UUIDType`), `invoice_available` en `invoice_id` (string) gefixed, monitoring tabel-markdown hersteld, `facturatie.to.frontend` toegevoegd aan §16, logging-referenties verwijderd, en optionele `uptime` aan heartbeat body toegevoegd.
+- Reden: Oplossen van inconsistenties, XSD-validatiefouten en Markdown-fouten in het contract v2.3.
+
 ## 2026-05-04 15:45 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
 - Betrokken teams: Alle teams, Monitoring, Heartbeat (sidecar)
