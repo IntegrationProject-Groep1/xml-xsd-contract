@@ -1235,8 +1235,8 @@ Wanneer een gebruiker zijn profiel wijzigt.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="UUIDType"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
@@ -1260,7 +1260,15 @@ Wanneer een gebruiker zijn profiel wijzigt.
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="company_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="company_name" type="xs:string" minOccurs="0"/>
+              <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
+              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1289,6 +1297,7 @@ Wanneer een gebruiker zijn profiel wijzigt.
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
+      <type>private</type>
     </customer>
   </body>
 </message>
@@ -1316,8 +1325,8 @@ Wanneer een account volledig wordt verwijderd.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="UUIDType"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
@@ -1331,8 +1340,8 @@ Wanneer een account volledig wordt verwijderd.
         <xs:complexType><xs:sequence>
           <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
           <xs:element name="identity_uuid" type="UUIDType"/>
-          <xs:element name="email"       type="xs:string"/>
-          <xs:element name="reason"      type="xs:string" minOccurs="0"/>
+          <xs:element name="email"         type="xs:string"/>
+          <xs:element name="reason"        type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -1382,8 +1391,8 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="UUIDType"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
@@ -1407,7 +1416,12 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="is_company" type="xs:boolean"/>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
               <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
@@ -1440,7 +1454,7 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
-      <is_company>false</is_company>
+      <type>private</type>
     </customer>
   </body>
 </message>
@@ -1516,11 +1530,11 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="user">
+          <xs:element name="customer">
             <xs:complexType><xs:sequence>
               <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
               <xs:element name="identity_uuid" type="UUIDType"/>
-              <xs:element name="email"   type="xs:string"/>
+              <xs:element name="email"         type="xs:string"/>
               <xs:element name="contact">
                 <xs:complexType><xs:sequence>
                   <xs:element name="first_name" type="xs:string"/>
@@ -1534,23 +1548,16 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <!-- Verplicht wanneer type=company -->
-              <xs:element name="company" minOccurs="0">
-                <xs:complexType><xs:sequence>
-                  <xs:element name="name"       type="xs:string"/>
-                  <xs:element name="vat_number" type="xs:string"/>
-                </xs:sequence></xs:complexType>
-              </xs:element>
+              <xs:element name="company_name" type="xs:string" minOccurs="0"/>
+              <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
+              <xs:element name="session_id"    type="xs:string"/>
             </xs:sequence></xs:complexType>
           </xs:element>
-          <xs:element name="session">
-            <xs:complexType><xs:sequence>
-              <xs:element name="session_id" type="xs:string"/>
-              <xs:element name="name"       type="xs:string"/>
-            </xs:sequence></xs:complexType>
-          </xs:element>
+          <xs:element name="session_title"   type="xs:string" minOccurs="0"/>
           <xs:element name="payment_status">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="pending"/>
+              <xs:enumeration value="paid"/>
             </xs:restriction></xs:simpleType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1573,7 +1580,7 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
     <correlation_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</correlation_id>
   </header>
   <body>
-    <user>
+    <customer>
       <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters@ehb.be</email>
       <contact>
@@ -1581,11 +1588,8 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
         <last_name>Peeters</last_name>
       </contact>
       <type>private</type>
-    </user>
-    <session>
       <session_id>sess-2026-mainstage-01</session_id>
-      <name>Main Stage Opening</name>
-    </session>
+    </customer>
     <payment_status>pending</payment_status>
   </body>
 </message>
@@ -1604,7 +1608,7 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
     <correlation_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</correlation_id>
   </header>
   <body>
-    <user>
+    <customer>
       <identity_uuid>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</identity_uuid>
       <email>marie.desmet@acme.be</email>
       <contact>
@@ -1612,15 +1616,10 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
         <last_name>Desmet</last_name>
       </contact>
       <type>company</type>
-      <company>
-        <name>Acme NV</name>
-        <vat_number>BE0123456789</vat_number>
-      </company>
-    </user>
-    <session>
+      <company_name>Acme NV</company_name>
+      <vat_number>BE0123456789</vat_number>
       <session_id>sess-2026-workshop-04</session_id>
-      <name>Tech Workshop: Cloud Integrations</name>
-    </session>
+    </customer>
     <payment_status>pending</payment_status>
   </body>
 </message>
@@ -1634,6 +1633,61 @@ Wanneer een sessie of event is afgelopen.
 
 - **Queue:** `event.ended`
 - **Richting:** Frontend → CRM
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="session_id" type="xs:string"/>
+          <xs:element name="ended_at"   type="xs:dateTime"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<message>
+  <header>
+    <message_id>b3a8c7d6-e5f4-3210-abcd-ef1234567890</message_id>
+    <timestamp>2026-05-15T22:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>event_ended</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>sess-keynote-001</session_id>
+    <ended_at>2026-05-15T22:00:00Z</ended_at>
+  </body>
+</message>
+```
 
 #### XSD
 
