@@ -4571,7 +4571,7 @@ Receivers:
 - [ ] `SessionUpdateReceiver.php` — accepteer `session_updated` als type-waarde (niet `session_update`)
 
 Nieuwe functionaliteit (uit v2.0):
-- [ ] `<payment_due currency="eur">` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
+- [ ] `<payment_due><amount currency="eur">0.00</amount></payment_due>` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
 - [ ] Identity RPC implementeren vóór CRM-call bij elke registratie (sectie 15.6)
 - [ ] Bind queue aan `user.events` exchange voor fanout van Identity Service
 
