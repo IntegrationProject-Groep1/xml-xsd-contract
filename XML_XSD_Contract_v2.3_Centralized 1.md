@@ -142,7 +142,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 -  invoice_request.xsd: VERVANG volledig — verwijder `<items>`, vervang `<customer>` door `<invoice_data>`
 -  new_registration.xsd: `<customer>` → `<contact>` wrapper
 -  invoice_created_notification: fix schema xmlns, version 1.0 → 2.0
--  payment_registered.xsd: verwijder `<master_uuid>`
+-  `payment_registered.xsd`: verwijder `<identity_uuid>` in header (verplaats naar body)
 -  **NIEUW**: luister op `facturatie.incoming` voor `payment_registered` van Frontend (sectie 11.5) — zet factuurstatus op 'paid'
 
 ---
@@ -268,7 +268,7 @@ Resultaat van een extra inhoudscontrole op datacompleetheid + XSD-integriteit pe
 
 - `consumption_order` (6.1): `unit_price` en `total_amount` gebruiken al verplicht currency-attribuut in de XSD. Geen blokkerende mismatch gevonden.
 - `invoice_request` (6.5 en 11.1): body-structuur is consistent op `<invoice_data>` en gebruikt `correlation_id` voor koppeling met `consumption_order`.
-- `new_registration` (10.1): contract is uitgelijnd op `<registration_fee>` (niet `<amount_due>`).
+- `new_registration` (10.1): contract is uitgelijnd op `<payment_due>` (niet `<amount_due>`).
 - `badge_scanned` (6.3): integriteit bijgewerkt voor runtime-compatibiliteit:
   - `location` accepteert nu ook `main_bar` naast `entrance|bar|session`.
   - `source` accepteert nu `kassa` of `iot_gateway` (voor gateway-scenario's).
@@ -327,7 +327,7 @@ Wat goed is:
 #### Concrete actiepunten:
 - [ ] `src/receiver.js`: hernoem case `'session_update'` → `'session_updated'`
 - [ ] `src/sender.js` `buildNewRegistrationXml()`: verwijder `<age>`, voeg `<date_of_birth>` toe vanuit `crm_user_sync.date_of_birth`
-- [ ] `src/sender.js` `buildInvoiceRequestXml()`: vervang volledige body door `<user_id>` + `<invoice_data>` (geen items, geen master_uuid)
+- [ ] `src/sender.js` `buildInvoiceRequestXml()`: vervang volledige body door `<identity_uuid>` + `<invoice_data>` (geen items, geen master_uuid)
 - [ ] `src/sender.js` `sendInvoiceRequest()`: queue parameter `'crm.to.facturatie'` → `'facturatie.incoming'`
 - [ ] `src/sender.js` `buildMailingSendXml()`: header `<type>mailing_status</type>` → `<type>send_mailing</type>`
 - [ ] `tests/sender.test.js`: bijwerken zodat tests de nieuwe schemas valideren
@@ -351,6 +351,9 @@ De repo heeft TWEE header-stijlen door elkaar:
 -  Header bevat nog `<master_uuid>` — verwijderen (zie sectie 5.1)
 -  Body bevat nog `<age>` — vervangen door `<date_of_birth>`
 -  Body gebruikt `<customer>` met losse `first_name`/`last_name` — moet `<contact>` wrapper hebben (Regel 2)
+-  Body gebruikt `<registration_fee>` — vervangen door `<payment_due>` (sectie 5.1)
+-  Body heeft `<session_id>` op body-niveau — verplaats naar binnen `<customer>` (sectie 5.1)
+-  Body gebruikt `<user_id>` — hernoem naar `<identity_uuid>` (sectie 5.1)
 
 **`UserUnregisteredSender.php`:**
 -  Type `user.unregistered` → `user_deleted` (changelog #7, sectie 5.3)
@@ -692,7 +695,7 @@ Deze regels gelden voor **elk** bericht zonder uitzondering.
 
 ```xml
 <!--  CORRECT — Gebruik de Master UUID van de Identity Service -->
-<user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+<identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
 
 <!--  FOUT — Gebruik GEEN interne database ID's van je eigen systeem -->
 <user_id>drupal-user-4821</user_id>
@@ -700,7 +703,7 @@ Deze regels gelden voor **elk** bericht zonder uitzondering.
 <user_id>odoo-partner-99</user_id>
 ```
 
-**Waarom:** Interne ID's (Salesforce ID, Drupal UID, Odoo Partner ID) zijn alleen zinvol binnen de eigen service. Voor communicatie tussen teams is de **Master UUID** van de Identity Service de enige geldige identifier. Interne queries worden gedaan met de eigen ID, maar voor XML-berichten naar buiten gebruik je verplicht de Master UUID.
+**Waarom:** Interne ID's (Salesforce ID, Drupal UID, Odoo Partner ID) zijn alleen zinvol binnen de eigen service. Voor communicatie tussen teams is de **Master UUID** van de Identity Service de enige geldige identifier. Interne queries worden gedaan met de eigen ID, maar voor XML-berichten naar buiten gebruik je verplicht de **`identity_uuid`**.
 
 ---
 
@@ -853,7 +856,7 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 |------|---------|
 | `invalid_xml_format` | Binnenkomend bericht voldoet niet aan XSD |
 | `unknown_message_type` | Onbekend berichttype ontvangen |
-| `profile_not_found` | De Master UUID (`user_id`) is niet bekend in je systeem |
+| `profile_not_found` | De Master UUID (`identity_uuid`) is niet bekend in je systeem |
 | `identity_service_unavailable` | Kan geen Master UUID ophalen bij de Identity Service |
 | `database_error` | Interne database fout bij verwerken bericht |
 
@@ -1122,8 +1125,7 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
 
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"     type="xs:string"/>
-          <xs:element name="correlation_id" type="xs:string"/>
+          <xs:element name="message_id"     type="UUIDType"/>
           <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
@@ -1131,16 +1133,16 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
             <xs:enumeration value="new_registration"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType"/>
         </xs:sequence></xs:complexType>
       </xs:element>
 
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="session_id" type="xs:string"/>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service -->
-              <xs:element name="user_id"       type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="type"          type="xs:string"/>
               <xs:element name="is_company_linked" type="xs:boolean"/>
@@ -1154,7 +1156,8 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
               </xs:element>
               <xs:element name="address" type="xs:string"/>
               <xs:element name="company_id" type="xs:string" minOccurs="0"/>
-              <xs:element name="registration_fee">
+              <xs:element name="session_id" type="xs:string"/>
+              <xs:element name="payment_due">
                 <xs:complexType><xs:sequence>
                   <xs:element name="amount">
                     <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
@@ -1180,16 +1183,15 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
 <message>
   <header>
     <message_id>c3d4e5f6-a7b8-9012-cdef-012345678902</message_id>
-    <correlation_id>c3d4e5f6-a7b8-9012-cdef-012345678902</correlation_id>
     <timestamp>2026-04-24T09:15:00Z</timestamp>
     <source>frontend</source>
     <type>new_registration</type>
     <version>2.0</version>
+    <correlation_id>c3d4e5f6-a7b8-9012-cdef-012345678902</correlation_id>
   </header>
   <body>
-    <session_id>sess-keynote-001</session_id>
     <customer>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters@ehb.be</email>
       <type>private</type>
       <is_company_linked>false</is_company_linked>
@@ -1199,16 +1201,17 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
         <last_name>Peeters</last_name>
       </contact>
       <address>Nijverheidskaai 170, 1070 Brussel</address>
-      <registration_fee>
-        <amount currency="eur">25.00</amount>
+      <session_id>sess-keynote-001</session_id>
+      <payment_due>
+        <amount currency="eur">0.00</amount>
         <status>unpaid</status>
-      </registration_fee>
+      </payment_due>
     </customer>
   </body>
 </message>
 ```
 
-> ** Tip voor Frontend:** Stuur `registration_fee` altijd mee. Bij een gratis sessie: `<amount currency="eur">0.00</amount>` met status `unpaid`. CRM gebruikt dit om Kassa en Facturatie te informeren over het verschuldigde bedrag.
+> ** Tip voor Frontend:** Stuur `payment_due` altijd mee. Bij een gratis sessie: `<amount currency="eur">0.00</amount>` met status `unpaid`. CRM gebruikt dit om Kassa en Facturatie te informeren over het verschuldigde bedrag.
 
 
 ---
@@ -1232,22 +1235,23 @@ Wanneer een gebruiker zijn profiel wijzigt.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="user_updated"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service -->
-              <xs:element name="user_id"       type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="date_of_birth" type="xs:date" minOccurs="0"/>
               <xs:element name="contact">
@@ -1256,7 +1260,15 @@ Wanneer een gebruiker zijn profiel wijzigt.
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="company_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="company_name" type="xs:string" minOccurs="0"/>
+              <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
+              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1279,12 +1291,13 @@ Wanneer een gebruiker zijn profiel wijzigt.
   </header>
   <body>
     <customer>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters.nieuw@ehb.be</email>
       <contact>
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
+      <type>private</type>
     </customer>
   </body>
 </message>
@@ -1312,22 +1325,23 @@ Wanneer een account volledig wordt verwijderd.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="user_deleted"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- user_id: de master_uuid van de Identity Service -->
-          <xs:element name="user_id"     type="xs:string"/>
-          <xs:element name="email"       type="xs:string"/>
-          <xs:element name="reason"      type="xs:string" minOccurs="0"/>
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="email"         type="xs:string"/>
+          <xs:element name="reason"        type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -1347,7 +1361,7 @@ Wanneer een account volledig wordt verwijderd.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <email>jan.peeters@ehb.be</email>
     <reason>Account op verzoek van gebruiker verwijderd</reason>
   </body>
@@ -1377,22 +1391,23 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="user_created"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service -->
-              <xs:element name="user_id"       type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="date_of_birth" type="xs:date"/>
               <xs:element name="contact">
@@ -1401,7 +1416,12 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
                   <xs:element name="last_name"  type="xs:string"/>
                 </xs:sequence></xs:complexType>
               </xs:element>
-              <xs:element name="is_company" type="xs:boolean"/>
+              <xs:element name="type">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="private"/>
+                  <xs:enumeration value="company"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
               <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
@@ -1427,14 +1447,14 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
   </header>
   <body>
     <customer>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters@ehb.be</email>
       <date_of_birth>1995-03-21</date_of_birth>
       <contact>
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
-      <is_company>false</is_company>
+      <type>private</type>
     </customer>
   </body>
 </message>
@@ -1453,7 +1473,7 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
   </header>
   <body>
     <customer>
-      <user_id>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</user_id>
+      <identity_uuid>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</identity_uuid>
       <email>info@ehb.be</email>
       <date_of_birth>1980-01-01</date_of_birth>
       <contact>
@@ -1497,8 +1517,7 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"     type="xs:string"/>
-          <xs:element name="correlation_id" type="xs:string"/>
+          <xs:element name="message_id"     type="UUIDType"/>
           <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
@@ -1506,14 +1525,16 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
             <xs:enumeration value="user_registered"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="user">
+          <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <xs:element name="user_id" type="xs:string"/>
-              <xs:element name="email"   type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid" type="UUIDType"/>
+              <xs:element name="email"         type="xs:string"/>
               <xs:element name="contact">
                 <xs:complexType><xs:sequence>
                   <xs:element name="first_name" type="xs:string"/>
@@ -1527,23 +1548,16 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <!-- Verplicht wanneer type=company -->
-              <xs:element name="company" minOccurs="0">
-                <xs:complexType><xs:sequence>
-                  <xs:element name="name"       type="xs:string"/>
-                  <xs:element name="vat_number" type="xs:string"/>
-                </xs:sequence></xs:complexType>
-              </xs:element>
+              <xs:element name="company_name" type="xs:string" minOccurs="0"/>
+              <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
+              <xs:element name="session_id"    type="xs:string"/>
             </xs:sequence></xs:complexType>
           </xs:element>
-          <xs:element name="session">
-            <xs:complexType><xs:sequence>
-              <xs:element name="session_id" type="xs:string"/>
-              <xs:element name="name"       type="xs:string"/>
-            </xs:sequence></xs:complexType>
-          </xs:element>
+          <xs:element name="session_title"   type="xs:string" minOccurs="0"/>
           <xs:element name="payment_status">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="pending"/>
+              <xs:enumeration value="paid"/>
             </xs:restriction></xs:simpleType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1559,26 +1573,23 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
 <message>
   <header>
     <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</message_id>
-    <correlation_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</correlation_id>
     <timestamp>2026-05-01T10:00:00Z</timestamp>
     <source>frontend</source>
     <type>user_registered</type>
     <version>2.0</version>
+    <correlation_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</correlation_id>
   </header>
   <body>
-    <user>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <customer>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters@ehb.be</email>
       <contact>
         <first_name>Jan</first_name>
         <last_name>Peeters</last_name>
       </contact>
       <type>private</type>
-    </user>
-    <session>
       <session_id>sess-2026-mainstage-01</session_id>
-      <name>Main Stage Opening</name>
-    </session>
+    </customer>
     <payment_status>pending</payment_status>
   </body>
 </message>
@@ -1590,30 +1601,25 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
 <message>
   <header>
     <message_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</message_id>
-    <correlation_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</correlation_id>
     <timestamp>2026-05-01T10:05:00Z</timestamp>
     <source>frontend</source>
     <type>user_registered</type>
     <version>2.0</version>
+    <correlation_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</correlation_id>
   </header>
   <body>
-    <user>
-      <user_id>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</user_id>
+    <customer>
+      <identity_uuid>f9c38d2e-5f3b-4c4f-ad6f-234567890bcd</identity_uuid>
       <email>marie.desmet@acme.be</email>
       <contact>
         <first_name>Marie</first_name>
         <last_name>Desmet</last_name>
       </contact>
       <type>company</type>
-      <company>
-        <name>Acme NV</name>
-        <vat_number>BE0123456789</vat_number>
-      </company>
-    </user>
-    <session>
+      <company_name>Acme NV</company_name>
+      <vat_number>BE0123456789</vat_number>
       <session_id>sess-2026-workshop-04</session_id>
-      <name>Tech Workshop: Cloud Integrations</name>
-    </session>
+    </customer>
     <payment_status>pending</payment_status>
   </body>
 </message>
@@ -1643,7 +1649,62 @@ Wanneer een sessie of event is afgelopen.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="session_id" type="xs:string"/>
+          <xs:element name="ended_at"   type="xs:dateTime"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<message>
+  <header>
+    <message_id>b3a8c7d6-e5f4-3210-abcd-ef1234567890</message_id>
+    <timestamp>2026-05-15T22:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>event_ended</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>sess-keynote-001</session_id>
+    <ended_at>2026-05-15T22:00:00Z</ended_at>
+  </body>
+</message>
+```
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
@@ -1651,6 +1712,7 @@ Wanneer een sessie of event is afgelopen.
             <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
@@ -1713,7 +1775,7 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
   <xs:complexType name="CustomerType">
     <xs:sequence>
       <xs:element name="id"      type="xs:string" minOccurs="0"/>
-      <xs:element name="user_id" type="xs:string" minOccurs="0"/>
+      <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
       <xs:element name="type">
         <xs:simpleType>
           <xs:restriction base="xs:string">
@@ -1778,11 +1840,12 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
-              <xs:element name="type"       type="xs:string" fixed="consumption_order"/>
-              <xs:element name="source"     type="xs:string" fixed="kassa"/>
+              <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
+              <xs:element name="source"     type="xs:string" fixed="kassa"/>
+              <xs:element name="type"       type="xs:string" fixed="consumption_order"/>
               <xs:element name="version"    type="xs:string" fixed="2.0"/>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -1818,16 +1881,16 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
 <message>
   <header>
     <message_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</message_id>
-    <type>consumption_order</type>
-    <source>kassa</source>
     <timestamp>2026-05-15T18:30:00Z</timestamp>
+    <source>kassa</source>
+    <type>consumption_order</type>
     <version>2.0</version>
   </header>
   <body>
     <is_anonymous>false</is_anonymous>
     <customer>
       <id>12345</id>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <type>company</type>
       <email>info@bedrijf.be</email>
       <address>
@@ -1873,7 +1936,7 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
+          <xs:element name="message_id" type="UUIDType"/>
           <xs:element name="timestamp"  type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="kassa"/></xs:restriction></xs:simpleType></xs:element>
@@ -1881,11 +1944,13 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
             <xs:enumeration value="badge_assigned"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="user_id"     type="xs:string"/>
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
+          <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="badge_id"    type="xs:string"/>
           <xs:element name="assigned_at" type="xs:dateTime"/>
         </xs:sequence></xs:complexType>
@@ -1907,7 +1972,7 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <badge_id>BADGE-0042</badge_id>
     <assigned_at>2026-05-15T18:05:00Z</assigned_at>
   </body>
@@ -2024,21 +2089,23 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id"     type="xs:string"/>
-              <xs:element name="type"           type="xs:string" fixed="refund_processed"/>
-              <xs:element name="source"         type="xs:string" fixed="kassa"/>
+              <xs:element name="message_id"     type="UUIDType"/>
               <xs:element name="timestamp"      type="xs:dateTime"/>
-              <xs:element name="version"        type="xs:string" fixed="2.0"/>
-              <!-- correlation_id = message_id van de originele payment_registered -->
-              <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="kassa"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="refund_processed"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <!-- user_id optioneel: anonieme refunds hebben geen user_id -->
-              <xs:element name="user_id" type="xs:string" minOccurs="0"/>
+              <!-- identity_uuid optioneel: anonieme refunds hebben geen identity_uuid -->
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
               <xs:element name="refund_type">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
@@ -2104,7 +2171,7 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
     <correlation_id>f14d0000-0000-0000-0000-000000000004</correlation_id>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <refund_type>consumption_item</refund_type>
     <refund>
       <amount currency="eur">5.00</amount>
@@ -2132,7 +2199,7 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
     <correlation_id>8fc6d7e8-f9a0-1234-cdef-234567800014</correlation_id>
   </header>
   <body>
-    <!-- geen user_id bij anonieme terugbetaling -->
+    <!-- geen identity_uuid bij anonieme terugbetaling -->
     <refund_type>consumption_item</refund_type>
     <refund>
       <amount currency="eur">5.00</amount>
@@ -2194,10 +2261,10 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
           <xs:complexType>
             <xs:sequence>
               <xs:element name="message_id"    type="UUIDType"/>
-              <xs:element name="type"          type="xs:string" fixed="invoice_request"/>
-              <xs:element name="source"        type="xs:string"/>
               <xs:element name="timestamp"     type="xs:dateTime"/>
-              <xs:element name="version"       type="xs:string"/>
+              <xs:element name="source"        type="SourceType"/>
+              <xs:element name="type"          type="xs:string" fixed="invoice_request"/>
+              <xs:element name="version"       type="xs:string" fixed="2.0"/>
               <!-- correlation_id = message_id van het consumption_order bericht -->
               <xs:element name="correlation_id" type="UUIDType"/>
             </xs:sequence>
@@ -2206,7 +2273,7 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id"      type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="invoice_data" type="InvoiceDataType"/>
             </xs:sequence>
           </xs:complexType>
@@ -2224,14 +2291,14 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
 <message>
   <header>
     <message_id>b12c3d4e-5f6a-7890-bcde-f01234567890</message_id>
-    <type>invoice_request</type>
-    <source>kassa</source>
     <timestamp>2026-05-15T20:00:00Z</timestamp>
+    <source>kassa</source>
+    <type>invoice_request</type>
     <version>2.0</version>
     <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <invoice_data>
       <first_name>Jan</first_name>
       <last_name>Peeters</last_name>
@@ -2264,7 +2331,7 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
 >
 > **`invoice.id`:** optioneel — afwezig bij `registration` (CRM maakt factuur aan). Aanwezig bij `consumption`.
 >
-> **`user_id`** op body-niveau: optioneel bij consumptie, verplicht bij registratie.
+> **`identity_uuid`** op body-niveau: optioneel bij consumptie, verplicht bij registratie.
 
 #### XSD (v2.1 — conform Kassa schema_payment_registered_v2.1.xsd)
 
@@ -2292,12 +2359,15 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id"     type="xs:string"/>
-              <xs:element name="type"           type="xs:string" fixed="payment_registered"/>
-              <xs:element name="source"         type="xs:string" fixed="kassa"/>
+              <xs:element name="message_id"     type="UUIDType"/>
               <xs:element name="timestamp"      type="xs:dateTime"/>
-              <xs:element name="version"        type="xs:string" fixed="2.0"/>
-              <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="kassa"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="payment_registered"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -2312,8 +2382,8 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <!-- user_id optioneel bij consumption, aanwezig bij registration -->
-              <xs:element name="user_id" type="xs:string" minOccurs="0"/>
+              <!-- identity_uuid optioneel bij consumption, aanwezig bij registration -->
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
               <xs:element name="invoice">
                 <xs:complexType>
                   <xs:sequence>
@@ -2365,15 +2435,15 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
 <message>
   <header>
     <message_id>a23bc45d-89ef-1234-b567-1f03c3d4e580</message_id>
-    <type>payment_registered</type>
-    <source>kassa</source>
     <timestamp>2026-05-15T18:35:00Z</timestamp>
+    <source>kassa</source>
+    <type>payment_registered</type>
     <version>2.0</version>
     <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
     <payment_context>consumption</payment_context>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <invoice>
       <id>INV-2026-001</id>
       <status>paid</status>
@@ -2395,15 +2465,15 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
 <message>
   <header>
     <message_id>f14d0000-0000-0000-0000-000000000004</message_id>
-    <type>payment_registered</type>
-    <source>kassa</source>
     <timestamp>2026-05-15T09:15:00Z</timestamp>
+    <source>kassa</source>
+    <type>payment_registered</type>
     <version>2.0</version>
-    <correlation_id>MSG-CRM-1001</correlation_id>
+    <correlation_id>9f47ac10-b58c-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
     <payment_context>registration</payment_context>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <invoice>
       <!-- id weggelaten: factuur bestaat nog niet, CRM maakt die aan -->
       <status>paid</status>
@@ -2441,18 +2511,19 @@ Kassa stuurt dit naar Drupal nadat een **inschrijvingsbetaling** aan de kassa is
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
-              <xs:element name="type"       type="xs:string" fixed="payment_status"/>
-              <xs:element name="source"     type="xs:string" fixed="kassa"/>
+              <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
+              <xs:element name="source"     type="xs:string" fixed="kassa"/>
+              <xs:element name="type"       type="xs:string" fixed="payment_status"/>
               <xs:element name="version"    type="xs:string" fixed="2.0"/>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id" type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="payment_status">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
@@ -2477,13 +2548,13 @@ Kassa stuurt dit naar Drupal nadat een **inschrijvingsbetaling** aan de kassa is
 <message>
   <header>
     <message_id>41e2f3a4-b5c6-7890-efab-890123400010</message_id>
-    <type>payment_status</type>
-    <source>kassa</source>
     <timestamp>2026-05-15T18:35:00Z</timestamp>
+    <source>kassa</source>
+    <type>payment_status</type>
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <payment_status>paid</payment_status>
   </body>
 </message>
@@ -2529,7 +2600,7 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id"        type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <!-- wallet_balance: het nieuwe saldo na de wijziging -->
               <xs:element name="wallet_balance">
                 <xs:complexType>
@@ -2562,7 +2633,7 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <wallet_balance currency="eur">15.50</wallet_balance>
   </body>
 </message>
@@ -2632,7 +2703,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"    type="xs:string"/>
+          <xs:element name="message_id"    type="UUIDType"/>
           <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="planning"/></xs:restriction></xs:simpleType></xs:element>
@@ -2640,7 +2711,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
             <xs:enumeration value="session_created"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
-          <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
@@ -2670,8 +2741,8 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
           <!-- speaker: optioneel — niet elke sessie heeft een externe spreker -->
           <xs:element name="speaker" minOccurs="0">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service (indien spreker een gebruiker is) -->
-              <xs:element name="user_id"      type="xs:string" minOccurs="0"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service (indien spreker een gebruiker is) -->
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
               <xs:element name="contact">
                 <xs:complexType><xs:sequence>
                   <xs:element name="first_name" type="xs:string"/>
@@ -2711,7 +2782,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
     <max_attendees>120</max_attendees>
     <current_attendees>0</current_attendees>
     <speaker>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <contact>
         <first_name>Sarah</first_name>
         <last_name>Leclercq</last_name>
@@ -2742,7 +2813,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"    type="xs:string"/>
+          <xs:element name="message_id"    type="UUIDType"/>
           <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="planning"/></xs:restriction></xs:simpleType></xs:element>
@@ -2750,7 +2821,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
             <xs:enumeration value="session_updated"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
-          <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
@@ -2780,8 +2851,8 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
           <xs:element name="change_reason"     type="xs:string" minOccurs="0"/>
           <xs:element name="speaker" minOccurs="0">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service (indien spreker een gebruiker is) -->
-              <xs:element name="user_id"      type="xs:string" minOccurs="0"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service (indien spreker een gebruiker is) -->
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
               <xs:element name="contact">
                 <xs:complexType><xs:sequence>
                   <xs:element name="first_name" type="xs:string"/>
@@ -2822,7 +2893,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
     <current_attendees>87</current_attendees>
     <change_reason>Spreker heeft 30 minuten vertraging door file</change_reason>
     <speaker>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <contact>
         <first_name>Sarah</first_name>
         <last_name>Leclercq</last_name>
@@ -2919,18 +2990,22 @@ Facturatie meldt de nieuwe status van een factuur.
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
-              <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="source"     type="xs:string" fixed="facturatie"/>
-              <xs:element name="type"       type="xs:string" fixed="invoice_status"/>
-              <xs:element name="version"    type="xs:string" fixed="2.0"/>
+              <xs:element name="message_id"     type="UUIDType"/>
+              <xs:element name="timestamp"      type="xs:dateTime"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="facturatie"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="invoice_status"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="invoice_id"  type="xs:string"/>
-          <xs:element name="user_id"     type="xs:string"/>
+          <xs:element name="invoice_id"    type="xs:string"/>
+          <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="status">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="draft"/>
@@ -2966,7 +3041,7 @@ Facturatie meldt de nieuwe status van een factuur.
   </header>
   <body>
     <invoice_id>foss-inv-00142</invoice_id>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <status>paid</status>
     <amount currency="eur">150.00</amount>
     <due_date>2026-06-15</due_date>
@@ -2995,20 +3070,21 @@ Een betaling werd verwerkt in FossBilling.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"    type="UUIDType"/>
+          <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="facturatie"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="payment_registered"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="invoice_id"    type="xs:string"/>
-          <xs:element name="user_id"       type="xs:string"/>
+          <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="amount_paid">
             <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
               <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
@@ -3042,7 +3118,7 @@ Een betaling werd verwerkt in FossBilling.
   </header>
   <body>
     <invoice_id>foss-inv-00142</invoice_id>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <amount_paid currency="eur">150.00</amount_paid>
     <payment_method>cash</payment_method>
     <paid_at>2026-05-15T18:29:00Z</paid_at>
@@ -3172,22 +3248,23 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="new_registration"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service -->
-              <xs:element name="user_id"         type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid"   type="UUIDType"/>
               <xs:element name="email"          type="xs:string"/>
               <xs:element name="date_of_birth"  type="xs:date"/>
               <xs:element name="contact">
@@ -3244,10 +3321,11 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     <source>crm</source>
     <type>new_registration</type>
     <version>2.0</version>
+    <correlation_id>c3d4e5f6-a7b8-9012-cdef-012345678902</correlation_id>
   </header>
   <body>
     <customer>
-      <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+      <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>jan.peeters@ehb.be</email>
       <date_of_birth>1995-03-21</date_of_birth>
       <contact>
@@ -3288,20 +3366,21 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="profile_update"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- user_id: de master_uuid van de Identity Service -->
-          <xs:element name="user_id"         type="xs:string"/>
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
+          <xs:element name="identity_uuid"   type="UUIDType"/>
           <xs:element name="email"         type="xs:string"/>
           <xs:element name="date_of_birth" type="xs:date" minOccurs="0"/>
           <xs:element name="contact">
@@ -3353,7 +3432,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <email>jan.peeters.nieuw@ehb.be</email>
     <contact>
       <first_name>Jan</first_name>
@@ -3383,31 +3462,26 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="UUIDType">
-    <xs:restriction base="xs:string">
-      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="UUIDType"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="cancel_registration"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="user_id" type="xs:string"/>
-          <xs:element name="session_id"  type="xs:string"/>
-          <xs:element name="reason"      type="xs:string" minOccurs="0"/>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="session_id"    type="xs:string"/>
+          <xs:element name="reason"        type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -3427,7 +3501,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <session_id>sess-keynote-001</session_id>
     <reason>Klant heeft zelf annulatie gevraagd</reason>
   </body>
@@ -3488,20 +3562,23 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id"     type="xs:string"/>
-              <xs:element name="type"           type="xs:string" fixed="invoice_request"/>
-              <xs:element name="source"         type="xs:string" fixed="crm"/>
+              <xs:element name="message_id"     type="UUIDType"/>
               <xs:element name="timestamp"      type="xs:dateTime"/>
-              <xs:element name="version"        type="xs:string" fixed="2.0"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="invoice_request"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
               <!-- correlation_id = message_id van de bijhorende consumption_order (zie 11.3) -->
-              <xs:element name="correlation_id" type="xs:string"/>
+              <xs:element name="correlation_id" type="UUIDType"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id"      type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="invoice_data" type="InvoiceDataType"/>
               <!-- GEEN <items> of <total> — Facturatie haalt die uit de consumption_order -->
             </xs:sequence>
@@ -3520,15 +3597,15 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 <message>
   <header>
     <message_id>d4b1c2d3-e4f5-6789-bcde-789012300019</message_id>
-    <type>invoice_request</type>
-    <source>crm</source>
     <timestamp>2026-05-16T08:00:00Z</timestamp>
+    <source>crm</source>
+    <type>invoice_request</type>
     <version>2.0</version>
     <!-- correlation_id matcht de message_id van de consumption_order -->
     <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <invoice_data>
       <first_name>Jan</first_name>
       <last_name>Peeters</last_name>
@@ -3567,21 +3644,22 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id" type="xs:string"/>
-          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="message_id"    type="UUIDType"/>
+          <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="invoice_cancelled"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="invoice_id"  type="xs:string"/>
-          <xs:element name="user_id" type="xs:string"/>
-          <xs:element name="reason"      type="xs:string" minOccurs="0"/>
+          <xs:element name="invoice_id"    type="xs:string"/>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="reason"        type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -3602,7 +3680,7 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
   </header>
   <body>
     <invoice_id>foss-inv-00142</invoice_id>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <reason>Inschrijving geannuleerd door klant</reason>
   </body>
 </message>
@@ -3703,7 +3781,7 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 
   <xs:complexType name="PaymentRegisteredBodyType">
     <xs:sequence>
-      <xs:element name="user_id" type="xs:string" minOccurs="0"/>
+      <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
       <xs:element name="invoice" type="InvoiceType"/>
       <xs:element name="payment_context">
         <xs:simpleType>
@@ -3781,7 +3859,7 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
     <version>2.0</version>
   </header>
   <body>
-    <user_id>b2c3d4e5-2222-4222-b222-222222222222</user_id>
+    <identity_uuid>b2c3d4e5-2222-4222-b222-222222222222</identity_uuid>
     <invoice>
       <id>26</id>
       <amount_paid currency="eur">150.00</amount_paid>
@@ -3856,8 +3934,8 @@ CRM vraagt Mailing om een e-mail te versturen.
             <xs:complexType><xs:sequence>
               <xs:element name="recipient" maxOccurs="unbounded">
                 <xs:complexType><xs:sequence>
-                  <xs:element name="email"       type="xs:string"/>
-                  <xs:element name="user_id"     type="xs:string"/>
+                  <xs:element name="email"         type="xs:string"/>
+                  <xs:element name="identity_uuid" type="UUIDType"/>
                   <xs:element name="contact">
                     <xs:complexType><xs:sequence>
                       <xs:element name="first_name" type="xs:string"/>
@@ -3911,7 +3989,7 @@ CRM vraagt Mailing om een e-mail te versturen.
     <recipients>
       <recipient>
         <email>jan.peeters@ehb.be</email>
-        <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+        <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
         <contact>
           <first_name>Jan</first_name>
           <last_name>Peeters</last_name>
@@ -3954,7 +4032,7 @@ CRM vraagt Mailing om een e-mail te versturen.
     <recipients>
       <recipient>
         <email>jan.peeters@ehb.be</email>
-        <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+        <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
         <contact>
           <first_name>Jan</first_name>
           <last_name>Peeters</last_name>
@@ -4056,13 +4134,6 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <!--
-    TYPE   : payment_registered
-    FLOW   : CRM → Frontend  (queue: frontend.incoming)
-    VERSIE : 2.0
-    Frontend's PaymentRegisteredReceiver.php luistert op deze queue
-    en updatet de betaalstatus van de gebruiker in Drupal.
-  -->
   <xs:simpleType name="UUIDType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
@@ -4075,19 +4146,22 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
-              <xs:element name="type"       type="xs:string" fixed="payment_registered"/>
-              <xs:element="type"       type="xs:string" fixed="payment_registered"/>
-              <xs:element name="source"     type="xs:string" fixed="crm"/>
-              <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="version"    type="xs:string" fixed="2.0"/>
+              <xs:element name="message_id"     type="UUIDType"/>
+              <xs:element name="timestamp"      type="xs:dateTime"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="payment_registered"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id" type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="invoice">
                 <xs:complexType>
                   <xs:sequence>
@@ -4137,7 +4211,7 @@ CRM informeert de Drupal Frontend over een bevestigde betaling. Frontend gebruik
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <invoice>
       <id>INV-2026-001</id>
       <amount_paid currency="eur">150.00</amount_paid>
@@ -4497,7 +4571,7 @@ Receivers:
 - [ ] `SessionUpdateReceiver.php` — accepteer `session_updated` als type-waarde (niet `session_update`)
 
 Nieuwe functionaliteit (uit v2.0):
-- [ ] `<registration_fee currency="eur">` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
+- [ ] `<payment_due><amount currency="eur">0.00</amount></payment_due>` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
 - [ ] Identity RPC implementeren vóór CRM-call bij elke registratie (sectie 15.6)
 - [ ] Bind queue aan `user.events` exchange voor fanout van Identity Service
 
@@ -4668,7 +4742,7 @@ CRM is technisch goed opgezet (Node.js + jsforce + amqplib + fast-xml-parser + x
 
 `src/sender.js`:
 - [ ] `buildNewRegistrationXml()` (CRM → Kassa): verwijder `<age>`, voeg `<date_of_birth>` toe vanuit `crm_user_sync.date_of_birth` (sectie 10.1)
-- [ ] `buildInvoiceRequestXml()` (CRM → Facturatie): vervang body volledig — `<user_id>` + `<invoice_data>`, GEEN `<items>`, GEEN `<master_uuid>` in header, `<correlation_id>` verplicht (sectie 11.1)
+- [ ] `buildInvoiceRequestXml()` (CRM → Facturatie): vervang body volledig — `<identity_uuid>` + `<invoice_data>`, GEEN `<items>`, GEEN `<master_uuid>` in header, `<correlation_id>` verplicht (sectie 11.1)
 - [ ] `sendInvoiceRequest()`: queue parameter `'crm.to.facturatie'` → `'facturatie.incoming'`
 - [ ] `buildMailingSendXml()`: type `mailing_status` → `send_mailing` (sectie 12.1)
 - [ ] `consumption_order` 1-op-1 doorgeven naar `facturatie.incoming` (passthrough, sectie 11.3)
@@ -4775,7 +4849,7 @@ Salesforce / data:
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id"    type="xs:string"/>
+              <xs:element name="identity_uuid"    type="UUIDType"/>
               <xs:element name="badge_id"   type="xs:string"/>
               <!-- session_id: optioneel — voor opkomst per sessie tracking -->
               <xs:element name="session_id" type="xs:string" minOccurs="0"/>
@@ -4802,7 +4876,7 @@ Salesforce / data:
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <badge_id>BADGE-0042</badge_id>
     <session_id>sess-keynote-001</session_id>
     <checkin_at>2026-05-15T13:58:00Z</checkin_at>
@@ -4823,7 +4897,7 @@ Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na he
 **Request Body:**
 ```json
 {
-  "user_id":       "user-uuid-123",
+  "identity_uuid":       "e8b27c1d-4f2a-4b3e-9c5f-123456789abc",
   "access_token":  "eyJ...",
   "refresh_token": "0.A...",
   "expires_in":    3600
@@ -4832,14 +4906,14 @@ Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na he
 
 | Veld | Verplicht | Beschrijving |
 |------|-----------|--------------|
-| `user_id` | ✅ | Master UUID van de gebruiker (moet matchen met `calendar_invite`) |
+| `identity_uuid` | ✅ | Master UUID van de gebruiker (moet matchen met `calendar_invite`) |
 | `access_token` | ✅ | Microsoft OAuth access token |
 | `refresh_token` | ✅ | Microsoft OAuth refresh token |
 | `expires_in` | ❌ | Seconden tot verloop (default: 3600) |
 
 **Response:**
 ```json
-{ "status": "ok", "user_id": "user-uuid-123" }
+{ "status": "ok", "identity_uuid": "e8b27c1d-4f2a-4b3e-9c5f-123456789abc" }
 ```
 
 > **Security Note:** Tokens worden encrypted at rest (Fernet) opgeslagen. Planning refresht ze automatisch.
@@ -4965,7 +5039,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
                           <xs:element name="speaker" minOccurs="0">
                             <xs:complexType>
                               <xs:sequence>
-                                <xs:element name="user_id"      type="xs:string" minOccurs="0"/>
+                                <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
                                 <xs:element name="contact">
                                   <xs:complexType>
                                     <xs:sequence>
@@ -5042,7 +5116,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
         <status>published</status>
         <max_attendees>120</max_attendees>
         <speaker>
-          <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+          <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
           <contact>
             <first_name>Sarah</first_name>
             <last_name>Leclercq</last_name>
@@ -5109,8 +5183,8 @@ Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken 
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <!-- user_id: de master_uuid van de Identity Service -->
-              <xs:element name="user_id"        type="xs:string"/>
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
+              <xs:element name="identity_uuid"  type="UUIDType"/>
               <xs:element name="session_id"     type="xs:string"/>
               <xs:element name="title"          type="xs:string"/>
               <xs:element name="start_datetime" type="xs:dateTime"/>
@@ -5200,7 +5274,7 @@ Frontend vraagt Planning om een Office365/Outlook kalenderafspraak aan te maken 
     <correlation_id>cal-req-4821</correlation_id>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <session_id>sess-keynote-001</session_id>
     <title>Keynote: AI in Healthcare</title>
     <start_datetime>2026-05-15T14:00:00Z</start_datetime>
@@ -5454,8 +5528,8 @@ Wanneer een administrator in Drupal een sessie verwijdert.
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="xs:string"/>
-              <xs:element name="timestamp"  type="xs:dateTime"/>
+              <xs:element name="message_id"     type="UUIDType"/>
+              <xs:element name="timestamp"      type="xs:dateTime"/>
               <xs:element name="source">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="crm"/>
@@ -5472,14 +5546,14 @@ Wanneer een administrator in Drupal een sessie verwijdert.
                   <xs:enumeration value="2.0"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
-              <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user_id"       type="xs:string"/>
+              <xs:element name="identity_uuid"  type="UUIDType"/>
               <xs:element name="vat_number"    type="xs:string"/>
               <xs:element name="error_message" type="xs:string" minOccurs="0"/>
             </xs:sequence>
@@ -5504,7 +5578,7 @@ Wanneer een administrator in Drupal een sessie verwijdert.
     <version>2.0</version>
   </header>
   <body>
-    <user_id>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</user_id>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <vat_number>BE0000000000</vat_number>
     <error_message>BTW-nummer BE0000000000 bestaat niet in de VIES-databank</error_message>
   </body>
@@ -5603,7 +5677,7 @@ Gebruik deze checklist bij het bouwen of reviewen van elke nieuwe sender of XSD:
          
   CRM stuurt (sender.js)               Kassa verwacht (XSD)          
                                                                               
-  <user_id>                                  <user_id>                      
+  <identity_uuid>                              <identity_uuid>                      
   <age>30</age>                  MISMATCH   <date_of_birth> verplicht       
   <contact> wrapper                          <contact> wrapper verplicht    
   <date_of_birth> ontbreekt                 <age> niet in schema            
@@ -5634,7 +5708,7 @@ Gebruik deze checklist bij het bouwen of reviewen van elke nieuwe sender of XSD:
 ```xml
 <!-- Body moet worden: -->
 <body>
-  <user_id>{uuid}</user_id>
+  <identity_uuid>{uuid}</identity_uuid>
   <invoice_data>
     <first_name>...</first_name>  <!-- GEEN <contact> wrapper hier — gedocumenteerde uitzondering -->
     <last_name>...</last_name>
