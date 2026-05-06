@@ -1141,7 +1141,7 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="type"          type="xs:string"/>
@@ -1250,7 +1250,7 @@ Wanneer een gebruiker zijn profiel wijzigt.
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="date_of_birth" type="xs:date" minOccurs="0"/>
@@ -1338,7 +1338,7 @@ Wanneer een account volledig wordt verwijderd.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
           <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="email"         type="xs:string"/>
           <xs:element name="reason"        type="xs:string" minOccurs="0"/>
@@ -1406,7 +1406,7 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="date_of_birth" type="xs:date"/>
@@ -1532,7 +1532,7 @@ Wanneer een gebruiker zich inschrijft voor een specifieke festivalsessie. Bevat 
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
               <xs:element name="contact">
@@ -1949,7 +1949,7 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
           <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="badge_id"    type="xs:string"/>
           <xs:element name="assigned_at" type="xs:dateTime"/>
@@ -3263,7 +3263,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
         <xs:complexType><xs:sequence>
           <xs:element name="customer">
             <xs:complexType><xs:sequence>
-              <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+              <!-- identity_uuid: de master_uuid van de Identity Service -->
               <xs:element name="identity_uuid"   type="UUIDType"/>
               <xs:element name="email"          type="xs:string"/>
               <xs:element name="date_of_birth"  type="xs:date"/>
@@ -3379,7 +3379,7 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- identity_uuid: de master_uuid van de Identity Service (UUID v7) -->
+          <!-- identity_uuid: de master_uuid van de Identity Service -->
           <xs:element name="identity_uuid"   type="UUIDType"/>
           <xs:element name="email"         type="xs:string"/>
           <xs:element name="date_of_birth" type="xs:date" minOccurs="0"/>
