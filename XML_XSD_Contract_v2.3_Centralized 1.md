@@ -2105,7 +2105,8 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
           <xs:complexType>
             <xs:sequence>
               <!-- identity_uuid optioneel: anonieme refunds hebben geen identity_uuid -->
-              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>              <xs:element name="refund_type">
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
+              <xs:element name="refund_type">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="consumption_item"/>
@@ -2468,7 +2469,7 @@ Kassa stuurt dit na elke afgeronde kassatransactie.
     <source>kassa</source>
     <type>payment_registered</type>
     <version>2.0</version>
-    <correlation_id>MSG-CRM-1001</correlation_id>
+    <correlation_id>9f47ac10-b58c-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
     <payment_context>registration</payment_context>
