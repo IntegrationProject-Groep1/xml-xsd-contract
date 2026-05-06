@@ -81,6 +81,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [19.1](#191-user_checkin) |
 |  **VERZENDT** | `event_ended` | → CRM |  | [5.6](#56-event_ended) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
+|  **VERZENDT** | `payment_registered` | → Facturatie |  **ONTBREEKT** — nog niet geïmplementeerd | [11.5](#115-payment_registered-frontend--facturatie) |
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
 |  **ONTVANGT** | `payment_status` | ← Kassa |  | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  | [7](#7-planning--crm) |
@@ -94,6 +95,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 -  UserUnregisteredSender.php: v1.0 header → v2.0, type `user.unregistered` → `user_deleted`
 -  UserCheckinSender.php: v1.0 header → v2.0, type `user.checkin` → `user_checkin`
 -  CalendarInviteSender.php: v1.0 header → v2.0, type `calendar.invite` → `calendar_invite`, voeg `version` toe
+-  **NIEUW — PaymentRegisteredSender.php (→ Facturatie)**: implementeer sender die `payment_registered` stuurt naar queue `facturatie.incoming` conform sectie 11.5
 
 ---
 
@@ -129,6 +131,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `invoice_request` | ← CRM |  XSD bevat `<items>` | [11.1](#111-invoice_request-crm--facturatie) |
 |  **ONTVANGT** | `consumption_order` (passthrough) | ← CRM/Kassa |  | [11.3](#113-consumption_order-crm--facturatie--passthrough) |
 |  **ONTVANGT** | `new_registration` | ← CRM |  | [10.1](#101-new_registration-crm--kassa) |
+|  **ONTVANGT** | `payment_registered` | ← Frontend | v2.0 | [11.5](#115-payment_registered-frontend--facturatie) |
 |  **VERZENDT** | `invoice_status` | → CRM |  type is `send_invoice` | [8.1](#81-invoice_status) |
 |  **VERZENDT** | `payment_registered` | → CRM |  XSD bevat `<master_uuid>` | [8.2](#82-payment_registered) |
 |  **VERZENDT** | `send_mailing` | → Mailing |  | [13.1](#131-send_mailing-facturatie--mailing) |
@@ -140,6 +143,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 -  new_registration.xsd: `<customer>` → `<contact>` wrapper
 -  invoice_created_notification: fix schema xmlns, version 1.0 → 2.0
 -  payment_registered.xsd: verwijder `<master_uuid>`
+-  **NIEUW**: luister op `facturatie.incoming` voor `payment_registered` van Frontend (sectie 11.5) — zet factuurstatus op 'paid'
 
 ---
 
@@ -169,7 +173,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  Team Monitoring — Systeemwaarschuwingen (KRITIEK - 1 XSD + Logstash)
+###  **Team Monitoring** — Systeemwaarschuwingen (KRITIEK - 1 XSD + Logstash)
 **Audit Status:** Alert schema moet naar message envelope
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
@@ -478,7 +482,7 @@ Wat nu correct is:
 
 ---
 
-###  Team Monitoring — `IntegrationProject-Groep1/Monitoring`
+###  **Team Monitoring** — `IntegrationProject-Groep1/Monitoring`
 
 **Status: ALERT-FORMAAT MOET GEMIGREERD WORDEN**
 
@@ -579,7 +583,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 8. [Facturatie → CRM](#8-facturatie--crm)
 9. [Mailing → CRM](#9-mailing--crm)
 10. [CRM → Kassa](#10-crm--kassa)
-11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough, 11.4 payment_registered passthrough)*
+11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough, 11.4 payment_registered passthrough, 11.5 payment_registered Frontend direct)*
 12. [CRM → Mailing](#12-crm--mailing)
 13. [Facturatie → Mailing](#13-facturatie--mailing)
 13.5 [Facturatie → Frontend](#135-facturatie--frontend)
@@ -3641,6 +3645,163 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 
 ---
 
+### 11.5 `payment_registered` (Frontend → Facturatie)
+
+> **Nieuw — Issue #27.** Frontend stuurt dit bericht **rechtstreeks** naar `facturatie.incoming` wanneer een betaling via de webshop (online factuur) is bevestigd. Facturatie zet de factuur onmiddellijk op 'paid' in FossBilling.
+>
+> **Verschil met 11.4:** Sectie 11.4 is een Kassa-betaling die via CRM passeert. Sectie 11.5 is een online betaling die **direct** van Frontend naar Facturatie gaat — zonder CRM als tussenpersoon.
+
+- **Queue:** `facturatie.incoming`
+- **Source:** `frontend`
+- **Wanneer:** na succesvolle online betaling van een factuur via de webshop
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SourceType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="crm"/>
+      <xs:enumeration value="kassa"/>
+      <xs:enumeration value="frontend"/>
+      <xs:enumeration value="planning"/>
+      <xs:enumeration value="facturatie"/>
+      <xs:enumeration value="monitoring"/>
+      <xs:enumeration value="mailing"/>
+      <xs:enumeration value="identity"/>
+      <xs:enumeration value="iot_gateway"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="header" type="HeaderType"/>
+        <xs:element name="body" type="PaymentRegisteredBodyType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="HeaderType">
+    <xs:sequence>
+      <xs:element name="message_id" type="UUIDType"/>
+      <xs:element name="timestamp" type="xs:dateTime"/>
+      <xs:element name="source" type="SourceType" fixed="frontend"/>
+      <xs:element name="type" type="xs:string" fixed="payment_registered"/>
+      <xs:element name="version" type="xs:string" fixed="2.0"/>
+      <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="PaymentRegisteredBodyType">
+    <xs:sequence>
+      <xs:element name="user_id" type="xs:string" minOccurs="0"/>
+      <xs:element name="invoice" type="InvoiceType"/>
+      <xs:element name="payment_context">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="registration"/>
+            <xs:enumeration value="consumption"/>
+            <xs:enumeration value="online_invoice"/>
+            <xs:enumeration value="session_registration"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="transaction" type="TransactionType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InvoiceType">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string" minOccurs="0"/>
+      <xs:element name="amount_paid" type="AmountType"/>
+      <xs:element name="status" type="InvoiceStatusType"/>
+      <xs:element name="due_date" type="xs:date" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TransactionType">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="payment_method" type="PaymentMethodType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="AmountType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal">
+        <xs:attribute name="currency" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="eur"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="InvoiceStatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="paid"/>
+      <xs:enumeration value="pending"/>
+      <xs:enumeration value="cancelled"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="PaymentMethodType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="company_link"/>
+      <xs:enumeration value="on_site"/>
+      <xs:enumeration value="online"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>a1b2c3d4-1111-4111-b111-111111111115</message_id>
+    <timestamp>2026-05-06T14:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>payment_registered</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <user_id>b2c3d4e5-2222-4222-b222-222222222222</user_id>
+    <invoice>
+      <id>26</id>
+      <amount_paid currency="eur">150.00</amount_paid>
+      <status>paid</status>
+    </invoice>
+    <payment_context>online_invoice</payment_context>
+    <transaction>
+      <id>TRANS-ABC123</id>
+      <payment_method>online</payment_method>
+    </transaction>
+  </body>
+</message>
+```
+
+> **Actiepunt Frontend:** Implementeer `PaymentRegisteredSender` die dit bericht publiceert naar queue `facturatie.incoming` na elke succesvolle betaling.
+>
+> **Actiepunt Facturatie:** Voeg een consumer toe op `facturatie.incoming` die berichten met `source=frontend` en `type=payment_registered` verwerkt → zet invoice op 'paid' in FossBilling.
+
+---
+
 ## 12. CRM → Mailing
 
 - **Queue:** `crm.to.mailing`
@@ -4262,6 +4423,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Van | Naar | Queue | Exchange / Routing |
 |-----|------|-------|-------------------|
 | Frontend | CRM | `crm.incoming` | — |
+| Frontend | Facturatie | `facturatie.incoming` | — (payment_registered direct, sectie 11.5) |
 | Kassa | CRM | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.payments.consumption` / `registration` / `refund` / `invoice` / `badge` |
 | IoT (Raspberry Pi) | Kassa | `kassa.incoming` | exchange: `kassa.exchange`, routing: `kassa.incoming` |
 | Planning | CRM | `planning.session.events` | exchange: `planning.exchange`, routing: `planning.session.*` |
@@ -4310,6 +4472,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | → CRM | `user_deleted` | `crm.incoming` |
 | → CRM | `event_ended` | `crm.incoming` |
 | → CRM | `user_checkin` | `crm.incoming` |
+| → Facturatie | `payment_registered` | `facturatie.incoming` (sectie 11.5) |
 
 **Verplichte registratie-volgorde:**
 1. Stuur RPC naar `identity.user.create.request` met e-mailadres
@@ -4337,6 +4500,9 @@ Nieuwe functionaliteit (uit v2.0):
 - [ ] `<registration_fee currency="eur">` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
 - [ ] Identity RPC implementeren vóór CRM-call bij elke registratie (sectie 15.6)
 - [ ] Bind queue aan `user.events` exchange voor fanout van Identity Service
+
+Nieuwe functionaliteit (Issue #27):
+- [ ] **`PaymentRegisteredSender` (Frontend → Facturatie)**: implementeer sender die `payment_registered` publiceert naar `facturatie.incoming` na online betaling — conform sectie 11.5
 
 ---
 
@@ -4417,6 +4583,7 @@ Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volled
 | ← CRM | `invoice_cancelled` | `facturatie.incoming` |
 | ← CRM | `consumption_order` (passthrough) | `facturatie.incoming` |
 | ← CRM | `payment_registered` (passthrough) | `facturatie.incoming` |
+| ← Frontend | `payment_registered` (direct) | `facturatie.incoming` (sectie 11.5) |
 | → CRM | `invoice_status` | `facturatie.to.crm` |
 | → CRM | `payment_registered` | `facturatie.to.crm` |
 | → Mailing | `send_mailing` | `facturatie.to.mailing` |
@@ -4442,6 +4609,7 @@ Queue & validatie:
 - [ ] Eigen XSD-validatie in receiver: faal → `crm.dead-letter` queue
 - [ ] `send_mailing` consumer implementeren — Facturatie → Mailing flow ontbreekt nog volledig (sectie 13)
 - [ ] Bind queue aan `user.events` exchange voor Identity fanout (sectie 15.5)
+- [ ] **NIEUW (Issue #27)**: Consumer implementeren voor `payment_registered` van source `frontend` op `facturatie.incoming` — zet factuurstatus op 'paid' in FossBilling (sectie 11.5)
 
 ---
 
