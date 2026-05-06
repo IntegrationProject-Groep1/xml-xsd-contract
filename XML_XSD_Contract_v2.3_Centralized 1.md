@@ -4605,6 +4605,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | **Frontend** | **CRM** | `crm.incoming` | **wallet_topup_request** (Online herlading aanvraag) |
 | **CRM** | **Kassa** | `kassa.incoming` | **wallet_remote_topup** (Stuur online geld naar actieve lease) |
 
+
 ---
 
 ## 17. Per-Team Samenvatting
