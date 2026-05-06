@@ -173,7 +173,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  Team Monitoring — Systeemwaarschuwingen (KRITIEK - 1 XSD + Logstash)
+###  **Team Monitoring** — Systeemwaarschuwingen (KRITIEK - 1 XSD + Logstash)
 **Audit Status:** Alert schema moet naar message envelope
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
@@ -482,7 +482,7 @@ Wat nu correct is:
 
 ---
 
-###  Team Monitoring — `IntegrationProject-Groep1/Monitoring`
+###  **Team Monitoring** — `IntegrationProject-Groep1/Monitoring`
 
 **Status: ALERT-FORMAAT MOET GEMIGREERD WORDEN**
 
@@ -3661,6 +3661,26 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SourceType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="crm"/>
+      <xs:enumeration value="kassa"/>
+      <xs:enumeration value="frontend"/>
+      <xs:enumeration value="planning"/>
+      <xs:enumeration value="facturatie"/>
+      <xs:enumeration value="monitoring"/>
+      <xs:enumeration value="mailing"/>
+      <xs:enumeration value="identity"/>
+      <xs:enumeration value="iot_gateway"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="message">
     <xs:complexType>
       <xs:sequence>
@@ -3672,12 +3692,12 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 
   <xs:complexType name="HeaderType">
     <xs:sequence>
-      <xs:element name="message_id" type="xs:string"/>
+      <xs:element name="message_id" type="UUIDType"/>
       <xs:element name="timestamp" type="xs:dateTime"/>
-      <xs:element name="source" type="xs:string" fixed="frontend"/>
+      <xs:element name="source" type="SourceType" fixed="frontend"/>
       <xs:element name="type" type="xs:string" fixed="payment_registered"/>
       <xs:element name="version" type="xs:string" fixed="2.0"/>
-      <xs:element name="correlation_id" type="xs:string" minOccurs="0"/>
+      <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -3767,10 +3787,10 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
       <amount_paid currency="eur">150.00</amount_paid>
       <status>paid</status>
     </invoice>
-    <payment_context>consumption</payment_context>
+    <payment_context>online_invoice</payment_context>
     <transaction>
       <id>TRANS-ABC123</id>
-      <payment_method>on_site</payment_method>
+      <payment_method>online</payment_method>
     </transaction>
   </body>
 </message>
@@ -5736,22 +5756,6 @@ Niet het team.
 Maak een issue aan op GitHub en update dit document.
 
 Maar: dit document IS nu de canonieke bron. Zolang er geen issue + update geweest is, geldt deze versie.
-
----
-
-*Document v2.3 — Gegenereerd op basis van volledige repo-audit + bestaande v2.0 contract — April 2026*
-*Volgende geplande revisie: na demo 3 — toevoegen of aanpassen via Pull Request*
-
-
-
-
-
-
-
-
-
-
-
 
 ---
 

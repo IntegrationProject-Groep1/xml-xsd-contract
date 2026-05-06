@@ -224,7 +224,7 @@ flowchart LR
     end
 
     %% Functional Flows
-    Alle_teams -. "heartbeat" .-> Heartbeat
+    Alle_teams -. "heartbeat" .-> Monitoring
     CRM -- "invoice_request<br/>new_registration" --> Facturatie
     CRM -- "payment_registered" --> Frontend
     CRM -- "RPC request" --> Identity
@@ -237,7 +237,6 @@ flowchart LR
     Frontend -- "payment_registered" --> Facturatie
     Frontend -- "RPC request" --> Identity
     Frontend -- "calendar_invite<br/>session_create_request<br/>session_delete_request<br/>session_update_request" --> Planning
-    Heartbeat -- "system_alert" --> Mailing
     Heartbeat -. "heartbeat" .-> Monitoring
     Identity -- "user_event" --> CRM
     Identity -- "identity_response" --> Requestor
@@ -263,17 +262,16 @@ flowchart LR
     linkStyle 10 stroke:#6366f1,stroke-width:2px;
     linkStyle 11 stroke:#6366f1,stroke-width:2px;
     linkStyle 12 stroke:#6366f1,stroke-width:2px;
-    linkStyle 13 stroke:#6366f1,stroke-width:2px;
-    linkStyle 14 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
-    linkStyle 15 stroke:#10b981,stroke-width:2px;
-    linkStyle 16 stroke:#6366f1,stroke-width:2px;
-    linkStyle 17 stroke:#10b981,stroke-width:2px;
-    linkStyle 18 stroke:#6366f1,stroke-width:2px;
-    linkStyle 19 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
-    linkStyle 20 stroke:#10b981,stroke-width:2px;
-    linkStyle 21 stroke:#6366f1,stroke-width:2px;
-    linkStyle 22 stroke:#10b981,stroke-width:2px;
-    linkStyle 23 stroke:#6366f1,stroke-width:2px;
+    linkStyle 13 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 14 stroke:#10b981,stroke-width:2px;
+    linkStyle 15 stroke:#6366f1,stroke-width:2px;
+    linkStyle 16 stroke:#10b981,stroke-width:2px;
+    linkStyle 17 stroke:#6366f1,stroke-width:2px;
+    linkStyle 18 stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5;
+    linkStyle 19 stroke:#10b981,stroke-width:2px;
+    linkStyle 20 stroke:#6366f1,stroke-width:2px;
+    linkStyle 21 stroke:#10b981,stroke-width:2px;
+    linkStyle 22 stroke:#6366f1,stroke-width:2px;
 ```
 
 <!-- NETWORK_MAP_END -->
