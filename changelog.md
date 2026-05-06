@@ -2,6 +2,30 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-06 20:45 (+02:00)
+- Auteur: Gemini CLI (Integratie Orchestrator)
+- Betrokken teams: Frontend, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Contract-structuur hersteld en actiepunten aangevuld — Issue #27 vervolg:
+  - **Sectie 17 (Team Facturatie)**: Header en tabel-opmaak hersteld (was mangeld in vorige update).
+  - **Quick Reference (§0)**: Status voor `payment_registered` bij Frontend en Facturatie bijgewerkt van "ONTBREEKT" naar "v2.0".
+  - **Sectie 17 (Team Frontend)**: Actiepunt toegevoegd voor de implementatie van `PaymentRegisteredSender.php`.
+- Reden: De vorige update had per abuis de Team Facturatie header overschreven en de tabel-opmaak gebroken. Tevens actiepunten verduidelijkt voor de teams op basis van Issue #27.
+
+## 2026-05-06 20:32 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tombomeke-ehb)
+- Betrokken teams: Frontend, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `README.md`, `changelog.md`
+- Wijziging: Nieuw berichttype `payment_registered` (Frontend → Facturatie) toegevoegd — Issue #27:
+  - **Sectie 11.5** toegevoegd met volledige XSD en XML-voorbeeld (source: `frontend`, queue: `facturatie.incoming`)
+  - **Quick Reference** (§0 Frontend + Facturatie): nieuwe VERZENDT/ONTVANGT rijen toegevoegd
+  - **§16 Queue-overzicht**: `Frontend | Facturatie | facturatie.incoming` rij toegevoegd
+  - **§17 Per-Team Samenvatting**: Frontend en Facturatie tabellen en actiepuntenlijsten bijgewerkt
+  - **README.md Mermaid diagram**: `Frontend -- "payment_registered" --> Facturatie` pijl toegevoegd
+  - **ToC** bijgewerkt: `11.5` vermeld in de Inhoudsopgave onder CRM → Facturatie
+  - Source-waarde gecorrigeerd van `"Frontend"` (uppercase) naar `"frontend"` (lowercase) conform SourceType enum in §2
+- Reden: Issue #27 — Frontend stuurde het bericht al niet naar Facturatie; de flow ontbrak ook volledig uit het contract. Toegevoegd conform het XML/XSD-voorbeeld uit het issue.
+
 ## 2026-05-06 10:00 (+02:00)
 - Auteur: Gemini CLI (Lead Integratie Agent)
 - Betrokken teams: Alle teams, Monitoring, Facturatie, CRM, Frontend
