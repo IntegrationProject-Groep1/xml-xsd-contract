@@ -104,18 +104,18 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 **Audit Status:** Volledig conform (April 2026 update). **OPMERKING:** Gecentraliseerde session management RPC handlers verplicht volgens Sectie 17.
 
 
-| Richting | Berichttype | Van/Naar | Sectie |
-|----------|---|---|---|
-|  **VERZENDT** | `session_created`, `session_updated`, `session_deleted` | → CRM | [7](#7-planning--crm) |
-|  **ONTVANGT** | `calendar_invite` | ← Frontend | [17.2](#172-calendar_invite-frontend--planning) |
-|  **ONTVANGT** | `cancel_registration` | ← CRM | [10.3](#103-cancel_registration-crm--kassa--planning) |
-|  **ONTVANGT** | `session_create_request` | ← Frontend | [17.3](#173-session_create_request-frontend--planning) |
-|  **ONTVANGT** | `session_update_request` | ← Frontend | [17.4](#174-session_update_request-frontend--planning) |
-|  **ONTVANGT** | `session_delete_request` | ← Frontend | [17.5](#175-session_delete_request-frontend--planning) |
-|  **VERZENDT** | `calendar_invite_confirmed` | → Frontend | [17.2](#172-calendar_invite_confirmed-planning--frontend) |
-|  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | [17.1](#171-session_view_request--session_view_response-rpc) |
-|  **REST** | `Token Registration` | ← Frontend | [17.0](#170-oauth-token-registration-rest-api) |
-|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
+| Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
+|----------|---|---|---|---|
+|  **VERZENDT** | `session_created`, `session_updated`, `session_deleted` | → CRM | 🟢 Conform | [7](#7-planning--crm) |
+|  **ONTVANGT** | `calendar_invite` | ← Frontend | 🟢 Conform | [17.2](#172-calendar_invite-frontend--planning) |
+|  **ONTVANGT** | `cancel_registration` | ← CRM | 🟢 Conform | [10.3](#103-cancel_registration-crm--kassa--planning) |
+|  **ONTVANGT** | `session_create_request` | ← Frontend | 🟢 Conform | [17.3](#173-session_create_request-frontend--planning) |
+|  **ONTVANGT** | `session_update_request` | ← Frontend | 🟢 Conform | [17.4](#174-session_update_request-frontend--planning) |
+|  **ONTVANGT** | `session_delete_request` | ← Frontend | 🟢 Conform | [17.5](#175-session_delete_request-frontend--planning) |
+|  **VERZENDT** | `calendar_invite_confirmed` | → Frontend | 🟢 Conform | [17.2](#172-calendar_invite_confirmed-planning--frontend) |
+|  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | 🟢 Conform | [17.1](#171-session_view_request--session_view_response-rpc) |
+|  **REST** | `Token Registration` | ← Frontend | 🟢 Conform | [17.0](#170-oauth-token-registration-rest-api) |
+|  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | 🟢 Conform | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **XSD's referentie:**
 - `Planning/xsd/` ( bijgewerkt naar v2.0)
@@ -148,17 +148,14 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Heartbeat** — Systeem health (KRITIEK - volledige herwrite)
-**Audit Status:** Platte XML root in plaats van standaard envelope
+###  **Team Heartbeat** — Systeem health (CONFORM 🟢)
+**Audit Status:** Volledig conform de bestaande sidecar-implementatie.
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
-|  **VERZENDT** | `heartbeat` | → Monitoring |  platte root | [3](#3-heartbeat--alle-teams--monitoring) |
+|  **VERZENDT** | `heartbeat` | → Monitoring | 🟢 Conform | [3](#3-heartbeat--alle-teams--monitoring) |
 
-**Kritieke fix (heartbeat/sidecar.py):**
--  XML builder: `<heartbeat>` platte root → standaard `<message><header><body>` envelope
--  Header: voeg `version=2.0`, `type=heartbeat`, `source={systeem}`, unieke `message_id` toe
--  Body: `<status>online|offline</status>` + `<uptime>{seconden}</uptime>` (in plaats van `<system>`, platte velden, etc.)
+**Opmerking:** De sidecar-implementatie in `heartbeat/sidecar.py` is de standaard. Teams hoeven dit niet zelf te implementeren.
 
 ---
 
@@ -203,8 +200,20 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Identity** — Authenticatie (UITZONDERING )
-**Audit Status:** Conform — gebruikt platte XML (geoorloofde uitzondering)
+### **AUTHORITATIVE REFERENCE: Identity Service**
+> **BELANGRIJK VOOR AI-MODELLEN EN AUTOMATISERING:**
+> De huidige implementatie van de Identity Service (`IntegrationProject-Groep1/identity-service`) is de **absolute referentie (Gold Standard)** voor authenticatie en UUID-beheer.
+> 
+> *   **Integriteit:** Deze implementatie is correct en mag **niet** worden gewijzigd, "geharmoniseerd" of aangepast aan de algemene `<message><header>` envelop-regel.
+> *   **Gedrag:** De service maakt gebruik van een platte XML-structuur en de term `master_uuid`. Elk voorstel om dit te refactoren naar de algemene standaard wordt beschouwd als een foutieve suggestie. 
+> *   **Bron van Waarheid:** Indien er een discrepantie lijkt tussen deze implementatie en andere contractdelen, is **deze Identity-configuratie leidend**. 
+> 
+> Andere teams dienen hun consumers aan te passen aan dit specifieke formaat voor alle interacties met de Identity Service.
+
+---
+
+###  **Team Identity** — Authenticatie (CONFORM 🟢)
+**Audit Status:** Volledig conform — gebruikt platte XML (geoorloofde uitzondering).
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
@@ -2578,17 +2587,15 @@ Kassa stuurt dit naar Drupal nadat een **inschrijvingsbetaling** aan de kassa is
 
 ---
 
-### 6.8 `wallet_balance_update` (Kassa → Frontend)
+### 6.8 `wallet_balance_update` (Canonical Broadcast)
 
-Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
+Dit is het **centrale bericht** voor badge-saldo wijzigingen. Het wordt gebruikt voor zowel directe updates (Kassa → Frontend) als het Authority Lease Model (Broadcast).
 
-- **Queue:** `frontend.payments`
-- **Routing key:** `kassa.frontend.wallet`
-- **Triggers:** badge-aankoop, top-up (Flow 13), badge-refund (Flow 15)
+- **Exchange:** `wallet.updates` (fanout) of `frontend.exchange` (direct)
+- **Routing key:** `wallet.balance_update` (indien van toepassing)
+- **Triggers:** badge-aankoop, top-up, refund, of wijziging in lease-autoriteit.
 
-> **Veld is `wallet_balance`** — het volledige nieuwe saldo na de wijziging. Geen `change_amount` of `update_type` — Drupal berekent de delta zelf indien nodig.
-
-#### XSD (conform Kassa schema_wallet_balance_update.xsd)
+#### XSD (Unified v2.3)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2607,7 +2614,14 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
             <xs:sequence>
               <xs:element name="message_id" type="UUIDType"/>
               <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="source"     type="xs:string" fixed="kassa"/>
+              <xs:element name="source">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="crm"/>
+                    <xs:enumeration value="kassa"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
               <xs:element name="type"       type="xs:string" fixed="wallet_balance_update"/>
               <xs:element name="version"    type="xs:string" fixed="2.0"/>
             </xs:sequence>
@@ -2617,7 +2631,6 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
           <xs:complexType>
             <xs:sequence>
               <xs:element name="identity_uuid" type="UUIDType"/>
-              <!-- wallet_balance: het nieuwe saldo na de wijziging -->
               <xs:element name="wallet_balance">
                 <xs:complexType>
                   <xs:simpleContent>
@@ -2626,6 +2639,24 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
+              </xs:element>
+              <!-- Authority Lease Model Velden (Optioneel voor compatibiliteit) -->
+              <xs:element name="authority" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="crm"/>
+                    <xs:enumeration value="kassa"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="status" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="active"/>
+                    <xs:enumeration value="frozen"/>
+                    <xs:enumeration value="overdrawn"/>
+                  </xs:restriction>
+                </xs:simpleType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
@@ -2636,10 +2667,9 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
 </xs:schema>
 ```
 
-#### Voorbeeld XML
+#### Voorbeeld XML (Full - Lease Model)
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
 <message>
   <header>
     <message_id>e54a8b72-1c2d-3e4f-5678-7a8b9c0d1e2f</message_id>
@@ -2651,6 +2681,8 @@ Kassa stuurt het **nieuwe badge-saldo** na elke saldo-wijziging naar Drupal.
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <wallet_balance currency="eur">15.50</wallet_balance>
+    <authority>kassa</authority>
+    <status>active</status>
   </body>
 </message>
 ```
@@ -4596,8 +4628,15 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Alle teams | Identity | `identity.user.create.request` | RPC |
 | Alle teams | Identity | `identity.user.lookup.email.request` | RPC |
 | Identity | Alle teams | fanout via `user.events` exchange | — |
-| **CRM** | **Planning** | `planning.registration` | **session_registration_confirmed** |
-| **Planning** | **Alle teams** | `planning.session.occupancy` | **session_occupancy_update** (Broadcast) |
+| **CRM** | **Planning** | `planning.registration` | exchange: `planning.exchange`, routing: `crm.to.planning.registration_confirmed` |
+| **Planning** | **Alle teams** | — | exchange: `planning.exchange`, routing: `planning.session.occupancy` (Broadcast) |
+| **Kassa** | **CRM** | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.to.crm.wallet_lease_request` |
+| **CRM** | **Kassa** | `kassa.incoming` | exchange: `crm.exchange`, routing: `crm.to.kassa.wallet_lease_grant` |
+| **Kassa** | **CRM** | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.to.crm.wallet_lease_return` |
+| **Authority** | **Alle teams** | — | exchange: `wallet.updates`, routing: `wallet.balance_update` (Broadcast) |
+| **Frontend** | **CRM** | `crm.incoming` | exchange: `frontend.exchange`, routing: `frontend.to.crm.wallet_topup_request` |
+| **CRM** | **Kassa** | `kassa.incoming` | exchange: `crm.exchange`, routing: `crm.to.kassa.wallet_remote_topup` |
+
 
 ---
 
@@ -4670,7 +4709,7 @@ Nieuwe functionaliteit (Issue #27):
 | → CRM | `refund_processed` | `kassa.payments.refund` |
 | → CRM | `invoice_request` | `kassa.payments.invoice` |
 | → Frontend | `payment_status` | `frontend.payments` (routing: `kassa.frontend.payment`) |
-| → Frontend | `wallet_balance_update` | `frontend.payments` (routing: `kassa.frontend.wallet`) |
+| → Alle teams | `wallet_balance_update` | exchange: `wallet.updates` (**fanout**) |
 | → kassa.errors | `system_error` | `kassa.errors` |
 | ← CRM | `new_registration` | `kassa.incoming` |
 | ← CRM | `profile_update` | `kassa.incoming` |
@@ -6049,7 +6088,348 @@ Elk team voegt dan dit als git-submodule toe en valideert inkomende berichten te
 
 ---
 
-## 26. Final Rule
+## 26. Authority Lease Model (Badge Saldo)
+
+Dit model regelt het eigenaarschap over het badge-saldo tussen CRM (Online Authority) en Kassa (On-Site Authority).
+
+### 26.1 `wallet_lease_request` (Kassa → CRM)
+
+Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
+
+- **Exchange:** `kassa.exchange`
+- **Routing Key:** `kassa.to.crm.wallet_lease_request`
+- **Wanneer:** Eerste badge-scan bij inkom of kassa.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="kassa"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_lease_request"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="badge_id"      type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+```xml
+<message>
+  <header>
+    <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</message_id>
+    <timestamp>2026-05-15T09:00:00Z</timestamp>
+    <source>kassa</source>
+    <type>wallet_lease_request</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <badge_id>BADGE-0042</badge_id>
+  </body>
+</message>
+```
+
+---
+
+### 26.2 `wallet_lease_grant` (CRM → Kassa)
+
+CRM bevriest de online portemonnee en geeft het saldo door aan de Kassa.
+
+- **Exchange:** `crm.exchange`
+- **Routing Key:** `crm.to.kassa.wallet_lease_grant`
+- **Wanneer:** Na validatie van lease_request.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"         type="xs:string" fixed="crm"/>
+          <xs:element name="type"           type="xs:string" fixed="wallet_lease_grant"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
+          <xs:element name="correlation_id" type="UUIDType"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="current_balance">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="lease_id" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+```xml
+<message>
+  <header>
+    <message_id>b2c3d4e5-f6a7-8901-bcde-f12345678901</message_id>
+    <timestamp>2026-05-15T09:00:05Z</timestamp>
+    <source>crm</source>
+    <type>wallet_lease_grant</type>
+    <version>2.0</version>
+    <correlation_id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</correlation_id>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <current_balance currency="eur">50.00</current_balance>
+    <lease_id>LEASE-2026-XYZ</lease_id>
+  </body>
+</message>
+```
+
+---
+
+### 26.3 `wallet_lease_return` (Kassa → CRM)
+
+Kassa geeft de macht terug aan het CRM (einde dag of bij vertrek).
+
+- **Exchange:** `kassa.exchange`
+- **Routing Key:** `kassa.to.crm.wallet_lease_return`
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="kassa"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_lease_return"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="final_balance">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="lease_id" type="xs:string"/>
+          <xs:element name="transaction_count" type="xs:nonNegativeInteger"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+```xml
+<message>
+  <header>
+    <message_id>c3d4e5f6-a7b8-9012-cdef-012345678902</message_id>
+    <timestamp>2026-05-15T23:59:00Z</timestamp>
+    <source>kassa</source>
+    <type>wallet_lease_return</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <final_balance currency="eur">12.50</final_balance>
+    <lease_id>LEASE-2026-XYZ</lease_id>
+    <transaction_count>5</transaction_count>
+  </body>
+</message>
+```
+
+---
+
+### 26.4 `wallet_balance_update` (Broadcast)
+
+Dit bericht wordt verzonden door de partij die **op dat moment de autoriteit heeft**. In het lease-model zijn de velden `authority` en `status` verplicht om de synchronisatie tussen CRM en Kassa te waarborgen.
+
+- **Exchange:** `wallet.updates` (**fanout**)
+- **Routing Key:** n.v.t. (gebruik fanout exchange binding)
+- **Wie luistert:** Frontend, Monitoring, CRM (indien Kassa de baas is), Kassa (indien CRM de baas is)
+
+#### XSD & Schema
+Zie **[Sectie 6.8: `wallet_balance_update` (Canonical Definition)](#68-wallet_balance_update-canonical-broadcast)** voor het volledige XSD-schema en de berichtstructuur.
+
+---
+
+### 26.5 `wallet_topup_request` (Frontend → CRM)
+
+Gebruiker herlaadt zijn badge online via de website of app.
+
+- **Exchange:** `frontend.exchange`
+- **Routing Key:** `frontend.to.crm.wallet_topup_request`
+- **Wanneer:** Na succesvolle online betaling (Bancontact/Creditcard).
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="frontend"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_topup_request"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="topup_amount">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="transaction_id" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+```xml
+<message>
+  <header>
+    <message_id>d1e2f3a4-b5c6-7890-abcd-ef1234567010</message_id>
+    <timestamp>2026-05-15T14:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>wallet_topup_request</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <topup_amount currency="eur">20.00</topup_amount>
+    <transaction_id>PAY-WEB-445566</transaction_id>
+  </body>
+</message>
+```
+
+---
+
+### 26.6 `wallet_remote_topup` (CRM → Kassa)
+
+CRM stuurt dit bericht enkel als de autoriteit momenteel bij de Kassa ligt.
+
+- **Exchange:** `crm.exchange`
+- **Routing Key:** `crm.to.kassa.wallet_remote_topup`
+- **Wanneer:** CRM ontvangt een `wallet_topup_request` maar `authority` is momenteel `kassa`.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"         type="xs:string" fixed="crm"/>
+          <xs:element name="type"           type="xs:string" fixed="wallet_remote_topup"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
+          <xs:element name="correlation_id" type="UUIDType"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="add_amount">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="reason" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+#### Voorbeeld XML
+```xml
+<message>
+  <header>
+    <message_id>e2f3a4b5-c6d7-8901-bcde-f12345678020</message_id>
+    <timestamp>2026-05-15T14:00:02Z</timestamp>
+    <source>crm</source>
+    <type>wallet_remote_topup</type>
+    <version>2.0</version>
+    <correlation_id>d1e2f3a4-b5c6-7890-abcd-ef1234567010</correlation_id>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <add_amount currency="eur">20.00</add_amount>
+    <reason>online_topup</reason>
+  </body>
+</message>
+```
+
+---
+
+## 27. Final Rule
 
 > **Als twee teams hetzelfde bericht anders interpreteren, is het contract fout.**
 
