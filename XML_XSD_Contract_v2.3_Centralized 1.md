@@ -4011,14 +4011,11 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
         <xs:element name="header">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="message_id" type="UUIDType"/>
-              <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
-              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
-              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="message_id"     type="UUIDType"/>
+              <xs:element name="timestamp"      type="xs:dateTime"/>
+              <xs:element name="source"         type="xs:string" fixed="frontend"/>
+              <xs:element name="type"           type="xs:string" fixed="event_ended"/>
+              <xs:element name="version"        type="xs:string" fixed="2.0"/>
               <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
