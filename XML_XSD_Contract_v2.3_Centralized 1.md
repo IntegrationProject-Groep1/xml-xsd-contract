@@ -812,6 +812,8 @@ Elk bericht heeft de volgende structuur:
       <xs:enumeration value="facturatie"/>
       <xs:enumeration value="mailing"/>
       <xs:enumeration value="monitoring"/>
+      <xs:enumeration value="identity-service"/>
+      <xs:enumeration value="iot_gateway"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -1031,9 +1033,9 @@ De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` 
 
 - **Exchange:** `monitoring.alerts`  
 - **Queue:** `monitoring.alerts`
-- **Wanneer:** Een systeem is down gegaan of terug online gekomen
+- **Wanneer:** Een systeem is down gegaan (heartbeat timeout)
 
-> ** Wijziging voor Mailing-team:** Jullie huidige `<alert><s>...</s>` formaat wordt vervangen door het standaard `<message>` formaat met een `<source>` tag in het body-blok (was `<s>`). Pas `alert.xsd` en de consumer aan.
+> **BELANGRIJK:** Vanaf v2.3 moet de Monitoring-detector de globale `<message>` envelop gebruiken (Regel 1). Het oude platte `<alert>` formaat is gedeporteerd.
 
 ### XSD
 
@@ -1080,10 +1082,9 @@ De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` 
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="down"/>
                   <xs:enumeration value="up"/>
-                  <xs:enumeration value="degraded"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
-              <xs:element name="last_seen" type="xs:dateTime" minOccurs="0"/>
+              <xs:element name="message" type="xs:string" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -1099,7 +1100,7 @@ De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` 
 <message>
   <header>
     <message_id>b2c3d4e5-f6a7-8901-bcde-f12345678901</message_id>
-    <timestamp>2026-04-24T10:35:12Z</timestamp>
+    <timestamp>2026-05-07T18:35:12Z</timestamp>
     <source>monitoring</source>
     <type>system_alert</type>
     <version>2.0</version>
@@ -1107,7 +1108,7 @@ De sidecar publiceert heartbeats met `exchange=""` en `routing_key="heartbeat"` 
   <body>
     <system>facturatie</system>
     <status>down</status>
-    <last_seen>2026-04-24T10:34:10Z</last_seen>
+    <message>Systeem facturatie heeft al meer dan 30s geen heartbeat gestuurd.</message>
   </body>
 </message>
 ```
@@ -1493,7 +1494,7 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
         <first_name>An</first_name>
         <last_name>Janssens</last_name>
       </contact>
-      <is_company>true</is_company>
+      <type>company</type>
       <company_name>Erasmushogeschool Brussel</company_name>
       <vat_number>BE0876543210</vat_number>
       <company_id>ehb-001</company_id>
@@ -3860,7 +3861,7 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
       <xs:enumeration value="facturatie"/>
       <xs:enumeration value="monitoring"/>
       <xs:enumeration value="mailing"/>
-      <xs:enumeration value="identity"/>
+      <xs:enumeration value="identity-service"/>
       <xs:enumeration value="iot_gateway"/>
     </xs:restriction>
   </xs:simpleType>
