@@ -1715,7 +1715,7 @@ Wanneer een sessie of event is afgelopen.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
   <xs:simpleType name="UUIDType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
@@ -1728,12 +1728,9 @@ Wanneer een sessie of event is afgelopen.
         <xs:complexType><xs:sequence>
           <xs:element name="message_id"     type="UUIDType"/>
           <xs:element name="timestamp"      type="xs:dateTime"/>
-          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
-          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
-          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="source"         type="xs:string" fixed="frontend"/>
+          <xs:element name="type"           type="xs:string" fixed="event_ended"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
           <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
@@ -3998,7 +3995,6 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
-
   <xs:simpleType name="UUIDType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
@@ -4006,33 +4002,24 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
   </xs:simpleType>
 
   <xs:element name="message">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="header">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="message_id" type="UUIDType"/>
-              <xs:element name="timestamp"  type="xs:dateTime"/>
-              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
-              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="event_ended"/></xs:restriction></xs:simpleType></xs:element>
-              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
-                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
-              <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="body">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="session_id" type="xs:string"/>
-              <xs:element name="ended_at"   type="xs:dateTime"/>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:complexType>
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"         type="xs:string" fixed="frontend"/>
+          <xs:element name="type"           type="xs:string" fixed="event_ended"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="session_id" type="xs:string"/>
+          <xs:element name="ended_at"   type="xs:dateTime"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
   </xs:element>
 </xs:schema>
 ```
@@ -4040,7 +4027,6 @@ Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kas
 #### Voorbeeld XML
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
 <message>
   <header>
     <message_id>b3a8c7d6-e5f4-3210-abcd-ef1234567890</message_id>

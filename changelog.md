@@ -2,6 +2,13 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-07 10:47 (+02:00)
+- Auteur: Gemini CLI (Integratie Orchestrator)
+- Betrokken teams: Frontend, CRM, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: XSD en Voorbeeld XML voor `event_ended` in sectie 11.6 (Frontend → Facturatie) exact gelijkgetrokken met sectie 5.7 (Frontend → CRM).
+- Reden: Voldoen aan globale regel 3 ("Berichtstructuren, naming en versies moeten uniform blijven") en regel 1 ("Consistentie gaat voor snelheid"). De definitie was al structureel correct, maar bevatte opmaak-inconsistenties (tags op meerdere regels versus gecomprimeerd en optionele XML-headers).
+
 ## 2026-05-07 10:45 (+02:00)
 - Auteur: Gemini CLI (Integratie Orchestrator)
 - Betrokken teams: Frontend, Facturatie
