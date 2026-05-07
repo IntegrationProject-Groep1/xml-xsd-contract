@@ -4605,14 +4605,14 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Alle teams | Identity | `identity.user.create.request` | RPC |
 | Alle teams | Identity | `identity.user.lookup.email.request` | RPC |
 | Identity | Alle teams | fanout via `user.events` exchange | — |
-| **CRM** | **Planning** | `planning.registration` | **session_registration_confirmed** |
-| **Planning** | **Alle teams** | `planning.session.occupancy` | **session_occupancy_update** (Broadcast) |
-| **Kassa** | **CRM** | `crm.incoming` | **wallet_lease_request** (Vraag macht over geld) |
-| **CRM** | **Kassa** | `kassa.incoming` | **wallet_lease_grant** (Geef macht + saldo) |
-| **Kassa** | **CRM** | `crm.incoming` | **wallet_lease_return** (Geef macht terug + finaal saldo) |
-| **Authority** | **Alle teams** | `wallet.updates` | **wallet_balance_update** (Huidig saldo + wie de baas is) |
-| **Frontend** | **CRM** | `crm.incoming` | **wallet_topup_request** (Online herlading aanvraag) |
-| **CRM** | **Kassa** | `kassa.incoming` | **wallet_remote_topup** (Stuur online geld naar actieve lease) |
+| **CRM** | **Planning** | `planning.registration` | exchange: `planning.exchange`, routing: `crm.to.planning.registration_confirmed` |
+| **Planning** | **Alle teams** | — | exchange: `planning.exchange`, routing: `planning.session.occupancy` (Broadcast) |
+| **Kassa** | **CRM** | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.to.crm.wallet_lease_request` |
+| **CRM** | **Kassa** | `kassa.incoming` | exchange: `crm.exchange`, routing: `crm.to.kassa.wallet_lease_grant` |
+| **Kassa** | **CRM** | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.to.crm.wallet_lease_return` |
+| **Authority** | **Alle teams** | — | exchange: `wallet.updates`, routing: `wallet.balance_update` (Broadcast) |
+| **Frontend** | **CRM** | `crm.incoming` | exchange: `frontend.exchange`, routing: `frontend.to.crm.wallet_topup_request` |
+| **CRM** | **Kassa** | `kassa.incoming` | exchange: `crm.exchange`, routing: `crm.to.kassa.wallet_remote_topup` |
 
 
 ---
@@ -6073,8 +6073,41 @@ Dit model regelt het eigenaarschap over het badge-saldo tussen CRM (Online Autho
 
 Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
 
-- **Queue:** `crm.incoming`
+- **Exchange:** `kassa.exchange`
+- **Routing Key:** `kassa.to.crm.wallet_lease_request`
 - **Wanneer:** Eerste badge-scan bij inkom of kassa.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="kassa"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_lease_request"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="badge_id"      type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
 
 #### Voorbeeld XML
 ```xml
@@ -6099,8 +6132,47 @@ Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
 
 CRM bevriest de online portemonnee en geeft het saldo door aan de Kassa.
 
-- **Queue:** `kassa.incoming`
+- **Exchange:** `crm.exchange`
+- **Routing Key:** `crm.to.kassa.wallet_lease_grant`
 - **Wanneer:** Na validatie van lease_request.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"         type="xs:string" fixed="crm"/>
+          <xs:element name="type"           type="xs:string" fixed="wallet_lease_grant"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
+          <xs:element name="correlation_id" type="UUIDType"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="current_balance">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="lease_id" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
 
 #### Voorbeeld XML
 ```xml
@@ -6127,7 +6199,46 @@ CRM bevriest de online portemonnee en geeft het saldo door aan de Kassa.
 
 Kassa geeft de macht terug aan het CRM (einde dag of bij vertrek).
 
-- **Queue:** `crm.incoming`
+- **Exchange:** `kassa.exchange`
+- **Routing Key:** `kassa.to.crm.wallet_lease_return`
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="kassa"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_lease_return"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="final_balance">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="lease_id" type="xs:string"/>
+          <xs:element name="transaction_count" type="xs:nonNegativeInteger"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
 
 #### Voorbeeld XML
 ```xml
@@ -6154,36 +6265,62 @@ Kassa geeft de macht terug aan het CRM (einde dag of bij vertrek).
 
 Dit bericht wordt verzonden door de partij die **op dat moment de autoriteit heeft**.
 
-- **Exchange:** `wallet.updates` (fanout/topic)
+- **Exchange:** `wallet.updates`
+- **Routing Key:** `wallet.balance_update`
 - **Wie luistert:** Frontend, Monitoring, CRM (indien Kassa de baas is)
 
-#### XSD (Unified)
+#### XSD
 ```xml
-<xs:element name="body">
-  <xs:complexType>
-    <xs:sequence>
-      <xs:element name="identity_uuid" type="UUIDType"/>
-      <xs:element name="wallet_balance" type="AmountType"/>
-      <xs:element name="authority">
-        <xs:simpleType>
-          <xs:restriction base="xs:string">
-            <xs:enumeration value="crm"/>   <!-- Online modus -->
-            <xs:enumeration value="kassa"/> <!-- On-site modus -->
-          </xs:restriction>
-        </xs:simpleType>
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="crm"/>
+              <xs:enumeration value="kassa"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+          <xs:element name="type" type="xs:string" fixed="wallet_balance_update"/>
+          <xs:element name="version" type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
       </xs:element>
-      <xs:element name="status">
-        <xs:simpleType>
-          <xs:restriction base="xs:string">
-            <xs:enumeration value="active"/>
-            <xs:enumeration value="frozen"/> <!-- Bijv. tijdens overdracht -->
-            <xs:enumeration value="overdrawn"/>
-          </xs:restriction>
-        </xs:simpleType>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="wallet_balance">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="authority">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="crm"/>
+              <xs:enumeration value="kassa"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+          <xs:element name="status">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="active"/>
+              <xs:enumeration value="frozen"/>
+              <xs:enumeration value="overdrawn"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+        </xs:sequence></xs:complexType>
       </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-</xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
 ```
 
 ---
@@ -6192,8 +6329,46 @@ Dit bericht wordt verzonden door de partij die **op dat moment de autoriteit hee
 
 Gebruiker herlaadt zijn badge online via de website of app.
 
-- **Queue:** `crm.incoming`
+- **Exchange:** `frontend.exchange`
+- **Routing Key:** `frontend.to.crm.wallet_topup_request`
 - **Wanneer:** Na succesvolle online betaling (Bancontact/Creditcard).
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id" type="UUIDType"/>
+          <xs:element name="timestamp"  type="xs:dateTime"/>
+          <xs:element name="source"     type="xs:string" fixed="frontend"/>
+          <xs:element name="type"       type="xs:string" fixed="wallet_topup_request"/>
+          <xs:element name="version"    type="xs:string" fixed="2.0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="topup_amount">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="transaction_id" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
 
 #### Voorbeeld XML
 ```xml
@@ -6219,8 +6394,47 @@ Gebruiker herlaadt zijn badge online via de website of app.
 
 CRM stuurt dit bericht enkel als de autoriteit momenteel bij de Kassa ligt.
 
-- **Queue:** `kassa.incoming`
+- **Exchange:** `crm.exchange`
+- **Routing Key:** `crm.to.kassa.wallet_remote_topup`
 - **Wanneer:** CRM ontvangt een `wallet_topup_request` maar `authority` is momenteel `kassa`.
+
+#### XSD
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="source"         type="xs:string" fixed="crm"/>
+          <xs:element name="type"           type="xs:string" fixed="wallet_remote_topup"/>
+          <xs:element name="version"        type="xs:string" fixed="2.0"/>
+          <xs:element name="correlation_id" type="UUIDType"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="add_amount">
+            <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+              <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+            </xs:extension></xs:simpleContent></xs:complexType>
+          </xs:element>
+          <xs:element name="reason" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
 
 #### Voorbeeld XML
 ```xml
