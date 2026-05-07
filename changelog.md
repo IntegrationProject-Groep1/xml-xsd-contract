@@ -2,6 +2,23 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-07 (avond) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
+- Betrokken teams: Alle teams, Monitoring, Heartbeat, Mailing
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Contract-afstemming met Monitoring-repo + logging XSD geformaliseerd:
+  - **Sectie 3.5 (nieuw)**: Log-bericht XSD toegevoegd (Alle teams excl. Monitoring → `logs` queue). Bevat `level` (info/warning/error), `action` (13 waarden), `message`. Source-enum incl. `iot_gateway`.
+  - **Sectie 3 (Heartbeat XSD)**: `<uptime type="xs:nonNegativeInteger">` toegevoegd als verplicht body-veld — Logstash quarantineert berichten zonder dit veld.
+  - **Sectie 4 (system_alert)**: Formaat teruggebracht naar de werkende implementatie: platte `<alert>` root (`type`, `system`, `message`, `timestamp`), queue `to_mailing`, default exchange. Gedocumenteerd als geoorloofde uitzondering op Regel 1 voor intern Monitoring↔Mailing verkeer.
+  - **Globale SourceType (§2)**: `identity-service` en `iot_gateway` toegevoegd aan de enum.
+  - **Heartbeat-note (§3)**: `iot_gateway` toegevoegd aan de toegestane source-waarden voor Monitoring-team.
+  - **TOC**: Sectie 3.5 toegevoegd.
+  - **Audit-sectie Monitoring**: Status bijgewerkt naar "nagenoeg conform", overbodige actiepunten verwijderd. Enige openstaande actie: `iot_gateway` toevoegen aan Logstash logs-whitelist.
+  - **Audit-sectie Heartbeat service**: `degraded` verwijderd uit body-beschrijving; `uptime` gemarkeerd als verplicht.
+  - **Routing-tabellen en per-team secties**: `monitoring.alerts` → `to_mailing` gecorrigeerd; Mailing-actiepunten bijgewerkt.
+  - **AUTHORITATIVE REFERENCE block verwijderd**: Kassa's `schema_log.xsd` was ten onrechte aangeduid als Gold Standard — contract is nu de enige bron van waarheid.
+- Reden: Vier concrete mismatches gevonden tussen contract en Monitoring-repo na analyse van commit e52044a en directe repo-inspectie. Contract aangepast zodat het de werkende implementatie correct beschrijft en teams een betrouwbare referentie hebben.
+
 ## 2026-05-07 10:47 (+02:00)
 - Auteur: Gemini CLI (Integratie Orchestrator)
 - Betrokken teams: Frontend, CRM, Facturatie
