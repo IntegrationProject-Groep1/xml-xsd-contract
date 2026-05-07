@@ -2,6 +2,15 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-07 (middag) (+02:00)
+- Auteur: Gemini CLI (Integratie Orchestrator)
+- Betrokken teams: CRM, Facturatie, Mailing
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Redundante `<template_id>` verwijderd uit `send_mailing` contract (Sectie 12.1 & 13.1):
+  - **Sectie 12.1 (XSD)**: `<xs:element name="template_id" type="xs:string"/>` verwijderd.
+  - **Sectie 12.1 & 13.1 (Voorbeelden)**: `<template_id>` tags verwijderd uit de XML voorbeelden.
+- Reden: Versimpeling van het contract. Het veld `<template_id>` (specifiek voor Sendgrid) is redundant omdat de Mailing-service de `<mail_type>` intern kan vertalen naar het juiste template-ID. Dit vermindert koppeling tussen zendende teams en de specifieke mailing-provider configuratie.
+
 ## 2026-05-07 (avond) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
 - Betrokken teams: Alle teams, Monitoring, Heartbeat, Mailing

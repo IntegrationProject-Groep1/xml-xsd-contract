@@ -4139,7 +4139,6 @@ CRM vraagt Mailing om een e-mail te versturen.
         <xs:complexType><xs:sequence>
           <xs:element name="campaign_id" type="xs:string"/>
           <xs:element name="subject"     type="xs:string"/>
-          <xs:element name="template_id" type="xs:string"/>
           <xs:element name="mail_type">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="registration_confirmation"/>
@@ -4203,7 +4202,6 @@ CRM vraagt Mailing om een e-mail te versturen.
   <body>
     <campaign_id>sg-campaign-0089</campaign_id>
     <subject>Bevestiging inschrijving Shiftfestival 2026</subject>
-    <template_id>tmpl-registration-confirm</template_id>
     <mail_type>registration_confirmation</mail_type>
     <recipients>
       <recipient>
@@ -4246,7 +4244,6 @@ CRM vraagt Mailing om een e-mail te versturen.
   <body>
     <campaign_id>sg-invoice-00142</campaign_id>
     <subject>Uw factuur voor Shiftfestival 2026</subject>
-    <template_id>tmpl-invoice-ready</template_id>
     <mail_type>invoice_ready</mail_type>
     <recipients>
       <recipient>
