@@ -2,6 +2,17 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-07 10:45 (+02:00)
+- Auteur: Gemini CLI (Integratie Orchestrator)
+- Betrokken teams: Frontend, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Nieuw berichttype `event_ended` (Frontend → Facturatie) toegevoegd — Issue #34:
+  - **Quick Reference (§0)**: `event_ended` bij Frontend bijgewerkt met extra bestemming (Facturatie).
+  - **Quick Reference (§0)**: `event_ended` bij Facturatie toegevoegd als ONTVANGT bericht.
+  - **Sectie 11.6** toegevoegd met volledige XSD en XML-voorbeeld (source: `frontend`, queue: `facturatie.incoming`).
+  - **Kritieke fixes**: Actiepunten toegevoegd voor Frontend (extra publicatie naar Facturatie) en Facturatie (nieuwe consumer voor mailing trigger).
+- Reden: Issue #34 — Facturatie heeft het `event_ended` bericht nodig om factuur-mailings te triggeren; Frontend stuurde dit voorheen alleen naar CRM.
+
 ## 2026-05-06 20:55 (+02:00)
 - Auteur: Gemini CLI (Integratie Orchestrator)
 - Betrokken teams: Frontend, Facturatie

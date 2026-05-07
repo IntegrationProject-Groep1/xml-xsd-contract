@@ -234,7 +234,7 @@ flowchart LR
     Facturatie -- "invoice_created_notification<br/>invoice_status<br/>payment_registered" --> CRM
     Facturatie -- "send_mailing" --> Mailing
     Frontend -- "event_ended<br/>new_registration<br/>user_checkin<br/>user_created<br/>user_deleted<br/>user_registered<br/>user_updated" --> CRM
-    Frontend -- "payment_registered" --> Facturatie
+    Frontend -- "event_ended<br/>payment_registered" --> Facturatie
     Frontend -- "RPC request" --> Identity
     Frontend -- "calendar_invite<br/>session_create_request<br/>session_delete_request<br/>session_update_request" --> Planning
     Heartbeat -. "heartbeat" .-> Monitoring
