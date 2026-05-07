@@ -148,17 +148,14 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Heartbeat** — Systeem health (KRITIEK - volledige herwrite)
-**Audit Status:** Platte XML root in plaats van standaard envelope
+###  **Team Heartbeat** — Systeem health (CONFORM 🟢)
+**Audit Status:** Volledig conform de bestaande sidecar-implementatie.
 
-| Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
-|----------|---|---|---|---|
-|  **VERZENDT** | `heartbeat` | → Monitoring |  platte root | [3](#3-heartbeat--alle-teams--monitoring) |
+| Richting | Berichttype | Van/Naar | Sectie |
+|----------|---|---|---|
+|  **VERZENDT** | `heartbeat` | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
 
-**Kritieke fix (heartbeat/sidecar.py):**
--  XML builder: `<heartbeat>` platte root → standaard `<message><header><body>` envelope
--  Header: voeg `version=2.0`, `type=heartbeat`, `source={systeem}`, unieke `message_id` toe
--  Body: `<status>online|offline</status>` + `<uptime>{seconden}</uptime>` (in plaats van `<system>`, platte velden, etc.)
+**Opmerking:** De sidecar-implementatie in `heartbeat/sidecar.py` is de standaard. Teams hoeven dit niet zelf te implementeren.
 
 ---
 
