@@ -2,6 +2,16 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-08 10:00 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
+- Betrokken teams: Kassa, CRM, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: QR-code ondersteuning als alternatief voor badge-scan aan de kassa:
+  - **§6.3 `badge_scanned`**: `xs:choice` ingevoerd in de body: keuze tussen `badge_id` (badge-scan) of `identity_uuid` (QR-scan). Dwingt exact één identifier af; backward compatible met bestaande badge-berichten. Tweede voorbeeldblok toegevoegd voor QR-scenario.
+  - **§26.1 `wallet_lease_request`**: `badge_id` optioneel gemaakt (minOccurs="0") zodat QR-scan (enkel `identity_uuid`) geldig is. Tweede voorbeeldblok toegevoegd.
+  - **Overzichtstabel (§Kassa)**: bron `badge_scanned` uitgebreid met "of Kassa (QR)".
+- Reden: QR-code op de frontend toont de `master_uuid`; de Odoo POS-camera scant die, waarna de klant direct geselecteerd is en de wallet lease flow start zonder fysieke badge.
+
 ## 2026-05-07 (middag) (+02:00)
 - Auteur: Gemini CLI (Integratie Orchestrator)
 - Betrokken teams: CRM, Facturatie, Mailing
