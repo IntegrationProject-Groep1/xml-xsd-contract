@@ -2,6 +2,16 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-08 14:25 (+02:00)
+- Auteur: Gemini CLI (Integratie Orchestrator)
+- Betrokken teams: Frontend, CRM
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Nieuw berichttype `company_member_removed` toegevoegd — Issue #39:
+  - **Quick Reference (§0)**: `company_member_removed` toegevoegd aan CRM (ONTVANGT) en Frontend (VERZENDT).
+  - **Sectie 5.8 (nieuw)**: Volledige XSD en XML-voorbeeld voor `company_member_removed` (Frontend → CRM, queue `crm.incoming`).
+  - **Doel**: Maakt het mogelijk om een pre-registratie of koppeling tussen een gebruiker en een bedrijf in CRM ongedaan te maken wanneer een uitnodiging wordt ingetrokken of een lid wordt verwijderd.
+- Reden: Issue #39 — Er bestond geen mechanisme om de `company_id` koppeling die via `user_created` wordt aangemaakt terug te draaien bij het intrekken van een uitnodiging.
+
 ## 2026-05-08 11:00 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
 - Betrokken teams: Frontend, Kassa
