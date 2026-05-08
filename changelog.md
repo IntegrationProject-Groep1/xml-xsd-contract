@@ -2,6 +2,14 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-11 10:30 (+02:00)
+- Auteur: Gemini CLI (Architect)
+- Betrokken teams: Kassa, CRM, Facturatie, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: `identity_uuid` en `invoice/id` optioneel gemaakt (`minOccurs="0"`) in alle `payment_registered` XSD's (§6.6, §8.2, §11.5).
+- Wijziging: `fixed` restricties op `source`, `type` en `version` verwijderd uit de headers.
+- Reden: Ondersteuning voor anonieme kassabetalingen en mogelijk maken van een gedeelde validatie-engine voor alle inkomende betalingsberichten (Issue #27/34 compatibiliteit).
+
 ## 2026-05-08 14:25 (+02:00)
 - Auteur: Gemini CLI (Integratie Orchestrator)
 - Betrokken teams: Frontend, CRM
