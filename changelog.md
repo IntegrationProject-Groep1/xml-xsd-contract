@@ -2,6 +2,17 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-08 11:00 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
+- Betrokken teams: Frontend, Kassa
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: `event_ended` ook naar Kassa sturen (§11.7):
+  - **§11.7 (nieuw)**: `event_ended` Frontend → Kassa, queue `kassa.incoming`. Identieke XSD als §5.7 en §11.6. Frontend publiceert hetzelfde bericht een derde keer.
+  - **Kassa-overzichtstabel**: `event_ended` toegevoegd als ontvangen bericht (← Frontend).
+  - **Frontend quick reference (§0)**: `event_ended` ontvangers uitgebreid met Kassa.
+  - **Actiepunten**: Frontend publiceert naar `kassa.incoming`; Kassa triggert `wallet_lease_return` (§26.3) voor alle actieve leases van de sessie.
+- Reden: Kassa moet weten wanneer een event afgelopen is om actieve wallet leases netjes te sluiten.
+
 ## 2026-05-08 10:00 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — GJeremy64)
 - Betrokken teams: Kassa, CRM, Frontend
