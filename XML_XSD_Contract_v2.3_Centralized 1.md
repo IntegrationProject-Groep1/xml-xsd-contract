@@ -862,6 +862,8 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 | `identity_service_unavailable` | Kan geen Master UUID ophalen bij de Identity Service |
 | `database_error` | Interne database fout bij verwerken bericht |
 
+### 2.6 `system_error`
+
 #### XSD
 
 ```xml
@@ -890,10 +892,14 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="error_code"          type="xs:string"/>
-              <xs:element name="error_description"   type="xs:string"/>
+              <xs:element name="error_code" type="xs:string"/>
+              <xs:choice>
+                <xs:element name="error_description" type="xs:string"/>
+                <xs:element name="message" type="xs:string"/>
+              </xs:choice>
+              <xs:element name="component" type="xs:string" minOccurs="0"/>
               <!-- related_message_id: message_id van het bericht dat de fout veroorzaakte -->
-              <xs:element name="related_message_id"  type="xs:string" minOccurs="0"/>
+              <xs:element name="related_message_id" type="xs:string" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -910,9 +916,9 @@ Elk team gebruikt dit formaat om fouten te rapporteren naar Monitoring of hun ei
 <message>
   <header>
     <message_id>63a4b5c6-d7e8-9012-abcd-012345600012</message_id>
-    <type>system_error</type>
-    <source>crm</source>
     <timestamp>2026-05-15T19:05:00Z</timestamp>
+    <source>crm</source>
+    <type>system_error</type>
     <version>2.0</version>
   </header>
   <body>
@@ -5883,6 +5889,8 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 
 ### 20.1 `vat_validation_error`
 
+#### XSD
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
@@ -5924,9 +5932,10 @@ Wanneer een administrator in Drupal een sessie verwijdert.
         <xs:element name="body">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="identity_uuid"  type="UUIDType"/>
-              <xs:element name="vat_number"    type="xs:string"/>
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
+              <xs:element name="vat_number" type="xs:string"/>
               <xs:element name="error_message" type="xs:string" minOccurs="0"/>
+              <xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
