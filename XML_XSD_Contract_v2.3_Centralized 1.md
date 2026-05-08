@@ -26,7 +26,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 | Richting | Berichttype | Van/Naar | Sectie |
 |----------|---|---|---|
 |  **ONTVANGT** | `new_registration`, `profile_update`, `cancel_registration` | ← CRM | [10. CRM → Kassa](#10-crm--kassa) |
-|  **ONTVANGT** | `badge_scanned` | ← IoT (Raspberry Pi) | [6.3](#63-badge_scanned) |
+|  **ONTVANGT** | `badge_scanned` | ← IoT (Raspberry Pi) of Kassa (QR) | [6.3](#63-badge_scanned) |
 |  **VERZENDT** | `payment_registered` | → CRM | [6.6 Kassa → CRM](#66-payment_registered-kassa--rabbitmq) |
 |  **VERZENDT** | `payment_status`, `wallet_balance_update` | → Frontend | [18](#18-frontend--kassa-direct-flows) |
 |  **BROADCAST** | `heartbeat` | → Monitoring | [3. Heartbeat](#3-heartbeat--alle-teams--monitoring) |
@@ -2053,9 +2053,15 @@ Een badge/QR-code wordt gekoppeld aan een klant bij de inkom.
 
 ### 6.3 `badge_scanned`
 
-Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).  
-**Flow:** IoT (Raspberry Pi) → Kassa  
+Een badge of QR-code wordt gescand aan de inkom of kassa.  
+**Flow:** IoT (Raspberry Pi) of Kassa → Kassa  
 **Routing Key:** `kassa.incoming`
+
+> **`scan_type`:** verplicht discriminator-veld.  
+> - `badge` → `badge_id` verplicht aanwezig, `identity_uuid` optioneel.  
+> - `qr_code` → `identity_uuid` verplicht aanwezig, `badge_id` afwezig.  
+>
+> Minstens één van `badge_id` of `identity_uuid` moet aanwezig zijn.
 
 #### XSD
 
@@ -2085,7 +2091,14 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="badge_id"   type="xs:string"/>
+          <xs:element name="scan_type">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="badge"/>
+              <xs:enumeration value="qr_code"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+          <xs:element name="badge_id"      type="xs:string"  minOccurs="0"/>
+          <xs:element name="identity_uuid" type="UUIDType"   minOccurs="0"/>
           <xs:element name="location">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="entrance"/>
@@ -2102,7 +2115,7 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
 </xs:schema>
 ```
 
-#### Voorbeeld XML
+#### Voorbeeld XML — badge-scan (bestaand scenario)
 
 ```xml
 <message>
@@ -2114,9 +2127,30 @@ Een badge wordt gescand aan de inkom (IoT / Raspberry Pi).
     <version>2.0</version>
   </header>
   <body>
+    <scan_type>badge</scan_type>
     <badge_id>BADGE-0042</badge_id>
     <location>entrance</location>
     <scanned_at>2026-05-15T18:06:30Z</scanned_at>
+  </body>
+</message>
+```
+
+#### Voorbeeld XML — QR-scan (nieuw scenario)
+
+```xml
+<message>
+  <header>
+    <message_id>29c0d1e2-f3a4-5678-cdef-678901200008</message_id>
+    <timestamp>2026-05-15T18:06:35Z</timestamp>
+    <source>kassa</source>
+    <type>badge_scanned</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <scan_type>qr_code</scan_type>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <location>entrance</location>
+    <scanned_at>2026-05-15T18:06:35Z</scanned_at>
   </body>
 </message>
 ```
@@ -6211,7 +6245,9 @@ Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
 
 - **Exchange:** `kassa.exchange`
 - **Routing Key:** `kassa.to.crm.wallet_lease_request`
-- **Wanneer:** Eerste badge-scan bij inkom of kassa.
+- **Wanneer:** Eerste badge-scan of QR-scan bij inkom of kassa.
+
+> **`badge_id`:** optioneel — afwezig bij QR-scan (identity_uuid volstaat). Aanwezig bij badge-scan.
 
 #### XSD
 ```xml
@@ -6237,7 +6273,7 @@ Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="identity_uuid" type="UUIDType"/>
-          <xs:element name="badge_id"      type="xs:string"/>
+          <xs:element name="badge_id"      type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -6245,7 +6281,7 @@ Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
 </xs:schema>
 ```
 
-#### Voorbeeld XML
+#### Voorbeeld XML — via badge
 ```xml
 <message>
   <header>
@@ -6258,6 +6294,22 @@ Kassa vraagt de macht over het saldo zodra een bezoeker het terrein betreedt.
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <badge_id>BADGE-0042</badge_id>
+  </body>
+</message>
+```
+
+#### Voorbeeld XML — via QR-scan
+```xml
+<message>
+  <header>
+    <message_id>b2c3d4e5-f6a7-8901-bcde-f01234567891</message_id>
+    <timestamp>2026-05-15T09:00:05Z</timestamp>
+    <source>kassa</source>
+    <type>wallet_lease_request</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
   </body>
 </message>
 ```
