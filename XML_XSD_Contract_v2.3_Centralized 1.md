@@ -4850,7 +4850,7 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Kassa | CRM | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.payments.consumption` / `registration` / `refund` / `invoice` / `badge` |
 | IoT (Raspberry Pi) | Kassa | `kassa.incoming` | exchange: `kassa.exchange`, routing: `kassa.incoming` |
 | Planning | CRM | `planning.session.events` | exchange: `planning.exchange`, routing: `planning.session.*` |
-| Facturatie | CRM | `facturatie.to.crm` | — |
+| Facturatie | CRM | `crm.incoming` | — |
 | Mailing | CRM | `crm.incoming` | — |
 | CRM | Kassa | `kassa.incoming` | exchange: `kassa.exchange` (topic) |
 | CRM | Facturatie | `facturatie.incoming` | — |
@@ -5030,8 +5030,8 @@ Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volled
 | ← CRM | `consumption_order` (passthrough) | `facturatie.incoming` |
 | ← CRM | `payment_registered` (passthrough) | `facturatie.incoming` |
 | ← Frontend | `payment_registered` (direct) | `facturatie.incoming` (sectie 11.5) |
-| → CRM | `invoice_status` | `facturatie.to.crm` |
-| → CRM | `payment_registered` | `facturatie.to.crm` |
+| → CRM | `invoice_status` | `crm.incoming` |
+| → CRM | `payment_registered` | `crm.incoming` |
 | → Mailing | `send_mailing` | `facturatie.to.mailing` |
 
 **Status v2.3 audit:  KRITIEKE XSD'S MOETEN VERVANGEN WORDEN**
