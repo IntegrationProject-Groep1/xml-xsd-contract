@@ -3069,7 +3069,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 
 ## 8. Facturatie → CRM
 
-- **Queue:** `facturatie.to.crm`
+- **Queue:** `crm.incoming`
 
 ### 8.1 `invoice_status`
 
