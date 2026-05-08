@@ -2057,11 +2057,7 @@ Een badge of QR-code wordt gescand aan de inkom of kassa.
 **Flow:** IoT (Raspberry Pi) of Kassa → Kassa  
 **Routing Key:** `kassa.incoming`
 
-> **`scan_type`:** verplicht discriminator-veld.  
-> - `badge` → `badge_id` verplicht aanwezig, `identity_uuid` optioneel.  
-> - `qr_code` → `identity_uuid` verplicht aanwezig, `badge_id` afwezig.  
->
-> Minstens één van `badge_id` of `identity_uuid` moet aanwezig zijn.
+> De body gebruikt `xs:choice` om exact één identifier af te dwingen: `badge_id` bij badge-scan, `identity_uuid` bij QR-scan. XSD 1.0 ondersteunt geen conditionele validatie op basis van elementwaarden, maar `xs:choice` dwingt de constraint "precies één van beide" correct af. Backward compatible: bestaande badge-berichten (enkel `badge_id`) zijn geldig als keuze-arm 1.
 
 #### XSD
 
@@ -2091,14 +2087,10 @@ Een badge of QR-code wordt gescand aan de inkom of kassa.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="scan_type">
-            <xs:simpleType><xs:restriction base="xs:string">
-              <xs:enumeration value="badge"/>
-              <xs:enumeration value="qr_code"/>
-            </xs:restriction></xs:simpleType>
-          </xs:element>
-          <xs:element name="badge_id"      type="xs:string"  minOccurs="0"/>
-          <xs:element name="identity_uuid" type="UUIDType"   minOccurs="0"/>
+          <xs:choice>
+            <xs:element name="badge_id"      type="xs:string"/>
+            <xs:element name="identity_uuid" type="UUIDType"/>
+          </xs:choice>
           <xs:element name="location">
             <xs:simpleType><xs:restriction base="xs:string">
               <xs:enumeration value="entrance"/>
@@ -2127,7 +2119,6 @@ Een badge of QR-code wordt gescand aan de inkom of kassa.
     <version>2.0</version>
   </header>
   <body>
-    <scan_type>badge</scan_type>
     <badge_id>BADGE-0042</badge_id>
     <location>entrance</location>
     <scanned_at>2026-05-15T18:06:30Z</scanned_at>
@@ -2147,7 +2138,6 @@ Een badge of QR-code wordt gescand aan de inkom of kassa.
     <version>2.0</version>
   </header>
   <body>
-    <scan_type>qr_code</scan_type>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <location>entrance</location>
     <scanned_at>2026-05-15T18:06:35Z</scanned_at>
