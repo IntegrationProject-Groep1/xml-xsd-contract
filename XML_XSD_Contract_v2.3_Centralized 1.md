@@ -5483,9 +5483,9 @@ Openstaand:
 | ← CRM | `profile_update` | `kassa.incoming` |
 | ← CRM | `cancel_registration` | `kassa.incoming` |
 
-**Status v2.3 audit:  CONFORM (v2.5 sync) — Geen wijzigingen vereist!**
+**Status v2.3 audit:  CONFORM 🟢 (gecorrigeerd mei 2026)**
 
-Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hieronder vermelde actiepunten zijn historische items uit v2.0 die ondertussen allemaal zijn afgewerkt — ze blijven hier voor referentie.
+1 implementatiefout gecorrigeerd tijdens mei 2026 audit. Zie changelog 2026-05-09 Kassa.
 
 **Historische actiepunten (afgewerkt):**
 - [x] `<age>` verwijderen — leeftijd lokaal berekenen via `date_of_birth`
@@ -5501,8 +5501,14 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 - [x] `<session_title>` uitlezen voor display op Kassa-scherm
 - [x] `version` → `"2.0"`, geen `<receiver>`
 
+**Gecorrigeerd (mei 2026):**
+- [x] `invoice_request` source="crm" → "kassa" in sender.py en schema_invoice_request.xsd — Kassa is de verzender, contract-XSD vereist source="kassa"
+
 **Resterende actie:**
-- [ ] Luisteren op `user.events` fanout exchange voor nieuwe gebruikers (Identity flow)
+- [x] Luisteren op `user.events` fanout exchange — geïmplementeerd via `SUBSCRIBE_USER_EVENTS` env var (opt-in, standaard uit)
+
+**Contract-inconsistentie (geen code-fix nodig):**
+- `wallet_balance_update` exchange: code gebruikt `kassa.exchange` + routing `kassa.frontend.wallet`; contract §17/§26.4 zegt `wallet.updates` (fanout); §6.8 laat beide toe ("of frontend.exchange (direct)"). Werkt correct als Frontend bindt aan kassa.exchange.
 ---
 
 ### Team Planning (Office365 / Outlook)

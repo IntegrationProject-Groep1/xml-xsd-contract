@@ -2,6 +2,18 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (Kassa implementatie fix) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: Kassa, CRM, Facturatie
+- Bestanden: `Kassa/integratie/sender.py`, `Kassa/integratie/schemas/schema_invoice_request.xsd`
+- Wijziging: 1 implementatiefout gecorrigeerd na volledige cross-reference audit:
+  1. **`invoice_request` source**: `source="crm"` → `source="kassa"` in zowel `sender.py:640` als `schema_invoice_request.xsd:46`. Kassa is de verzender van `invoice_request` (flow: Kassa → CRM/Facturatie). Contract-XSD §6.5 vereist `source="kassa"`. De lokale XSD en de code gebruikten allebei `"crm"` — hierdoor zouden downstream-ontvangers die tegen de contract-XSD valideren het bericht weigeren.
+- Overige bevindingen (geen code-fix):
+  - `wallet_balance_update` gaat naar `kassa.exchange` ipv `wallet.updates` fanout — contract §6.8 laat dit toe ("of frontend.exchange (direct)"), niet kritiek.
+  - `user.events` subscription al geïmplementeerd via `SUBSCRIBE_USER_EVENTS` env var (opt-in).
+  - `event_ended` handler in receiver was al voorbereid en is nu actief nu Frontend ook naar `kassa.incoming` publiceert.
+- Reden: Audit op verzoek van maintainer — contract stond als CONFORM maar `invoice_request` had verkeerde source-waarde die downstream-validatie zou breken.
+
 ## 2026-05-09 (Frontend implementatie fixes) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: Frontend
