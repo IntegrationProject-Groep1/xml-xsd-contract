@@ -136,8 +136,8 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Facturatie** — Factuurverwerking (KRITIEK - 4 XSD's + queue)
-**Audit Status:** XSD's fout, queue fout, geen actieve builder
+###  **Team Facturatie** — Factuurverwerking (DEELS CONFORM - 2 fixes resterend)
+**Audit Status:** Queue gecorrigeerd, send_mailing sender gefixed, payment_registered.xsd bijgewerkt. Resterend: `invoice_request.xsd` en `new_registration.xsd` code-side aanpassen (Amina — branch fix/after-xsd-uni)
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|

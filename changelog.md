@@ -2,6 +2,18 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (Facturatie implementatie fixes) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: Facturatie, Mailing
+- Bestanden: `Facturatie/.env.example`, `Facturatie/src/services/xsd/payment_registered.xsd`, `Facturatie/src/services/rabbitmq_sender.py`, `Facturatie/src/services/rabbitmq_receiver.py`
+- Wijziging: Vier implementatiefouten gecorrigeerd in de Facturatie-code:
+  1. **`.env.example`**: `QUEUE_INCOMING=crm.to.facturatie` → `facturatie.incoming` (code defaultt al correct, template was nog fout).
+  2. **`payment_registered.xsd`**: `source`, `type`, `version` hadden geen constraints — `xs:enumeration` toegevoegd. Source accepteert nu `crm`, `kassa`, `frontend`, `facturatie` (inbound én outbound gebruik van dit schema).
+  3. **`rabbitmq_sender.py` `build_invoice_created_notification_xml`**: kritieke bug — bouwde `<template_id>` (niet in XSD) en `<user_id>` (XSD verwacht `<identity_uuid>`) → elke send_mailing aanroep crashte op XSD-validatie. `template_id` verwijderd, `user_id` → `identity_uuid`, parameter `customer_id` vervangen door `identity_uuid`.
+  4. **`rabbitmq_receiver.py`** call sites: alle 3 aanroepen van `build_invoice_created_notification_xml` bijgewerkt naar `identity_uuid=` parameter (new_registration gebruikt `master_uuid` van identity service; invoice_request gebruikt `master_uuid`; event_ended gebruikt `meta.get("master_uuid")`).
+- Reden: Bug in sender zorgde ervoor dat alle factuurnotificaties naar Mailing crashten. Queue-naam in template was verkeerd. XSD had geen type-constraints. Amina's branch (fix/after-xsd-uni) pakt de receiver paths aan — deze fixes overlappen niet.
+- Let op: Amina (Facturatie) heeft `fix/after-xsd-uni` branch met receiver-fixes (consumption_order customer_id, invoice_request paths). Merge volgorde: main → dev, dan fix/after-xsd-uni → dev, dan dev → main.
+
 ## 2026-05-09 (audit Facturatie) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: Facturatie, CRM, Mailing, Frontend
