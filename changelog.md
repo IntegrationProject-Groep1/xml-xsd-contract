@@ -2,6 +2,17 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (Frontend implementatie fixes) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: Frontend
+- Bestanden: alle PHP senders in `IP-groep1-frontend/web/modules/custom/rabbitmq_sender/src/`
+- Wijziging: Volledige audit en correctie van alle Frontend senders (12 bestanden):
+  1. **`xmlns:xsi` verwijderd uit alle senders**: 11 senders hadden `$message->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsi', '...')` of de string-equivalent. Contract §23 verbiedt namespace-attributen op `<message>`. Verwijderd uit: `NewRegistrationSender`, `UserCheckinSender`, `UserCreatedSender`, `UserRegisteredSender`, `UserUnregisteredSender`, `UserUpdatedSender`, `EventEndedSender` (string XML), `SessionCreateRequestSender`, `SessionUpdateRequestSender`, `SessionDeleteRequestSender`, `SessionViewRequestSender`. `CalendarInviteSender` was reeds gefixed in dezelfde sessie.
+  2. **Contract §17 tabel gecorrigeerd**: `event_ended` queue stond als `crm.incoming` — code publiceert correct naar `event.ended` + `facturatie.incoming` + `kassa.incoming`. Tabel bijgewerkt naar de juiste queues.
+  3. **Quick-reference status bijgewerkt**: `KRITIEK` → `CONFORM 🟢`, audit actiepunten gemarkeerd als afgewerkt.
+- Openstaand: `PaymentRegisteredSender.php` (Frontend → Facturatie, queue `facturatie.incoming`) is nog niet geïmplementeerd.
+- Reden: Audit op verzoek van maintainer — v2.0 migratie was reeds volledig gedaan door Frontend-team, enige resterende issue was `xmlns:xsi` patroon dat §23 schendt.
+
 ## 2026-05-09 (Planning implementatie fixes) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: Planning, CRM, Frontend

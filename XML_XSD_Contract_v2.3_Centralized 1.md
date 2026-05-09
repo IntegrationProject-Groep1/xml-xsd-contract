@@ -75,40 +75,42 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Frontend** — Gebruiker registratie & events (KRITIEK - volledige header-migratie)
-**Audit Status:** Alle senders gemengd v1.0/v2.0 — moet naar v2.0
+###  **Team Frontend** — Gebruiker registratie & events (CONFORM 🟢)
+**Audit Status:** Volledig conform (gecorrigeerd mei 2026) — alle senders gemigreerd naar v2.0, xmlns:xsi verwijderd
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
-|  **VERZENDT** | `new_registration` | → CRM |  bevat `<master_uuid>`, `<age>` | [5.1](#51-new_registration-frontend--crm) |
-|  **VERZENDT** | `user_created` | → CRM |  v1.0 header + dotted type | [5.2](#52-user_created) |
-|  **VERZENDT** | `user_updated` | → CRM |  v1.0 header | [5.3](#53-user_updated) |
-|  **VERZENDT** | `user_deleted` | → CRM |  v1.0 header + `user.unregistered` | [5.4](#54-user_deleted) |
-|  **VERZENDT** | `user_registered` | → CRM |  v1.0 header + dotted type + verkeerde queue | [5.5](#55-user_registered) |
-|  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [19.1](#191-user_checkin) |
-|  **VERZENDT** | `company_member_removed` | → CRM | NIEUW | [5.8](#58-company_member_removed) |
+|  **VERZENDT** | `new_registration` | → CRM |  | [5.1](#51-new_registration-frontend--crm) |
+|  **VERZENDT** | `user_created` | → CRM |  | [5.2](#52-user_created) |
+|  **VERZENDT** | `user_updated` | → CRM |  | [5.3](#53-user_updated) |
+|  **VERZENDT** | `user_deleted` | → CRM |  | [5.4](#54-user_deleted) |
+|  **VERZENDT** | `user_registered` | → CRM |  | [5.5](#55-user_registered) |
+|  **VERZENDT** | `user_checkin` | → CRM |  | [19.1](#191-user_checkin) |
+|  **VERZENDT** | `company_member_removed` | → CRM |  | [5.8](#58-company_member_removed) |
 |  **VERZENDT** | `company_registration` | → CRM | NIEUW | [5.9](#59-company_registration-frontend--crm) |
 |  **VERZENDT** | `company_update` | → CRM | NIEUW | [5.10](#510-company_update-frontend--crm) |
 |  **VERZENDT** | `company_delete` | → CRM | NIEUW | [5.11](#511-company_delete-frontend--crm) |
-|  **VERZENDT** | `event_ended` | → CRM, Facturatie, Kassa |  | [5.7](#57-event_ended), [11.6](#116-event_ended-frontend--facturatie), [11.7](#117-event_ended-frontend--kassa) |
-|  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
+|  **VERZENDT** | `event_ended` | → `event.ended`, Facturatie, Kassa |  | [5.7](#57-event_ended), [11.6](#116-event_ended-frontend--facturatie), [11.7](#117-event_ended-frontend--kassa) |
+|  **VERZENDT** | `calendar_invite` | → Planning |  | [17.2](#172-calendar_invite-frontend--planning) |
 |  **VERZENDT** | `payment_registered` | → Facturatie |  **ONTBREEKT** — nog niet geïmplementeerd | [11.5](#115-payment_registered-frontend--facturatie) |
 |  **ONTVANGT** | `payment_registered` | ← CRM |  | [13.1](#131-payment_registered-crm--frontend) |
 |  **ONTVANGT** | `payment_status` | ← Kassa |  | [16](#16-rabbitmq-queue--exchange-overzicht) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  | [7](#7-planning--crm) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
-**Kritieke fixes (web/modules/custom/rabbitmq_sender/src/):**
--  NewRegistrationSender.php: `<master_uuid>` verwijderen, `<age>` → `<date_of_birth>`, `<customer>` → `<contact>`
--  UserCreatedSender.php: v1.0 header → v2.0, type `user.created` → `user_created`
--  UserRegisteredSender.php: v1.0 header → v2.0, type `user.registered` → `user_registered`, queue `frontend.user.registered` → `crm.incoming`, `is_company` boolean → `<type>private|company</type>` (zie §5.5)
--  UserUpdatedSender.php: v1.0 header → v2.0, type `user.updated` → `user_updated`
--  UserUnregisteredSender.php: v1.0 header → v2.0, type `user.unregistered` → `user_deleted`
--  UserCheckinSender.php: v1.0 header → v2.0, type `user.checkin` → `user_checkin`
--  CalendarInviteSender.php: v1.0 header → v2.0, type `calendar.invite` → `calendar_invite`, voeg `version` toe
--  **NIEUW — PaymentRegisteredSender.php (→ Facturatie)**: implementeer sender die `payment_registered` stuurt naar queue `facturatie.incoming` conform sectie 11.5
--  **NIEUW — event_ended (→ Facturatie)**: implementeer sender die `event_ended` ook naar `facturatie.incoming` stuurt conform sectie 11.6 (Issue #34)
--  **NIEUW — event_ended (→ Kassa)**: publiceer `event_ended` ook naar `kassa.incoming` conform sectie 11.7 (derde publish, naast `event.ended` en `facturatie.incoming`)
+**Gecorrigeerd (mei 2026 audit):**
+-  NewRegistrationSender.php: `<master_uuid>` verwijderd, `<age>` → `<date_of_birth>`, v2.0 header, `xmlns:xsi` verwijderd
+-  UserCreatedSender.php: v2.0 header, type `user_created`, `xmlns:xsi` verwijderd
+-  UserRegisteredSender.php: v2.0 header, type `user_registered`, queue `crm.incoming`, `is_company` → `<type>`, `xmlns:xsi` verwijderd
+-  UserUpdatedSender.php: v2.0 header, type `user_updated`, `xmlns:xsi` verwijderd
+-  UserUnregisteredSender.php: v2.0 header, type `user_deleted`, `xmlns:xsi` verwijderd
+-  UserCheckinSender.php: v2.0 header, type `user_checkin`, `xmlns:xsi` verwijderd
+-  CalendarInviteSender.php: v2.0 header, type `calendar_invite`, `xmlns:xsi` verwijderd
+-  EventEndedSender.php: publiceert naar `event.ended`, `facturatie.incoming` én `kassa.incoming`, `xmlns:xsi` verwijderd
+-  SessionCreateRequestSender.php, SessionUpdateRequestSender.php, SessionDeleteRequestSender.php, SessionViewRequestSender.php: `xmlns:xsi` verwijderd
+
+**Openstaand:**
+-  **PaymentRegisteredSender.php (→ Facturatie)**: nog niet geïmplementeerd — stuurt `payment_registered` naar `facturatie.incoming` (sectie 11.5)
 
 ---
 
@@ -5434,7 +5436,7 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 | ← Planning | `session_deleted` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.deleted` |
 | → CRM | `user_registered` | `crm.incoming` |
 | → CRM | `user_deleted` | `crm.incoming` |
-| → CRM | `event_ended` | `crm.incoming` |
+| → Alle teams | `event_ended` | queue: `event.ended` + `facturatie.incoming` + `kassa.incoming` |
 | → CRM | `user_checkin` | `crm.incoming` |
 | → Facturatie | `payment_registered` | `facturatie.incoming` (sectie 11.5) |
 
@@ -5443,29 +5445,23 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 2. Wacht op `identity_response` → haal `master_uuid` op
 3. Pas dán stuur je `new_registration` naar CRM met die `master_uuid`
 
-**Actiepunten (v2.3 audit — KRITIEK):**
+**Status: CONFORM 🟢 (gecorrigeerd mei 2026)**
 
->  Deze hele lijst is een directe consequentie van de scan. Niets is "optioneel" — alles is fout in de huidige code.
-
-PHP senders die volledig moeten gemigreerd worden naar de v2.0 header:
-- [ ] `UserUnregisteredSender.php` — type `user.unregistered` → `user_deleted`, xmlns weg, `<receiver>` weg, `version=2.0`, geen `<master_uuid>`
-- [ ] `UserCreatedSender.php` — type `user.created` → `user_created`, idem header-migratie
-- [ ] `UserRegisteredSender.php` — type `user.registered` → `user_registered`, v2.0 header (xmlns weg, `<receiver>` weg, `<version>2.0</version>`), queue → `crm.incoming`, `is_company` boolean → `<type>private|company</type>` (zie §5.5)
-- [ ] `UserUpdatedSender.php` — type `user.updated` → `user_updated`, idem header-migratie
-- [ ] `UserCheckinSender.php` — type `user.checkin` → `user_checkin`, idem + voeg `<session_id>` body toe (sectie 19.1)
-- [ ] `CalendarInviteSender.php` — type `calendar.invite` → `calendar_invite`, voeg `<version>2.0</version>` toe (was afwezig!), voeg `<attendee_email>` toe in body (sectie 17.2)
-- [ ] `NewRegistrationSender.php` — verwijder `<master_uuid>` uit header, vervang `<age>` door `<date_of_birth>`, namen in `<contact>` wrapper (sectie 5.1)
-- [ ] `EventEndedSender.php` — implementeer nieuwe sender voor `event_ended` (sectie 5.6), source=`frontend`, queue `crm.incoming`
+PHP senders — v2.0 migratie (volledig afgewerkt):
+- [x] `UserUnregisteredSender.php` — type `user_deleted`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `UserCreatedSender.php` — type `user_created`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `UserRegisteredSender.php` — type `user_registered`, v2.0 header, queue `crm.incoming`, `<type>private|company</type>`, `xmlns:xsi` verwijderd
+- [x] `UserUpdatedSender.php` — type `user_updated`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `UserCheckinSender.php` — type `user_checkin`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `CalendarInviteSender.php` — type `calendar_invite`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `NewRegistrationSender.php` — `<master_uuid>` verwijderd, `<date_of_birth>`, v2.0 header, `xmlns:xsi` verwijderd
+- [x] `EventEndedSender.php` — publiceert naar `event.ended` + `facturatie.incoming` + `kassa.incoming`, `xmlns:xsi` verwijderd
+- [x] `SessionCreateRequestSender.php`, `SessionUpdateRequestSender.php`, `SessionDeleteRequestSender.php`, `SessionViewRequestSender.php` — `xmlns:xsi` verwijderd
 
 Receivers:
-- [ ] `SessionUpdateReceiver.php` — accepteer `session_updated` als type-waarde (niet `session_update`)
+- [x] `SessionUpdateReceiver.php` — accepteert `session_updated` als type-waarde
 
-Nieuwe functionaliteit (uit v2.0):
-- [ ] `<payment_due><amount currency="eur">0.00</amount></payment_due>` meesturen bij `new_registration` (0.00 bij gratis sessie, sectie 5.1)
-- [ ] Identity RPC implementeren vóór CRM-call bij elke registratie (sectie 15.6)
-- [ ] Bind queue aan `user.events` exchange voor fanout van Identity Service
-
-Nieuwe functionaliteit (Issue #27):
+Openstaand:
 - [ ] **`PaymentRegisteredSender` (Frontend → Facturatie)**: implementeer sender die `payment_registered` publiceert naar `facturatie.incoming` na online betaling — conform sectie 11.5
 
 ---
