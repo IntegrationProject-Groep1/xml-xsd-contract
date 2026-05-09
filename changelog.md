@@ -2,6 +2,17 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (Planning implementatie fixes) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: Planning, CRM, Frontend
+- Bestanden: `Planning/producer.py`, `Planning/consumer.py`
+- Wijziging: Vier implementatiefouten gecorrigeerd na volledige cross-reference audit:
+  1. **`producer.py` `_build_message_root`**: `xmlns="urn:integration:planning:v1"` stond op elk outbound `<message>` element. Contract §7 vereist expliciet verwijdering. lxml's XSD-validator faalt op namespace-mismatch → alle outbound sessie-berichten werden stilzwijgend gedropt. Opgelost: `etree.Element("message")` (geen xmlns).
+  2. **`producer.py` `publish_session_created/updated/deleted`**: berichten werden alleen gepubliceerd naar `planning.to.frontend.session.*` (Frontend routing key). Contract §7 vereist publicatie op beide routing keys: `planning.session.created/updated/deleted` (CRM) én `planning.to.frontend.session.*` (Frontend). CRM ontving geen sessie-events. Opgelost: dubbele publish toegevoegd na succesvolle Frontend-publish.
+  3. **`consumer.py` `ROUTING_KEY_VIEW_RESPONSE`**: was `"planning.session.view.response"` — contract §19.2 vereist `"planning.to.frontend.session.view.response"`. Frontend ontving geen view-responses. Opgelost.
+  4. **`consumer.py` `SESSION_ROUTING_KEYS`**: `crm.to.planning.cancel_registration` stond gebonden aan `planning.exchange`, maar contract §17 (Team Planning) zegt dat CRM's `cancel_registration` via `calendar.exchange` binnenkomt. Opgelost: routing key verplaatst naar `CALENDAR_ROUTING_KEYS` (→ `calendar.exchange`). Eveneens verwijderd: `frontend.to.planning.cancel_registration` (niet in contract — Frontend stuurt cancel_registration niet rechtstreeks naar Planning).
+- Reden: Audit op verzoek van maintainer — contract zei "CONFORM" maar implementatie had 4 structurele bugs waardoor CRM sessie-events miste en Frontend geen view-responses kreeg.
+
 ## 2026-05-09 (Facturatie implementatie fixes) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: Facturatie, Mailing

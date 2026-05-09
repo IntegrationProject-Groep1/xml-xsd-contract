@@ -112,27 +112,33 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 
 ---
 
-###  **Team Planning** — Sessies & agenda (CONFORM )
-**Audit Status:** Volledig conform (April 2026 update). **OPMERKING:** Gecentraliseerde session management RPC handlers verplicht volgens Sectie 17.
-
+###  **Team Planning** — Sessies & agenda (CONFORM 🟢)
+**Audit Status:** 4 implementatiefouten gevonden en gecorrigeerd (mei 2026 audit). XSD's correct. Zie changelog 2026-05-09 Planning.
 
 | Richting | Berichttype | Van/Naar | Huidi-Status | Sectie |
 |----------|---|---|---|---|
 |  **VERZENDT** | `session_created`, `session_updated`, `session_deleted` | → CRM | 🟢 Conform | [7](#7-planning--crm) |
-|  **ONTVANGT** | `calendar_invite` | ← Frontend | 🟢 Conform | [17.2](#172-calendar_invite-frontend--planning) |
-|  **ONTVANGT** | `cancel_registration` | ← CRM | 🟢 Conform | [10.3](#103-cancel_registration-crm--kassa--planning) |
-|  **ONTVANGT** | `session_create_request` | ← Frontend | 🟢 Conform | [17.3](#173-session_create_request-frontend--planning) |
-|  **ONTVANGT** | `session_update_request` | ← Frontend | 🟢 Conform | [17.4](#174-session_update_request-frontend--planning) |
-|  **ONTVANGT** | `session_delete_request` | ← Frontend | 🟢 Conform | [17.5](#175-session_delete_request-frontend--planning) |
-|  **VERZENDT** | `calendar_invite_confirmed` | → Frontend | 🟢 Conform | [17.2](#172-calendar_invite_confirmed-planning--frontend) |
-|  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | 🟢 Conform | [17.1](#171-session_view_request--session_view_response-rpc) |
-|  **REST** | `Token Registration` | ← Frontend | 🟢 Conform | [17.0](#170-oauth-token-registration-rest-api) |
+|  **VERZENDT** | `session_created`, `session_updated`, `session_deleted` | → Frontend | 🟢 Conform | [17](#17-per-team-samenvatting) |
+|  **ONTVANGT** | `calendar_invite` | ← Frontend | 🟢 Conform | [19.3](#193-calendar_invite--calendar_invite_confirmed) |
+|  **ONTVANGT** | `cancel_registration` | ← CRM | 🟢 Conform (`calendar.exchange`) | [10.3](#103-cancel_registration-crm--kassa--planning) |
+|  **ONTVANGT** | `session_create_request` | ← Frontend | 🟢 Conform | [19.4](#194-session_create_request-frontend--planning) |
+|  **ONTVANGT** | `session_update_request` | ← Frontend | 🟢 Conform | [19.5](#195-session_update_request-frontend--planning) |
+|  **ONTVANGT** | `session_delete_request` | ← Frontend | 🟢 Conform | [19.6](#196-session_delete_request-frontend--planning) |
+|  **VERZENDT** | `calendar_invite_confirmed` | → Frontend | 🟢 Conform | [19.3](#193-calendar_invite--calendar_invite_confirmed) |
+|  **RPC** | `session_view_request` / `session_view_response` | ↔ Frontend | 🟢 Conform | [19.2](#192-session_view_request--session_view_response-rpc) |
+|  **REST** | `Token Registration` | ← Frontend | 🟢 Conform | [19.0](#190-oauth-token-registration-rest-api) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | 🟢 Conform | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **XSD's referentie:**
-- `Planning/xsd/` ( bijgewerkt naar v2.0)
+- `Planning/xsd/` (bijgewerkt naar v2.0)
 
-**Belangrijk:** Gebruikt nu Master UUID (Session Persistence) via `correlation_id` voor alle sessie-gerelateerde berichten.
+**Gecorrigeerd (mei 2026):**
+- `producer.py`: `xmlns="urn:integration:planning:v1"` verwijderd van `<message>` — veroorzaakte stille XSD-validatiefouten
+- `producer.py`: sessie-events nu gepubliceerd naar BEIDE routing keys (`planning.session.*` voor CRM én `planning.to.frontend.session.*` voor Frontend)
+- `consumer.py`: `session_view_response` routing key gecorrigeerd naar `planning.to.frontend.session.view.response`
+- `consumer.py`: `cancel_registration` (CRM) nu correct gebonden aan `calendar.exchange` (was `planning.exchange`)
+
+**Belangrijk:** Gebruikt Master UUID (Session Persistence) via `correlation_id` voor alle sessie-gerelateerde berichten.
 
 ---
 
@@ -5522,9 +5528,9 @@ Kassa's `XML_Structuren_Kassa.md` v2.5 voldoet volledig aan dit contract. De hie
 | ← Frontend | `session_delete_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.delete` |
 | ← CRM | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
 
-**Status v2.3 audit:  VOLLEDIG CONFORM (April 2026 update) **
+**Status v2.3 audit:  VOLLEDIG CONFORM (gecorrigeerd mei 2026) 🟢**
 
-Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volledig conform v2.0 gemaakt. Tevens is de gap in de annulatie-flow gedicht via Option A (forwarding door CRM).
+Planning XSD's waren correct. Code had 4 implementatiefouten (zie changelog 2026-05-09 Planning). Allemaal gecorrigeerd.
 
 **Afgewerkte actiepunten (April 2026):**
 - [x] **XSD's**: Alle 7 XSD's in `/xsd/` folder gemigreerd naar v2.0 (geen namespaces, `xs:dateTime`, snake_case types).
@@ -5532,8 +5538,11 @@ Planning heeft alle resterende afwijkingen weggewerkt en de XSD-validatie volled
 - [x] **Heartbeat**: Broadcaster actief op queue `heartbeat`.
 - [x] **Annulatie Flow**: Handler geïmplementeerd voor `cancel_registration` (inkomend van CRM) om `current_attendees` te verlagen.
 
-**Routing/runtime:**
-- [x] Session events worden nu gepubliceerd op beide routing keys: `planning.session.*` (CRM) én `planning.to.frontend.session.*` (Frontend).
+**Gecorrigeerd (mei 2026 audit):**
+- [x] `xmlns` verwijderd van `<message>` element in `producer.py` — XSD-validatie was stille fout.
+- [x] Sessie-events gepubliceerd op beide routing keys: `planning.session.*` (CRM) én `planning.to.frontend.session.*` (Frontend).
+- [x] `session_view_response` routing key gecorrigeerd naar `planning.to.frontend.session.view.response`.
+- [x] `cancel_registration` (CRM) correct gebonden aan `calendar.exchange`.
 - [x] Luistert op `planning.calendar.invite` queue voor inkomende kalenderverzoeken.
 - [x] Luistert op `calendar.exchange` voor `cancel_registration` berichten geforward door CRM.
 ---|-------|
