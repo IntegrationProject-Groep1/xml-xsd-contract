@@ -54,7 +54,7 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `company_delete` | ← Frontend | NIEUW | [5.11](#511-company_delete-frontend--crm) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  `session_update` (fout) | [7.1-7.2](#71-session_created) |
 |  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.6](#66-payment_registered-kassa--rabbitmq) |
-|  **ONTVANGT** | `invoice_created_notification` | ← Facturatie |  | [8.1](#81-invoice_status) |
+|  **ONTVANGT** | `invoice_status` | ← Facturatie |  | [8.1](#81-invoice_status) |
 |  **ONTVANGT** | `mailing_status` | ← Mailing |  (moet `send_mailing` zijn) | [9.1](#91-mailing_status) |
 |  **VERZENDT** | `new_registration` | → Kassa |  bevat `<age>` | [10.1](#101-new_registration-crm--kassa) |
 |  **VERZENDT** | `profile_update` | → Kassa |  bevat `<age>` | [10.2](#102-profile_update-crm--kassa) |
@@ -143,19 +143,21 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |----------|---|---|---|---|
 |  **ONTVANGT** | `invoice_request` | ← CRM |  XSD bevat `<items>` | [11.1](#111-invoice_request-crm--facturatie) |
 |  **ONTVANGT** | `consumption_order` (passthrough) | ← CRM/Kassa |  | [11.3](#113-consumption_order-crm--facturatie--passthrough) |
-|  **ONTVANGT** | `new_registration` | ← CRM |  | [10.1](#101-new_registration-crm--kassa) |
+|  **ONTVANGT** | `new_registration` | ← CRM |  (zelfde schema als CRM→Kassa §10.1) | [10.1](#101-new_registration-crm--kassa) |
+|  **ONTVANGT** | `profile_update` | ← CRM |  | [10.4](#104-profile_update-crm--facturatie) |
 |  **ONTVANGT** | `payment_registered` | ← Frontend | v2.0 | [11.5](#115-payment_registered-frontend--facturatie) |
 |  **ONTVANGT** | `event_ended` | ← Frontend | v2.0 | [11.6](#116-event_ended-frontend--facturatie) |
 |  **VERZENDT** | `invoice_status` | → CRM |  type is `send_invoice` | [8.1](#81-invoice_status) |
-|  **VERZENDT** | `payment_registered` | → CRM |  XSD bevat `<master_uuid>` | [8.2](#82-payment_registered) |
-|  **VERZENDT** | `send_mailing` | → Mailing |  | [13.1](#131-send_mailing-facturatie--mailing) |
+|  **VERZENDT** | `payment_registered` | → CRM |  header zonder `source`/`type` constraints | [8.2](#82-payment_registered) |
+|  **VERZENDT** | `send_mailing` | → Mailing |  (XSD: zie §12.1 — source `facturatie` toegestaan) | [13.1](#131-send_mailing-facturatie--mailing) |
+|  **VERZENDT** | `invoice_available` | → Frontend |  | [13.5](#135-facturatie--frontend) |
 |  **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring |  | [3](#3-heartbeat--alle-teams--monitoring) |
 
 **Kritieke fixes (Facturatie/schemas/):**
 -  Queue listener: `crm.to.facturatie` → `facturatie.incoming`
 -  invoice_request.xsd: VERVANG volledig — verwijder `<items>`, vervang `<customer>` door `<invoice_data>`
 -  new_registration.xsd: `<customer>` → `<contact>` wrapper
--  invoice_created_notification: fix schema xmlns, version 1.0 → 2.0
+-  invoice_status.xsd (`invoice_created_notification`): fix schema xmlns, version 1.0 → 2.0, type `send_invoice` → `invoice_status`
 -  `payment_registered.xsd`: verwijder `<identity_uuid>` in header (verplaats naar body)
 -  **NIEUW**: luister op `facturatie.incoming` voor `payment_registered` van Frontend (sectie 11.5) — zet factuurstatus op 'paid'
 -  **NIEUW**: luister op `facturatie.incoming` voor `event_ended` van Frontend (sectie 11.6) — trigger factuur-mailing flow (Issue #34)
@@ -3621,9 +3623,12 @@ Facturatie stuurt dit naar CRM nadat een online betaling (via de facturatie-link
             <xs:sequence>
               <xs:element name="message_id"     type="UUIDType"/>
               <xs:element name="timestamp"      type="xs:dateTime"/>
-              <xs:element name="source"         type="xs:string"/>
-              <xs:element name="type"           type="xs:string"/>
-              <xs:element name="version"        type="xs:string"/>
+              <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="facturatie"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="payment_registered"/></xs:restriction></xs:simpleType></xs:element>
+              <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+                <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
               <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
             </xs:sequence>
           </xs:complexType>
@@ -4838,6 +4843,10 @@ CRM vraagt Mailing om een e-mail te versturen.
 ### 13.1 `send_mailing` (Facturatie → Mailing)
 
 > **Voor Mailing-team:** jullie consumer moet berichten met `source=facturatie` én `source=crm` verwerken. Het `type` is in beide gevallen `send_mailing`.
+
+#### XSD
+
+> **Facturatie gebruikt exact dezelfde XSD als §12.1 (CRM → Mailing).** De `source`-enum in §12.1 accepteert al zowel `crm` als `facturatie`. Er is geen aparte XSD nodig — valideer inkomende berichten op `facturatie.to.mailing` tegen het schema in §12.1.
 
 #### Voorbeeld XML — factuur klaar
 

@@ -2,6 +2,21 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (audit Facturatie) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: Facturatie, CRM, Mailing, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Zes contract-inconsistenties gecorrigeerd na volledige Facturatie-audit:
+  1. **Quick reference Facturatie**: `profile_update ← CRM` (§10.4) toegevoegd — ontbrak volledig.
+  2. **Quick reference Facturatie**: `invoice_available → Frontend` (§13.5.1) toegevoegd — ontbrak volledig.
+  3. **Quick reference Facturatie**: `new_registration` rij verduidelijkt met annotatie "(zelfde schema als CRM→Kassa §10.1)" — link was misleidend.
+  4. **Quick reference Facturatie**: audit-status `payment_registered → CRM` bijgewerkt — `<master_uuid>` is al gecorrigeerd in de XSD; status toont nu de werkelijke resterende issue (geen `source`/`type` constraints).
+  5. **§8.2 XSD**: `source`, `type`, `version` hadden plain `xs:string` — vervangen door `xs:enumeration` constraints (`facturatie`, `payment_registered`, `2.0`), conform §8.1.
+  6. **§13.1**: expliciete verwijzing toegevoegd dat §12.1 XSD van toepassing is (source-enum accepteert al `facturatie`). Voordien stond er geen XSD, wat verwarrend was voor Mailing.
+  7. **CRM quick reference**: `invoice_created_notification` hernoemd naar `invoice_status` — conform de werkelijke sectienaam §8.1.
+  8. **Facturatie kritieke fixes**: `invoice_created_notification` verduidelijkt met type-correctie (`send_invoice` → `invoice_status`).
+- Reden: Audit op verzoek van maintainer — contract beschreef Facturatie's berichten onvolledig en inconsistent. Geen implementatiewijzigingen; alleen contractdocumentatie gecorrigeerd.
+
 ## 2026-05-09 (vandaag) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: CRM, Frontend
