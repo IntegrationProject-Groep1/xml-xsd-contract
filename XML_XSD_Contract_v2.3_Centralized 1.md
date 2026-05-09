@@ -49,6 +49,9 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **ONTVANGT** | `user_created`, `user_updated`, `user_deleted` | ← Frontend |  dotted type | [5.2-5.4](#52-user_updated) |
 |  **ONTVANGT** | `cancel_registration` | ← Frontend | NIEUW | [5.6](#56-cancel_registration-frontend--crm) |
 |  **ONTVANGT** | `company_member_removed` | ← Frontend | NIEUW | [5.8](#58-company_member_removed) |
+|  **ONTVANGT** | `company_registration` | ← Frontend | NIEUW | [5.9](#59-company_registration-frontend--crm) |
+|  **ONTVANGT** | `company_update` | ← Frontend | NIEUW | [5.10](#510-company_update-frontend--crm) |
+|  **ONTVANGT** | `company_delete` | ← Frontend | NIEUW | [5.11](#511-company_delete-frontend--crm) |
 |  **ONTVANGT** | `session_created`, `session_updated` | ← Planning |  `session_update` (fout) | [7.1-7.2](#71-session_created) |
 |  **ONTVANGT** | `payment_registered` | ← Kassa |  | [6.6](#66-payment_registered-kassa--rabbitmq) |
 |  **ONTVANGT** | `invoice_created_notification` | ← Facturatie |  | [8.1](#81-invoice_status) |
@@ -84,6 +87,9 @@ Klik op jouw team om direct naar de gedetailleerde specificaties te gaan. **Groe
 |  **VERZENDT** | `user_registered` | → CRM |  v1.0 header + dotted type + verkeerde queue | [5.5](#55-user_registered) |
 |  **VERZENDT** | `user_checkin` | → CRM |  v1.0 header + `user.checkin` | [19.1](#191-user_checkin) |
 |  **VERZENDT** | `company_member_removed` | → CRM | NIEUW | [5.8](#58-company_member_removed) |
+|  **VERZENDT** | `company_registration` | → CRM | NIEUW | [5.9](#59-company_registration-frontend--crm) |
+|  **VERZENDT** | `company_update` | → CRM | NIEUW | [5.10](#510-company_update-frontend--crm) |
+|  **VERZENDT** | `company_delete` | → CRM | NIEUW | [5.11](#511-company_delete-frontend--crm) |
 |  **VERZENDT** | `event_ended` | → CRM, Facturatie, Kassa |  | [5.7](#57-event_ended), [11.6](#116-event_ended-frontend--facturatie), [11.7](#117-event_ended-frontend--kassa) |
 |  **VERZENDT** | `calendar_invite` | → Planning |  dotted type + mist `version` | [17.2](#172-calendar_invite-frontend--planning) |
 |  **VERZENDT** | `payment_registered` | → Facturatie |  **ONTBREEKT** — nog niet geïmplementeerd | [11.5](#115-payment_registered-frontend--facturatie) |
@@ -585,7 +591,7 @@ Deze onderdelen bestaan aantoonbaar in code of operationele documentatie, maar s
 3. [Heartbeat — Alle teams → Monitoring](#3-heartbeat--alle-teams--monitoring)
 3.5 [Log — Alle teams (excl. Monitoring) → Monitoring](#35-log--alle-teams-excl-monitoring--monitoring)
 4. [Monitoring → Mailing — Alert](#4-monitoring--mailing--alert)
-5. [Frontend → CRM](#5-frontend--crm) *(5.1 new_registration, 5.2 user_updated, 5.3 user_deleted, 5.4 user_created, 5.5 user_registered, 5.6 cancel_registration, 5.7 event_ended)*
+5. [Frontend → CRM](#5-frontend--crm) *(5.1 new_registration, 5.2 user_updated, 5.3 user_deleted, 5.4 user_created, 5.5 user_registered, 5.6 cancel_registration, 5.7 event_ended, 5.8 company_member_removed, 5.9 company_registration, 5.10 company_update, 5.11 company_delete)*
 6. [Kassa → CRM](#6-kassa--crm)
 7. [Planning → CRM](#7-planning--crm)
 8. [Facturatie → CRM](#8-facturatie--crm)
@@ -1910,6 +1916,317 @@ Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich 
 3. **Zet het gebruikerstype terug naar `private`** als er geen andere bedrijfskoppeling meer overblijft voor deze gebruiker.
 4. Als de gebruiker nog geen account heeft aangemaakt (invite was pending), verwijdert CRM de pre-registratie.
 5. Log de actie met de meegeleverde `reason`.
+
+---
+
+### 5.9 `company_registration` (Frontend → CRM)
+
+Wanneer een nieuw bedrijf wordt geregistreerd via de frontend. CRM slaat de bedrijfsgegevens op in Salesforce.
+
+- **Queue:** `crm.incoming`
+- **Richting:** Frontend → CRM
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="guid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="message_id" type="guid"/>
+              <xs:element name="timestamp" type="xs:dateTime"/>
+              <xs:element name="source" type="xs:string"/>
+              <xs:element name="type" type="xs:string"/>
+              <xs:element name="version" type="xs:decimal"/>
+              <xs:element name="master_uuid" type="guid"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="body">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="company">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="master_uuid" type="guid"/>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="email" type="xs:string"/>
+                    <xs:element name="vat_number">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:pattern value="[A-Z]{2}[0-9]{10}"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="vat_rate" type="xs:integer"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>11111111-1111-1111-1111-111111111111</message_id>
+    <timestamp>2026-05-09T09:51:49Z</timestamp>
+    <source>frontend</source>
+    <type>company_registration</type>
+    <version>2.0</version>
+    <master_uuid>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</master_uuid>
+  </header>
+  <body>
+    <company>
+      <master_uuid>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</master_uuid>
+      <name>Acme BV</name>
+      <email>info@acme.be</email>
+      <vat_number>BE0123456789</vat_number>
+      <vat_rate>21</vat_rate>
+    </company>
+  </body>
+</message>
+```
+
+#### Verwacht Gedrag CRM
+1. Valideer het bericht tegen de XSD.
+2. Maak een nieuw bedrijfsprofiel aan in Salesforce op basis van `master_uuid`.
+3. Sla naam, e-mail, BTW-nummer en BTW-tarief op.
+
+> **Opmerking:** De `master_uuid` in de header en in `<company>` zijn identiek — dit is de unieke identifier van het bedrijf.
+
+---
+
+### 5.10 `company_update` (Frontend → CRM)
+
+Wanneer bedrijfsgegevens worden gewijzigd of leden worden toegevoegd/verwijderd. CRM past het bedrijfsprofiel in Salesforce aan en beheert de personeelslijst op basis van de meegestuurde member-acties.
+
+- **Queue:** `crm.incoming`
+- **Richting:** Frontend → CRM
+
+> **Aandacht:** Er bestaat ook een `company_member_removed` bericht (§5.8) dat uitsluitend dient voor het ontkoppelen van leden. `company_update` is breder: het combineert veldwijzigingen én ledenwijzigingen in één bericht. Teams die enkel een lid willen verwijderen kunnen `company_member_removed` blijven gebruiken; voor gecombineerde updates is `company_update` de aangewezen weg.
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="guid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="memberAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="add"/>
+      <xs:enumeration value="remove"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="message_id" type="guid"/>
+              <xs:element name="timestamp" type="xs:dateTime"/>
+              <xs:element name="source" type="xs:string"/>
+              <xs:element name="type" type="xs:string"/>
+              <xs:element name="version" type="xs:decimal"/>
+              <xs:element name="master_uuid" type="guid"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="body">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="company">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="email" type="xs:string"/>
+                    <xs:element name="vat_number" type="xs:string"/>
+
+                    <xs:element name="members" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="member" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="master_uuid" type="guid"/>
+                                <xs:element name="action" type="memberAction"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>22222222-2222-2222-2222-222222222222</message_id>
+    <timestamp>2026-05-09T09:51:49Z</timestamp>
+    <source>frontend</source>
+    <type>company_update</type>
+    <version>2.0</version>
+    <master_uuid>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</master_uuid>
+  </header>
+  <body>
+    <company>
+      <name>Acme BVBA</name>
+      <email>finance@acme.be</email>
+      <vat_number>BE0123456789</vat_number>
+      <members>
+        <member>
+          <master_uuid>bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb</master_uuid>
+          <action>add</action>
+        </member>
+        <member>
+          <master_uuid>cccccccc-cccc-cccc-cccc-cccccccccccc</master_uuid>
+          <action>remove</action>
+        </member>
+      </members>
+    </company>
+  </body>
+</message>
+```
+
+#### Verwacht Gedrag CRM
+1. Zoek het bedrijf op via `master_uuid` in de header.
+2. Werk naam, e-mail en BTW-nummer bij in Salesforce.
+3. Verwerk elk `<member>` element: bij `add` wordt de medewerker gekoppeld aan het bedrijf, bij `remove` wordt de koppeling verbroken.
+4. Negeer berichten met ontbrekende verplichte velden (`name`, `email`, `vat_number`).
+
+---
+
+### 5.11 `company_delete` (Frontend → CRM)
+
+Wanneer een bedrijf verwijderd moet worden. CRM voert een soft delete uit in Salesforce zodat de gegevens herstelbaar blijven.
+
+- **Queue:** `crm.incoming`
+- **Richting:** Frontend → CRM
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="guid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="message">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="header">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="message_id" type="guid"/>
+              <xs:element name="timestamp" type="xs:dateTime"/>
+              <xs:element name="source" type="xs:string"/>
+              <xs:element name="type" type="xs:string"/>
+              <xs:element name="version" type="xs:decimal"/>
+              <xs:element name="master_uuid" type="guid"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="body">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="company">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="master_uuid" type="guid"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+```
+
+#### Voorbeeld XML
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>33333333-3333-3333-3333-333333333333</message_id>
+    <timestamp>2026-05-09T09:51:49Z</timestamp>
+    <source>frontend</source>
+    <type>company_delete</type>
+    <version>2.0</version>
+    <master_uuid>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</master_uuid>
+  </header>
+  <body>
+    <company>
+      <master_uuid>aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa</master_uuid>
+    </company>
+  </body>
+</message>
+```
+
+#### Verwacht Gedrag CRM
+1. Zoek het bedrijf op via `master_uuid`.
+2. Voer een **soft delete** uit — het bedrijfsprofiel wordt gemarkeerd als verwijderd maar blijft in Salesforce bewaard voor eventueel herstel.
+3. Ontkoppel alle gekoppelde medewerkers van het bedrijf.
 
 ---
 

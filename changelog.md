@@ -2,6 +2,18 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-09 (vandaag) (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
+- Betrokken teams: CRM, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijziging: Drie nieuwe berichttypen toegevoegd (Frontend → CRM, queue `crm.incoming`) op basis van ingediende issues:
+  - **§5.9 `company_registration`** (nieuw): Registreer een nieuw bedrijf in Salesforce. Body bevat `master_uuid`, `name`, `email`, `vat_number` (patroon `[A-Z]{2}[0-9]{10}`) en `vat_rate`. Volledige XSD en XML-voorbeeld toegevoegd.
+  - **§5.10 `company_update`** (nieuw): Pas bedrijfsgegevens aan en/of beheer leden via `add`/`remove` acties. Body bevat `name`, `email`, `vat_number` en optioneel `<members>`. Toelichting toegevoegd over de verhouding met het bestaande `company_member_removed` (§5.8). Volledige XSD en XML-voorbeeld toegevoegd.
+  - **§5.11 `company_delete`** (nieuw): Soft delete van een bedrijf op basis van `master_uuid`. Volledige XSD en XML-voorbeeld toegevoegd.
+  - **Quick Reference (§0)**: CRM-tabel uitgebreid met 3 nieuwe ONTVANGT-rijen; Frontend-tabel uitgebreid met 3 nieuwe VERZENDT-rijen.
+  - **Inhoudsopgave (§5)**: Sectiereferenties 5.9, 5.10 en 5.11 toegevoegd.
+- Reden: Drie ingediende issues meldden dat de CRM company-flows (registratie, update, delete) ontbraken in het contract terwijl de code al beschikbaar was bij het CRM-team. Frontend kon zich er nog niet op baseren.
+
 ## 2026-05-11 10:30 (+02:00)
 - Auteur: Gemini CLI (Architect)
 - Betrokken teams: Kassa, CRM, Facturatie, Frontend
