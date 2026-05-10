@@ -3496,9 +3496,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
               <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
               <xs:element name="badge_id"     type="xs:string" minOccurs="0"/>
-              <xs:element name="session_id"    type="xs:string"/>
-              <!-- session_title: optioneel maar aanbevolen voor Kassa-display -->
-              <xs:element name="session_title"  type="xs:string" minOccurs="0"/>
               <xs:element name="payment_due">
                 <xs:complexType><xs:sequence>
                   <xs:element name="amount">
@@ -3548,8 +3545,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
       <company_name>Erasmushogeschool Brussel</company_name>
       <vat_number>BE0876543210</vat_number>
       <company_id>ehb-001</company_id>
-      <session_id>sess-keynote-001</session_id>
-      <session_title>Keynote: AI in Healthcare</session_title>
       <payment_due>
         <amount currency="eur">25.00</amount>
         <status>unpaid</status>
