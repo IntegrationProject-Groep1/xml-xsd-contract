@@ -16,7 +16,7 @@
 
 | Datum | Versie | Wijziging |
 |-------|--------|-----------|
-| 2026-05-11 | v2.3 | **Sectie 19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen voor Kassa, Frontend en Planning bijgewerkt. Queue/exchange overzicht uitgebreid met routing keys voor dit RPC-paar. Globale regelcontrole: alle 6 regels geslaagd. ⚠️ Openstaand punt: request-XSD staat momenteel alleen `source="kassa"` toe — uitbreiding met `"frontend"` vereist. |
+| 2026-05-11 | v2.3 | **Sectie 19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen voor Kassa, Frontend en Planning bijgewerkt. Queue/exchange overzicht uitgebreid met routing keys voor dit RPC-paar. Globale regelcontrole: alle 6 regels geslaagd. Request-XSD uitgebreid met `source="frontend"` zodat zowel Kassa als Frontend dit RPC-bericht kunnen versturen. |
 
 ---
 
@@ -5935,8 +5935,6 @@ Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basi
 > **XSD-bestand (Kassa):** `Kassa/integratie/schemas/schema_user_sessions_request.xsd`  
 > **XSD-bestand (Planning):** `Kassa/integratie/schemas/schema_user_sessions_response.xsd`
 
-> ⚠️ **Contract-opmerking:** De huidige request-XSD staat alleen `source="kassa"` toe. Wanneer Frontend dit RPC-bericht ook verstuurt, moet de XSD worden uitgebreid met `<xs:enumeration value="frontend"/>` in het `<source>` element.
-
 #### Globale regelcontrole
 
 | Regel | Status | Opmerking |
@@ -5961,10 +5959,11 @@ Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basi
   </xs:simpleType>
 
   <!--
-    user_sessions_request — Kassa → Planning (RPC request)
-    Sent by the Kassa when a visitor's QR code is scanned.
+    user_sessions_request — Kassa / Frontend → Planning (RPC request)
+    Sent by Kassa when a visitor's QR code is scanned, or by Frontend to fetch a user's sessions.
     Planning responds with user_sessions_response on the reply_to queue.
-    Routing key: kassa.to.planning.user_sessions_request
+    Routing key (Kassa):    kassa.to.planning.user_sessions_request
+    Routing key (Frontend): frontend.to.planning.user_sessions_request
   -->
   <xs:element name="message">
     <xs:complexType>
@@ -5979,7 +5978,7 @@ Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basi
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="kassa"/>
-                    <!-- TODO: voeg toe voor Frontend-gebruik: <xs:enumeration value="frontend"/> -->
+                    <xs:enumeration value="frontend"/>
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
