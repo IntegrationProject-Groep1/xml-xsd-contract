@@ -17,6 +17,7 @@
 | Datum | Versie | Wijziging |
 |-------|--------|-----------|
 | 2026-05-11 | v2.3 | **Sectie 19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen voor Kassa, Frontend en Planning bijgewerkt. Queue/exchange overzicht uitgebreid met routing keys voor dit RPC-paar. Globale regelcontrole: alle 6 regels geslaagd. Request-XSD uitgebreid met `source="frontend"` zodat zowel Kassa als Frontend dit RPC-bericht kunnen versturen. |
+| 2026-05-11 | v2.3 | **Sectie 26.2 bijgewerkt** — `wallet_lease_grant` XSD uitgebreid met optioneel `<payment_due>` element (openstaande inschrijvingskosten bezoeker). Bevat `<amount currency="eur">` (Rule 3 ✅) en optionele `<status>` (unpaid/paid). Voorbeeld XML bijgewerkt. |
 
 ---
 
@@ -6819,6 +6820,22 @@ CRM bevriest de online portemonnee en geeft het saldo door aan de Kassa.
             </xs:extension></xs:simpleContent></xs:complexType>
           </xs:element>
           <xs:element name="lease_id" type="xs:string"/>
+          <!-- payment_due: total registration fees still owed by this visitor (optional) -->
+          <xs:element name="payment_due" minOccurs="0">
+            <xs:complexType><xs:sequence>
+              <xs:element name="amount">
+                <xs:complexType><xs:simpleContent><xs:extension base="xs:decimal">
+                  <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+                </xs:extension></xs:simpleContent></xs:complexType>
+              </xs:element>
+              <xs:element name="status" minOccurs="0">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="unpaid"/>
+                  <xs:enumeration value="paid"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+            </xs:sequence></xs:complexType>
+          </xs:element>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -6841,6 +6858,11 @@ CRM bevriest de online portemonnee en geeft het saldo door aan de Kassa.
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <current_balance currency="eur">50.00</current_balance>
     <lease_id>LEASE-2026-XYZ</lease_id>
+    <!-- payment_due is optional — omit if no outstanding fees -->
+    <payment_due>
+      <amount currency="eur">25.00</amount>
+      <status>unpaid</status>
+    </payment_due>
   </body>
 </message>
 ```
