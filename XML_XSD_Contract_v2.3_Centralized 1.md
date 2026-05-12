@@ -105,7 +105,6 @@
 | **ONTVANGT** | `invoice_available` | ← Facturatie | [13.5](#135-facturatie--frontend) |
 | **ONTVANGT** | `vat_validation_error` | ← CRM / Facturatie | [20.1](#201-vat_validation_error) |
 | **RPC** | `session_view_request` / `session_view_response` | ↔ Planning | [19.2](#192-session_view_request--session_view_response-rpc) |
-| **RPC** | `session_view_request_all` / `session_view_response_all` | ↔ Planning | [19.2](#192-session_view_request--session_view_response-rpc) |
 | **RPC** | `user_sessions_request` / `user_sessions_response` | ↔ Planning | [19.7](#197-user_sessions_request--user_sessions_response-rpc) |
 | **RPC** | `identity_request` | → Identity | [15.1-15.3](#151-rpc-request--gebruiker-aanmaken) |
 | **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
@@ -5381,7 +5380,6 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
               <xs:element name="type">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="session_view_request"/>
-                  <xs:enumeration value="session_view_request_all"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="version">
@@ -5430,7 +5428,6 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
               <xs:element name="type">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="session_view_response"/>
-                  <xs:enumeration value="session_view_response_all"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
               <xs:element name="version"        type="xs:string" fixed="2.0"/>
@@ -5537,7 +5534,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
     <message_id>f9e8d7c6-b5a4-3210-9876-543210fedcba</message_id>
     <timestamp>2026-05-15T09:05:00Z</timestamp>
     <source>frontend</source>
-    <type>session_view_request_all</type>
+    <type>session_view_request</type>
     <version>2.0</version>
   </header>
   <body>
@@ -5600,7 +5597,7 @@ Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via 
     <message_id>d4e5f6a7-b2c3-8901-bcde-f12345678901</message_id>
     <timestamp>2026-05-15T09:05:01Z</timestamp>
     <source>planning</source>
-    <type>session_view_response_all</type>
+    <type>session_view_response</type>
     <version>2.0</version>
     <correlation_id>f9e8d7c6-b5a4-3210-9876-543210fedcba</correlation_id>
   </header>
