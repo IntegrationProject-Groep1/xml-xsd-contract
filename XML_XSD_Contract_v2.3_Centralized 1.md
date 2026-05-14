@@ -2328,6 +2328,8 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
                           <xs:element name="unit_price"   type="CurrencyAmountType"/>
                           <xs:element name="total_amount" type="CurrencyAmountType"/>
                           <xs:element name="vat_rate"     type="xs:integer" minOccurs="0"/>
+                          <!-- session_id optioneel: enkel aanwezig bij sessie-gerelateerde artikelen -->
+                          <xs:element name="session_id"   type="xs:string" minOccurs="0"/>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
@@ -2396,6 +2398,43 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
       <reason>customer_request</reason>
     </refund>
     <original_transaction_id>TRX-987654</original_transaction_id>
+  </body>
+</message>
+```
+
+#### Voorbeeld XML — cash refund met items (gefactureerde order)
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <header>
+    <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567891</message_id>
+    <timestamp>2026-05-15T17:00:00Z</timestamp>
+    <source>kassa</source>
+    <type>refund_processed</type>
+    <version>2.0</version>
+    <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <refund_type>consumption_item</refund_type>
+    <refund>
+      <amount currency="eur">50.00</amount>
+      <method>cash</method>
+      <reason>customer_request</reason>
+    </refund>
+    <original_transaction_id>TRX-2026-04150002</original_transaction_id>
+    <items>
+      <item>
+        <sku>SES-001</sku>
+        <description>Workshop Python</description>
+        <quantity>1</quantity>
+        <unit_price currency="eur">50.00</unit_price>
+        <total_amount currency="eur">50.00</total_amount>
+        <vat_rate>21</vat_rate>
+        <session_id>sess-workshop-042</session_id>
+      </item>
+    </items>
   </body>
 </message>
 ```
@@ -4103,6 +4142,8 @@ CRM stuurt dit bericht naar Facturatie wanneer een factuur geannuleerd of terugb
                       <xs:element name="unit_price"   type="CurrencyAmountType"/>
                       <xs:element name="total_amount" type="CurrencyAmountType"/>
                       <xs:element name="vat_rate"     type="xs:integer" minOccurs="0"/>
+                      <!-- session_id optioneel: enkel aanwezig bij sessie-gerelateerde artikelen -->
+                      <xs:element name="session_id"   type="xs:string" minOccurs="0"/>
                     </xs:sequence>
                   </xs:complexType>
                 </xs:element>
@@ -4160,6 +4201,7 @@ CRM stuurt dit bericht naar Facturatie wanneer een factuur geannuleerd of terugb
         <unit_price currency="eur">50.00</unit_price>
         <total_amount currency="eur">50.00</total_amount>
         <vat_rate>21</vat_rate>
+        <session_id>sess-workshop-042</session_id>
       </item>
     </items>
   </body>
