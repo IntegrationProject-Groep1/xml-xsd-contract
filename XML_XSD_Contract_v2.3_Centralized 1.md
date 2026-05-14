@@ -69,6 +69,7 @@
 | **ONTVANGT** | `user_checkin` | ← Frontend | [19.1](#191-user_checkin) |
 | **ONTVANGT** | `user_event` (fanout) | ← Identity | [15.5](#155-fanout-event--usercreated) |
 | **VERZENDT** | `new_registration`, `profile_update`, `cancel_registration` | → Kassa | [10.1-10.3](#101-new_registration-crm--kassa) |
+| **VERZENDT** | `profile_update` | → Facturatie | [10.4](#104-profile_update-crm--facturatie) |
 | **VERZENDT** | `invoice_request` | → Facturatie | [11.1](#111-invoice_request-crm--facturatie) |
 | **VERZENDT** | `send_mailing` | → Mailing | [12.1](#121-send_mailing-crm--mailing) |
 | **VERZENDT** | `payment_registered` | → Frontend | [14.1](#141-payment_registered-crm--frontend) |
@@ -4480,30 +4481,36 @@ CRM vraagt Mailing om een e-mail te versturen.
 #### Voorbeeld XML — factuur klaar
 
 ```xml
+<?xml version="1.0" encoding="UTF-8"?>
 <message>
   <header>
-    <message_id>07e4f5a6-b7c8-9012-efab-012345600022</message_id>
-    <timestamp>2026-05-16T09:05:00Z</timestamp>
+    <message_id>c17f1edc-9d29-4a92-a10e-5b133baa4312</message_id>
+    <timestamp>2026-05-14T14:48:09Z</timestamp>
     <source>facturatie</source>
     <type>send_mailing</type>
     <version>2.0</version>
-    <correlation_id>d4e5f6a7-b8c9-0123-defa-123456789003</correlation_id>
+    <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
-    <campaign_id>sg-invoice-00142</campaign_id>
-    <subject>Uw factuur voor Shiftfestival 2026</subject>
+    <campaign_id>foss-invoice-228</campaign_id>
+    <subject>Uw factuur staat klaar</subject>
     <mail_type>invoice_ready</mail_type>
     <recipients>
       <recipient>
-        <email>jan.peeters@ehb.be</email>
-        <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+        <email>jan.peeters@bedrijf.be</email>
+        <identity_uuid>a1b2c3d4-e5f6-7890-abcd-ef1234567890</identity_uuid>
         <contact>
           <first_name>Jan</first_name>
           <last_name>Peeters</last_name>
         </contact>
       </recipient>
     </recipients>
-    <template_data>{"invoice_id":"foss-inv-00142","amount":"31.50","currency":"eur","due_date":"2026-06-15"}</template_data>
+    <template_data>{"invoice_number":"FOSS00228","invoice_date":"2026-05-14","due_date":"2026-05-19","seller":{"company":"Desiderius","address":"Nijverheidskaai 170, 1070 Anderlecht","email":"desiderius@email.com","vat_number":"","iban":"","bic":""},"buyer":{"first_name":"Jan","last_name":"Peeters","email":"jan.peeters@bedrijf.be","address":"...","vat_number":""},"items":[{"description":"Inschrijvingskosten","quantity":1,"unit_price":"250.00","vat_rate":21.0,"vat_amount":"52.50","total":"302.50","currency":"eur"}],"summary":{"subtotal":"250.00","vat_total":"52.50","total":"302.50","currency":"eur"},"payment":{"reference":"+++228/2026/00001+++","method":"on_site"}}</template_data>
+    <attachment>
+      <filename>factuur-FOSS00228.pdf</filename>
+      <content_type>application/pdf</content_type>
+      <base64_data>JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0...[volledige base64]</base64_data>
+    </attachment>
   </body>
 </message>
 ```
@@ -5177,7 +5184,7 @@ CRM is de centrale data-hub. Zie secties 5–14 voor alle gedetailleerde flows.
 | ← Mailing | `mailing_status` | queue: `crm.incoming` |
 | ← Identity | `user_event` (fanout) | exchange: `user.events` (fanout) |
 | → Kassa | `new_registration`, `profile_update`, `cancel_registration` | queue: `kassa.incoming` |
-| → Facturatie | `invoice_request`, `consumption_order`, `payment_registered` | queue: `facturatie.incoming` |
+| → Facturatie | `profile_update`, `invoice_request`, `consumption_order`, `payment_registered` | queue: `facturatie.incoming` |
 | → Mailing | `send_mailing` | queue: `crm.to.mailing` |
 | → Frontend | `payment_registered`, `vat_validation_error` | queue: `frontend.incoming` |
 | → Planning | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
