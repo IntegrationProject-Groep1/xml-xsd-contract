@@ -2315,6 +2315,25 @@ Kassa stuurt dit bij elke terugbetaling. Routing key: `kassa.payments.refund`.
               <xs:element name="original_transaction_id" type="xs:string"/>
               <!-- new_wallet_balance: alleen aanwezig bij method=badge_wallet -->
               <xs:element name="new_wallet_balance" type="CurrencyAmountType" minOccurs="0"/>
+              <!-- items optioneel: welke artikelen terugbetaald werden -->
+              <xs:element name="items" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="item" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="sku"          type="xs:string"/>
+                          <xs:element name="description"  type="xs:string"/>
+                          <xs:element name="quantity"     type="xs:integer"/>
+                          <xs:element name="unit_price"   type="CurrencyAmountType"/>
+                          <xs:element name="total_amount" type="CurrencyAmountType"/>
+                          <xs:element name="vat_rate"     type="xs:integer" minOccurs="0"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

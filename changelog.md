@@ -2,6 +2,20 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-14 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: Kassa, CRM, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijzigingen:
+  1. **§13.1 `send_mailing` (Facturatie → Mailing)**: Voorbeeld XML volledig vernieuwd met realistische factuurdata — uitgebreide `template_data` (verkoper, koper, items, BTW, betaalreferentie) en `<attachment>` blok (factuur-PDF als base64).
+  2. **§CRM tabellen — `profile_update` → Facturatie**: Ontbrekende rij toegevoegd aan de CRM VERZENDT-tabel (ref §10.4) en aan de CRM routing-overzichtstabel.
+  3. **§6.1 `consumption_order` XSD**: Optioneel `<session_id>` (xs:integer) toegevoegd aan `ItemType`. Voorbeeld XML uitgebreid met gemengde bestelling (2 sessie-items met session_id + 1 horecaproduct zonder). Business Logic Regel 3 toegevoegd. §11.3 passthrough erft automatisch.
+  4. **§6.5 `invoice_request` (Kassa → CRM) + §11.1 (CRM → Facturatie)**: `payment_status` (paid/pending, verplicht) en `payment_method` (optioneel) toegevoegd aan de body van beide XSD's en voorbeeld XML's. Facturatie bepaalt de betaalstatus nu uit `invoice_request` alleen.
+  5. **§11.4 `payment_registered` (CRM → Facturatie) verwijderd**: CRM forwardt `payment_registered` niet meer naar `facturatie.incoming`. Betaalstatus zit in `invoice_request`. TOC, Facturatie ONTVANGT-tabel en routing-overzichten bijgewerkt. §11.5 (Frontend → Facturatie) blijft ongewijzigd.
+  6. **§11.2 `invoice_cancelled` XSD volledig herzien**: `correlation_id` verplicht (was optioneel); `invoice_id` verwijderd; `refund_amount` vervangen door optioneel `<items>` blok (sku, description, quantity, unit_price, total_amount, vat_rate) met `CurrencyAmountType`. Items afwezig = volledige annulatie; items aanwezig = gedeeltelijke creditnota. Twee voorbeeld XML's toegevoegd.
+  7. **§6.4 `refund_processed` XSD**: Optioneel `<items>` blok toegevoegd (zelfde structuur als §11.2) na `<new_wallet_balance>`.
+- Reden: Reeks ingediende bugs en verbeterverzoeken: ontbrekende profile_update routing, session-level facturatie, payment_status self-contained in invoice_request, en gedetailleerde item-lijsten bij annulaties en terugbetalingen.
+
 ## 2026-05-09 (Kassa implementatie fix) (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — tom1dekoning@gmail.com)
 - Betrokken teams: Kassa, CRM, Facturatie
