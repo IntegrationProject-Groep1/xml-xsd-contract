@@ -4030,14 +4030,15 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
             <xs:enumeration value="invoice_cancelled"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
-          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+          <xs:element name="correlation_id" type="UUIDType"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="invoice_id"    type="xs:string"/>
           <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="reason"        type="xs:string" minOccurs="0"/>
+          <!-- refund_amount absent = volledige annulatie (inschrijving); aanwezig = gedeeltelijke creditnota (consumptie-terugbetaling) -->
+          <xs:element name="refund_amount" type="xs:decimal" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -4055,9 +4056,9 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     <source>crm</source>
     <type>invoice_cancelled</type>
     <version>2.0</version>
+    <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
-    <invoice_id>foss-inv-00142</invoice_id>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <reason>Inschrijving geannuleerd door klant</reason>
   </body>
