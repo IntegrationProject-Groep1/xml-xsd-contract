@@ -245,7 +245,7 @@
 16. [RabbitMQ Queue & Exchange Overzicht](#16-rabbitmq-queue--exchange-overzicht)
 17. [Per-Team Samenvatting](#17-per-team-samenvatting)
 18. [Frontend ← Kassa (Direct flows)](#18-frontend--kassa-direct-flows)
-19. [Frontend ↔ Planning (Directe flows)](#19-frontend--planning-directe-flows) *(19.1 user_checkin, 19.2 session_view RPC, 19.3 calendar_invite, 19.4 session_create_request, 19.5 session_update_request, 19.6 session_delete_request, 19.7 user_sessions RPC)*
+19. [Frontend ↔ Planning (Directe flows)](#19-frontend--planning-directe-flows) *(19.1 user_checkin, 19.2 session_view RPC ~~DEPRECATED~~, 19.3 calendar_invite, 19.4 session_create_request, 19.5 session_update_request, 19.6 session_delete_request, 19.7 user_sessions RPC → Frontend, 19.8 Frontend → Kassa sessiewijzigingen)*
 20. [CRM / Facturatie → Frontend: BTW Validatiefout](#20-crm--facturatie--frontend-btw-validatiefout) *(20.1 vat_validation_error)*
 21. [Migratie Roadmap (NIEUW v2.3)](#21-migratie-roadmap)
 22. [Validatie Checklist](#22-validatie-checklist-per-bericht)
@@ -4026,6 +4026,28 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 
 ### 11.2 `invoice_cancelled` (CRM → Facturatie)
 
+CRM stuurt dit bericht naar Facturatie wanneer een factuur geannuleerd of terugbetaald moet worden. Er zijn twee flows:
+
+| Flow | Wanneer | Lookup-sleutel |
+|---|---|---|
+| **Kassa-refund** | Kassier verwerkt terugbetaling in POS → Kassa stuurt `refund_processed` → CRM stuurt dit door | `correlation_id` in header (= `message_id` van originele `invoice_request`) |
+| **Directe annulatie** | CRM annuleert zelf (bv. inschrijving geannuleerd) | `invoice_id` in body (= Facturatie-intern ID, ontvangen via `invoice_status`) |
+
+> **Regel:** Minstens één van `invoice_id` of `correlation_id` MOET aanwezig zijn. Facturatie gebruikt `invoice_id` als die aanwezig is (snelste pad), anders zoekt het op via `correlation_id`.
+
+> **`items` aanwezig** = gedeeltelijke creditnota voor die specifieke artikelen. **`items` afwezig** = volledige annulatie van de factuur.
+
+#### Globale regelcontrole
+
+| Regel | Status | Opmerking |
+|---|---|---|
+| Regel 1 — geen `xmlns`, geen `<receiver>` | ✅ | Correct |
+| Regel 2 — `<contact>` nesting | ✅ | Geen namen in dit bericht |
+| Regel 3 — valuta op geldbedragen | ✅ | `unit_price` en `total_amount` gebruiken `CurrencyAmountType` met `currency="eur"` |
+| Regel 4 — `date_of_birth` | ✅ | Geen datumvelden |
+| Regel 5 — Master UUID | ✅ | `identity_uuid` gebruikt `UUIDType` patroon |
+| Regel 6 — adres splitsing | ✅ | Geen adresvelden |
+
 #### XSD
 
 ```xml
@@ -4050,8 +4072,8 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"     type="UUIDType"/>
-          <xs:element name="timestamp"      type="xs:dateTime"/>
+          <xs:element name="message_id"  type="UUIDType"/>
+          <xs:element name="timestamp"   type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
@@ -4065,8 +4087,10 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
       <xs:element name="body">
         <xs:complexType><xs:sequence>
           <xs:element name="identity_uuid" type="UUIDType"/>
+          <!-- invoice_id = Facturatie-intern ID ontvangen via invoice_status (verplicht bij directe annulatie flow) -->
+          <xs:element name="invoice_id"    type="xs:string" minOccurs="0"/>
           <xs:element name="reason"        type="xs:string" minOccurs="0"/>
-          <!-- items optioneel: aanwezig bij consumption refunds, afwezig bij volledige annulatie (bv. inschrijving) -->
+          <!-- items: aanwezig = gedeeltelijke creditnota, afwezig = volledige annulatie -->
           <xs:element name="items" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -4092,7 +4116,7 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 </xs:schema>
 ```
 
-#### Voorbeeld XML — volledige annulatie (inschrijving)
+#### Voorbeeld XML — volledige annulatie via invoice_id (directe annulatie, bv. inschrijving)
 
 ```xml
 <message>
@@ -4102,17 +4126,17 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     <source>crm</source>
     <type>invoice_cancelled</type>
     <version>2.0</version>
-    <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <invoice_id>foss-inv-00142</invoice_id>
     <reason>Inschrijving geannuleerd door klant</reason>
     <!-- geen items → Facturatie annuleert de volledige factuur -->
   </body>
 </message>
 ```
 
-#### Voorbeeld XML — gedeeltelijke creditnota (consumptie-terugbetaling)
+#### Voorbeeld XML — gedeeltelijke creditnota via correlation_id (Kassa-refund)
 
 ```xml
 <message>
@@ -4122,11 +4146,12 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
     <source>crm</source>
     <type>invoice_cancelled</type>
     <version>2.0</version>
+    <!-- correlation_id = message_id van de originele invoice_request -->
     <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
-    <reason>Klant heeft Workshop Python geretourneerd</reason>
+    <reason>Klant heeft Workshop Python geretourneerd aan de kassa</reason>
     <items>
       <item>
         <sku>SES-001</sku>
@@ -5459,14 +5484,12 @@ Voordat gebruikers hun kalender kunnen synchroniseren, moet elke gebruiker na he
 
 ---
 
-### 19.2 `session_view_request` / `session_view_response` (RPC)
+### 19.2 `session_view_request` / `session_view_response` (RPC) ~~DEPRECATED~~
 
-Frontend vraagt sessiedetails op bij Planning. Planning antwoordt synchroon via het RPC-patroon.
+> **⚠️ Verwijderd in v2.3:** Planning is als service weggevallen. Deze RPC bestaat niet meer. Sessiedata komt nu via `session_created` / `session_updated` / `session_deleted` push-berichten van Frontend naar Kassa (zie sectie 19.8).
 
-- **Request exchange:** `planning.exchange`
-- **Request routing key:** `frontend.to.planning.session.view`
-- **Response exchange:** `planning.exchange`
-- **Response routing key:** `planning.to.frontend.session.view.response` (op reply_to queue)
+- **Request exchange:** `planning.exchange` *(niet meer actief)*
+- **Request routing key:** `frontend.to.planning.session.view` *(niet meer actief)*
 
 #### XSD — Request
 
@@ -6122,16 +6145,16 @@ Wanneer een administrator in Drupal een sessie verwijdert.
 
 ### 19.7 `user_sessions_request` / `user_sessions_response` (RPC)
 
-Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basis van zijn/haar `identity_uuid`. Dit wordt getriggerd wanneer een QR-code wordt gescand (Kassa) of wanneer de Frontend een overzicht wil van de ingeschreven sessies van een gebruiker. Planning antwoordt synchroon via het RPC-patroon op de `reply_to` queue.
+Kassa vraagt de sessielijst op van een bezoeker bij **Frontend** (voorheen Planning) op basis van zijn/haar `identity_uuid`. Dit wordt getriggerd wanneer een QR-code wordt gescand. Frontend antwoordt synchroon via het RPC-patroon op de `reply_to` queue.
 
-- **Request exchange (Kassa):** `planning.exchange`
-- **Request routing key (Kassa):** `kassa.to.planning.user_sessions_request`
-- **Request exchange (Frontend):** `planning.exchange`
-- **Request routing key (Frontend):** `frontend.to.planning.user_sessions_request`
+> **⚠️ Breaking change v2.3:** Planning is verwijderd als RPC-target. Kassa stuurt nu via `kassa.exchange` naar Frontend. De response heeft `source="frontend"`.
+
+- **Request exchange (Kassa):** `kassa.exchange`
+- **Request routing key (Kassa):** `kassa.to.frontend.user_sessions_request`
 - **Response routing key:** beantwoord op `reply_to` queue — `correlation_id` matcht de request
 
 > **XSD-bestand (Kassa):** `Kassa/integratie/schemas/schema_user_sessions_request.xsd`  
-> **XSD-bestand (Planning):** `Kassa/integratie/schemas/schema_user_sessions_response.xsd`
+> **XSD-bestand (response):** `Kassa/integratie/schemas/schema_user_sessions_response.xsd`
 
 #### Globale regelcontrole
 
@@ -6247,6 +6270,7 @@ Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basi
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="planning"/>
+                    <xs:enumeration value="frontend"/>
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
@@ -6434,6 +6458,123 @@ Kassa en Frontend vragen de sessielijst op van een bezoeker bij Planning op basi
     </sessions>
   </body>
 </message>
+```
+
+---
+
+## 19.8 Frontend → Kassa: Sessiewijzigingen (Push)
+
+Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa via `kassa.exchange`. Kassa werkt `x_session_title` op de partner bij en notificeert de POS.
+
+- **Exchange:** `kassa.exchange`
+- **Queue (Kassa):** `kassa.incoming`
+
+| Berichttype | Routing key |
+|---|---|
+| `session_created` | `frontend.to.kassa.session.created` |
+| `session_updated` | `frontend.to.kassa.session.updated` |
+| `session_deleted` | `frontend.to.kassa.session.deleted` |
+
+> **Let op:** Dit zijn gebruikersregistratie-events (een specifieke gebruiker heeft zich in- of uitgeschreven voor een sessie), niet sessiecatalogus-updates. Voor cataloguswijzigingen zie sectie 7 (Planning → CRM).
+
+### 19.8.1 `session_created` (Frontend → Kassa)
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CurrencyAmountType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal">
+        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"    type="UUIDType"/>
+          <xs:element name="timestamp"     type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="session_created"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <!-- identity_uuid: voor welke gebruiker deze sessieregistratie geldt -->
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="session">
+            <xs:complexType><xs:sequence>
+              <xs:element name="session_id" type="xs:string"/>
+              <xs:element name="title"      type="xs:string"/>
+              <!-- price optioneel: afwezig = gratis -->
+              <xs:element name="price"      type="CurrencyAmountType" minOccurs="0"/>
+            </xs:sequence></xs:complexType>
+          </xs:element>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+### 19.8.2 `session_updated` (Frontend → Kassa)
+
+Zelfde body als `session_created`. Kassa zoekt op `session_id` en update titel en prijs in-place (upsert als niet gevonden).
+
+#### XSD
+
+Identiek aan 19.8.1, met `<xs:enumeration value="session_updated"/>` als type.
+
+### 19.8.3 `session_deleted` (Frontend → Kassa)
+
+#### XSD
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="UUIDType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="message">
+    <xs:complexType><xs:sequence>
+      <xs:element name="header">
+        <xs:complexType><xs:sequence>
+          <xs:element name="message_id"    type="UUIDType"/>
+          <xs:element name="timestamp"     type="xs:dateTime"/>
+          <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="session_deleted"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="body">
+        <xs:complexType><xs:sequence>
+          <xs:element name="identity_uuid" type="UUIDType"/>
+          <xs:element name="session_id"   type="xs:string"/>
+          <xs:element name="reason"       type="xs:string" minOccurs="0"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+    </xs:sequence></xs:complexType>
+  </xs:element>
+</xs:schema>
 ```
 
 ---
