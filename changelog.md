@@ -2,6 +2,15 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: Kassa, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijzigingen:
+  1. **§6.4 `refund_processed` XSD**: Optioneel `<items>` blok toegevoegd na `<new_wallet_balance>` (sku, description, quantity, unit_price, total_amount, vat_rate). Geeft CRM/Facturatie detail over welke artikelen terugbetaald werden.
+  2. **§11.2 `invoice_cancelled`**: `correlation_id` blijft optioneel (`minOccurs="0"`) — eerdere foutieve wijziging teruggedraaid. Oorspronkelijk commentaar hersteld.
+- Reden: Review toonde twee fouten uit de vorige sessie: items blok was nooit toegevoegd aan §6.4 (commit was destijds geweigerd), en §11.2 correlation_id was onterecht verplicht gemaakt.
+
 ## 2026-05-14 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
 - Betrokken teams: Kassa, CRM, Facturatie
