@@ -1945,7 +1945,8 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
           </xs:simpleContent>
         </xs:complexType>
       </xs:element>
-      <xs:element name="item_type" type="xs:string" minOccurs="0"/>
+      <xs:element name="item_type"  type="xs:string"  minOccurs="0"/>
+      <xs:element name="session_id" type="xs:integer" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -1994,6 +1995,7 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
 #### Business Logic Rules (Verplicht)
 *   **Regel 1 (Top-ups):** Voor wallet-herladingen moet `item_type` de waarde `wallet_topup` hebben en `vat_rate` moet `0` zijn. Dit is een niet-belastbare financiële transactie.
 *   **Regel 2 (Anoniem):** Als `is_anonymous` op `true` staat, wordt het `<customer>` blok weggelaten. In dit geval kan er later geen factuur worden aangevraagd; de klant ontvangt enkel een fysiek kasticket.
+*   **Regel 3 (Sessie-items):** Als een item een sessieticket betreft, voegt Kassa een `<session_id>` toe met het numerieke ID van de bijhorende sessie. Horeca- en andere niet-sessie-items laten `<session_id>` weg. Eén bestelling kan een mix bevatten van sessie-items (met `session_id`) en overige items (zonder). Facturatie gebruikt `session_id` voor financiële rapportage per sessie.
 
 #### Voorbeeld XML
 
@@ -2023,8 +2025,31 @@ Klant bestelt consumpties aan de bar. Schema v2.3 — bevat `sku`, `vat_rate` en
       </address>
     </customer>
     <items>
+      <!-- Sessieticket A: session_id aanwezig → Facturatie boekt €50 op sessie 1234 -->
       <item>
         <id>LINE-4201</id>
+        <sku>SES-001</sku>
+        <description>Workshop Python</description>
+        <quantity>1</quantity>
+        <unit_price currency="eur">50.00</unit_price>
+        <vat_rate>21</vat_rate>
+        <total_amount currency="eur">50.00</total_amount>
+        <session_id>1234</session_id>
+      </item>
+      <!-- Sessieticket B: session_id aanwezig → Facturatie boekt €30 op sessie 5678 -->
+      <item>
+        <id>LINE-4202</id>
+        <sku>SES-002</sku>
+        <description>Lezing Design Thinking</description>
+        <quantity>1</quantity>
+        <unit_price currency="eur">30.00</unit_price>
+        <vat_rate>21</vat_rate>
+        <total_amount currency="eur">30.00</total_amount>
+        <session_id>5678</session_id>
+      </item>
+      <!-- Horecaproduct: geen session_id → Facturatie boekt €5 als horeca-omzet -->
+      <item>
+        <id>LINE-4203</id>
         <sku>BEV-001</sku>
         <description>Koffie</description>
         <quantity>2</quantity>
