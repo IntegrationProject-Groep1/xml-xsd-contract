@@ -143,7 +143,7 @@
 | **ONTVANGT** | `consumption_order` (passthrough) | ← CRM/Kassa | [11.3](#113-consumption_order-crm--facturatie--passthrough) |
 | **ONTVANGT** | `new_registration` | ← CRM | [10.1](#101-new_registration-crm--kassa) |
 | **ONTVANGT** | `profile_update` | ← CRM | [10.4](#104-profile_update-crm--facturatie) |
-| **ONTVANGT** | `payment_registered` | ← Frontend | [11.5](#115-payment_registered-frontend--facturatie) |
+| **ONTVANGT** | `payment_registered` | ← Frontend (online betalingen) | [11.5](#115-payment_registered-frontend--facturatie) |
 | **ONTVANGT** | `event_ended` | ← Frontend | [11.6](#116-event_ended-frontend--facturatie) |
 | **VERZENDT** | `invoice_status` | → CRM | [8.1](#81-invoice_status) |
 | **VERZENDT** | `payment_registered` | → CRM | [8.2](#82-payment_registered) |
@@ -236,7 +236,7 @@
 8. [Facturatie → CRM](#8-facturatie--crm)
 9. [Mailing → CRM](#9-mailing--crm)
 10. [CRM → Kassa](#10-crm--kassa)
-11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough, 11.4 payment_registered passthrough, 11.5 payment_registered Frontend direct)*
+11. [CRM → Facturatie](#11-crm--facturatie) *(11.1 invoice_request, 11.2 invoice_cancelled, 11.3 consumption_order passthrough, 11.5 payment_registered Frontend direct)*
 12. [CRM → Mailing](#12-crm--mailing)
 13. [Facturatie → Mailing](#13-facturatie--mailing)
 13.5 [Facturatie → Frontend](#135-facturatie--frontend)
@@ -2449,6 +2449,13 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
           <xs:complexType>
             <xs:sequence>
               <xs:element name="identity_uuid" type="UUIDType"/>
+              <xs:element name="payment_status">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="paid"/>
+                  <xs:enumeration value="pending"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="payment_method" type="xs:string" minOccurs="0"/>
               <xs:element name="invoice_data" type="InvoiceDataType"/>
             </xs:sequence>
           </xs:complexType>
@@ -2474,6 +2481,8 @@ Kassa vraagt een factuur aan voor een bedrijf. De koppeling met de bijhorende `c
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <payment_status>paid</payment_status>
+    <payment_method>cash</payment_method>
     <invoice_data>
       <contact>
         <first_name>Jan</first_name>
@@ -3937,6 +3946,13 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
           <xs:complexType>
             <xs:sequence>
               <xs:element name="identity_uuid" type="UUIDType"/>
+              <xs:element name="payment_status">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="paid"/>
+                  <xs:enumeration value="pending"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="payment_method" type="xs:string" minOccurs="0"/>
               <xs:element name="invoice_data" type="InvoiceDataType"/>
               <!-- GEEN <items> of <total> — Facturatie haalt die uit de consumption_order -->
             </xs:sequence>
@@ -3964,6 +3980,8 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <payment_status>paid</payment_status>
+    <payment_method>cash</payment_method>
     <invoice_data>
       <contact>
         <first_name>Jan</first_name>
@@ -4074,21 +4092,11 @@ Facturatie ontvangt beide, matcht op correlation_id = f47ac10b, bouwt factuur.
 
 ---
 
-### 11.4 `payment_registered` (CRM → Facturatie) — Passthrough
-
-Wanneer Kassa een `payment_registered` stuurt naar `crm.incoming` (routing: `kassa.payments.registration`), geeft CRM dit **1-op-1 door** naar `facturatie.incoming`. Facturatie zet de factuurstatus onmiddellijk op 'paid'.
-
-> **Architectuurprincipe:** CRM doet hier niets slims. Geen merge, geen transformatie. CRM slaat de betaling op in Salesforce voor administratie en routeert het bericht zonder enige aanpassing door naar Facturatie.
-
-**XSD & XML:** Exact identiek aan Sectie 6.6.
-
----
-
 ### 11.5 `payment_registered` (Frontend → Facturatie)
 
 > **Nieuw — Issue #27.** Frontend stuurt dit bericht **rechtstreeks** naar `facturatie.incoming` wanneer een betaling via de webshop (online factuur) is bevestigd. Facturatie zet de factuur onmiddellijk op 'paid' in FossBilling.
 >
-> **Verschil met 11.4:** Sectie 11.4 is een Kassa-betaling die via CRM passeert. Sectie 11.5 is een online betaling die **direct** van Frontend naar Facturatie gaat — zonder CRM als tussenpersoon.
+> **Kassa vs. online:** Kassa-betalingen sturen `payment_status` mee in `invoice_request` (§11.1). Sectie 11.5 dekt online betalingen die **direct** van Frontend naar Facturatie gaan — zonder CRM als tussenpersoon.
 
 - **Queue:** `facturatie.incoming`
 - **Source:** `frontend`
@@ -5161,7 +5169,6 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 | ← CRM | `invoice_request` | queue: `facturatie.incoming` |
 | ← CRM | `invoice_cancelled` | queue: `facturatie.incoming` |
 | ← CRM | `consumption_order` (passthrough) | queue: `facturatie.incoming` |
-| ← CRM | `payment_registered` (passthrough) | queue: `facturatie.incoming` |
 | ← CRM | `new_registration`, `profile_update` | queue: `facturatie.incoming` |
 | ← Frontend | `payment_registered` (direct) | queue: `facturatie.incoming` |
 | ← Frontend | `event_ended` | queue: `facturatie.incoming` |
@@ -5209,7 +5216,7 @@ CRM is de centrale data-hub. Zie secties 5–14 voor alle gedetailleerde flows.
 | ← Mailing | `mailing_status` | queue: `crm.incoming` |
 | ← Identity | `user_event` (fanout) | exchange: `user.events` (fanout) |
 | → Kassa | `new_registration`, `profile_update`, `cancel_registration` | queue: `kassa.incoming` |
-| → Facturatie | `profile_update`, `invoice_request`, `consumption_order`, `payment_registered` | queue: `facturatie.incoming` |
+| → Facturatie | `profile_update`, `invoice_request`, `consumption_order` | queue: `facturatie.incoming` |
 | → Mailing | `send_mailing` | queue: `crm.to.mailing` |
 | → Frontend | `payment_registered`, `vat_validation_error` | queue: `frontend.incoming` |
 | → Planning | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
@@ -6614,7 +6621,7 @@ Planning broadcast de nieuwe stand naar iedereen via de fanout/topic exchange.
 
 10. **CRM** `receiver.js`: `session_update` → `session_updated`
 11. **CRM** `sender.js`: `<age>` → `<date_of_birth>`, `invoice_request` body herwerken, queue naar `facturatie.incoming`, `mailing_status` → `send_mailing`
-12. **CRM**: implementeer passthrough voor `consumption_order` en `payment_registered` naar `facturatie.incoming`
+12. **CRM**: implementeer passthrough voor `consumption_order` naar `facturatie.incoming` (geen `payment_registered` meer — betaalstatus zit in `invoice_request`)
 13. Test: Kassa → CRM → Facturatie flow werkt end-to-end
 
 ### Fase 5: Frontend volledige migratie (2-3 dagen — grootste werk)
