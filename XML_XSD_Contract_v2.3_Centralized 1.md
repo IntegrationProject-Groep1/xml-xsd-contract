@@ -4012,24 +4012,34 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
   <xs:simpleType name="UUIDType">
     <xs:restriction base="xs:string">
       <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:complexType name="CurrencyAmountType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal">
+        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
         <xs:complexType><xs:sequence>
-          <xs:element name="message_id"    type="UUIDType"/>
-          <xs:element name="timestamp"     type="xs:dateTime"/>
+          <xs:element name="message_id"     type="UUIDType"/>
+          <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="crm"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="invoice_cancelled"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
+          <!-- correlation_id = message_id van de originele invoice_request -->
           <xs:element name="correlation_id" type="UUIDType"/>
         </xs:sequence></xs:complexType>
       </xs:element>
@@ -4037,8 +4047,25 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
         <xs:complexType><xs:sequence>
           <xs:element name="identity_uuid" type="UUIDType"/>
           <xs:element name="reason"        type="xs:string" minOccurs="0"/>
-          <!-- refund_amount absent = volledige annulatie (inschrijving); aanwezig = gedeeltelijke creditnota (consumptie-terugbetaling) -->
-          <xs:element name="refund_amount" type="xs:decimal" minOccurs="0"/>
+          <!-- items optioneel: aanwezig bij consumption refunds, afwezig bij volledige annulatie (bv. inschrijving) -->
+          <xs:element name="items" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="item" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="sku"          type="xs:string"/>
+                      <xs:element name="description"  type="xs:string"/>
+                      <xs:element name="quantity"     type="xs:integer"/>
+                      <xs:element name="unit_price"   type="CurrencyAmountType"/>
+                      <xs:element name="total_amount" type="CurrencyAmountType"/>
+                      <xs:element name="vat_rate"     type="xs:integer" minOccurs="0"/>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
@@ -4046,7 +4073,7 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
 </xs:schema>
 ```
 
-#### Voorbeeld XML
+#### Voorbeeld XML — volledige annulatie (inschrijving)
 
 ```xml
 <message>
@@ -4061,6 +4088,36 @@ CRM routeert de factuuraanvraag van Kassa door naar Facturatie. **CRM doet geen 
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
     <reason>Inschrijving geannuleerd door klant</reason>
+    <!-- geen items → Facturatie annuleert de volledige factuur -->
+  </body>
+</message>
+```
+
+#### Voorbeeld XML — gedeeltelijke creditnota (consumptie-terugbetaling)
+
+```xml
+<message>
+  <header>
+    <message_id>a1b2c3d4-e5f6-7890-abcd-ef1234567891</message_id>
+    <timestamp>2026-05-10T15:30:00Z</timestamp>
+    <source>crm</source>
+    <type>invoice_cancelled</type>
+    <version>2.0</version>
+    <correlation_id>f47ac10b-58cc-4372-a567-0e02b2c3d479</correlation_id>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
+    <reason>Klant heeft Workshop Python geretourneerd</reason>
+    <items>
+      <item>
+        <sku>SES-001</sku>
+        <description>Workshop Python</description>
+        <quantity>1</quantity>
+        <unit_price currency="eur">50.00</unit_price>
+        <total_amount currency="eur">50.00</total_amount>
+        <vat_rate>21</vat_rate>
+      </item>
+    </items>
   </body>
 </message>
 ```
