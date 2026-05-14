@@ -4081,7 +4081,7 @@ CRM stuurt dit bericht naar Facturatie wanneer een factuur geannuleerd of terugb
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
           <!-- correlation_id = message_id van de originele invoice_request -->
-          <xs:element name="correlation_id" type="UUIDType"/>
+          <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
       <xs:element name="body">
