@@ -4080,7 +4080,7 @@ CRM stuurt dit bericht naar Facturatie wanneer een factuur geannuleerd of terugb
             <xs:enumeration value="invoice_cancelled"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="2.0"/></xs:restriction></xs:simpleType></xs:element>
-          <!-- correlation_id = message_id van de originele invoice_request -->
+          <!-- correlation_id = message_id van de originele invoice_request (verplicht bij Kassa-refund flow) -->
           <xs:element name="correlation_id" type="UUIDType" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
