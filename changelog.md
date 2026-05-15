@@ -2,6 +2,27 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: CRM, Frontend, Kassa, Facturatie
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: **`company_id` vervangen door `vat_number` (Issue #55)** — `<company_id>` verwijderd uit §5.1, §5.2, §5.4, §10.1, §10.2 en §10.4 (waar `vat_number` al aanwezig was). In §5.8 (`company_member_removed`) vervangen door verplicht `<vat_number type="xs:string"/>`. Beschrijvingstekst en voorbeeld-XML's bijgewerkt.
+- Reden: Issue #55 — `company_id` was een arbitraire interne string zonder formaatbeperking. `vat_number` (reeds verplicht in §5.9/§5.10) is de wettelijk unieke bedrijfsidentifier en al aanwezig als veld in alle betrokken berichten. Vervanging elimineert de impliciete koppeling tussen twee ongerelateerde identifiers.
+
+## 2026-05-15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent)
+- Betrokken teams: CRM, Frontend, Kassa, Planning
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: **§7 bijgewerkt** — `session_created/updated/deleted` (→ CRM) van `Planning` naar `Frontend`. Exchange gewijzigd van `planning.exchange` naar `frontend.exchange`, routing keys van `planning.session.*` naar `frontend.session.*`, source enum van `"planning"` naar `"frontend"`. Planning verstuurt deze berichten niet meer. §17 (quick reference tabellen Kassa & Frontend) en §26 (routing tabellen) bijgewerkt.
+- Reden: Sessieberichten worden door Frontend verstuurd, niet Planning.
+
+## 2026-05-15 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent)
+- Betrokken teams: Frontend, Kassa
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: **§19.8 herschreven** — `session_created/updated/deleted` (Frontend → Kassa) beschrijven de **sessie zelf**, niet een gebruikersregistratie. `identity_uuid` verwijderd uit body. Volledige sessievelden toegevoegd: `start_datetime`, `end_datetime`, `location`, `session_type`, `status`, `max_attendees`, `current_attendees`, `price currency="eur"` (optioneel), `speaker` (optioneel). `session_deleted` body: enkel `session_id`, `reason`, `deleted_by`. Kassa maakt/updatet alleen het POS-product. Kassa routing table bijgewerkt: `user_sessions_request` RPC target gewijzigd van Planning naar Frontend.
+- Reden: Sessieberichten beschrijven de sessie, niet een gebruiker.
+
 ## 2026-05-15 15:00 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
 - Betrokken teams: Facturatie, Frontend
@@ -17,6 +38,17 @@ Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
   1. **§6.4 `refund_processed` XSD**: Optioneel `<items>` blok toegevoegd na `<new_wallet_balance>` (sku, description, quantity, unit_price, total_amount, vat_rate). Geeft CRM/Facturatie detail over welke artikelen terugbetaald werden.
   2. **§11.2 `invoice_cancelled`**: `correlation_id` blijft optioneel (`minOccurs="0"`) — eerdere foutieve wijziging teruggedraaid. Oorspronkelijk commentaar hersteld.
 - Reden: Review toonde twee fouten uit de vorige sessie: items blok was nooit toegevoegd aan §6.4 (commit was destijds geweigerd), en §11.2 correlation_id was onterecht verplicht gemaakt.
+
+## 2026-05-11 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent)
+- Betrokken teams: Kassa, Frontend, Planning
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijzigingen:
+  1. **§19.2 & §19.5 bijgewerkt** — `session_view_response` uitgebreid met optioneel `<price currency="eur">` per sessie. `session_update_request` uitgebreid met optioneel `<current_attendees>` en `<price currency="eur">`. Voorbeeld XML's bijgewerkt.
+  2. **§19.7 bijgewerkt** — `user_sessions_response` XSD uitgebreid met optioneel `<price currency="eur">` element per sessie. Voorbeeld XML en regelcontrole bijgewerkt.
+  3. **§19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen bijgewerkt. Request-XSD uitgebreid met `source="frontend"`.
+  4. **§26.2 bijgewerkt** — `wallet_lease_grant` XSD uitgebreid met optioneel `<payment_due>` element (openstaande inschrijvingskosten bezoeker), met `<amount currency="eur">` en optionele `<status>` (unpaid/paid).
+- Reden: Rule 3 (uniforme valuta-structuur) en ontbrekend RPC-paar voor sessie-opvragingen.
 
 ## 2026-05-14 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)

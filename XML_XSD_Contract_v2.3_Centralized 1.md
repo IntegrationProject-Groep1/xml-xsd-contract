@@ -12,18 +12,6 @@
 
 ---
 
-## Changelog
-
-| Datum | Versie | Wijziging |
-|-------|--------|-----------|
-| 2026-05-15 | v2.3 | **Sectie 19.8 herschreven** — `session_created/updated/deleted` (Frontend → Kassa) beschrijven de **sessie zelf**, niet een gebruikersregistratie. `identity_uuid` verwijderd uit body. Volledige sessievelden toegevoegd: `start_datetime`, `end_datetime`, `location`, `session_type`, `status`, `max_attendees`, `current_attendees`, `price currency="eur"` (optioneel), `speaker` (optioneel). `session_deleted` body: enkel `session_id`, `reason`, `deleted_by`. Kassa maakt/updatet alleen het POS-product — geen partnerwijziging, geen bus event. Kassa routing table bijgewerkt: `user_sessions_request` RPC target gewijzigd van Planning naar Frontend. |
-| 2026-05-11 | v2.3 | **Secties 19.2 & 19.5 bijgewerkt** — `session_view_response` uitgebreid met optioneel `<price currency="eur">` per sessie (Rule 3 ✅). `session_update_request` uitgebreid met optioneel `<current_attendees>` en `<price currency="eur">`. Voorbeeld XML's bijgewerkt. |
-| 2026-05-11 | v2.3 | **Sectie 19.7 bijgewerkt** — `user_sessions_response` XSD uitgebreid met optioneel `<price currency="eur">` element per sessie (Rule 3 ✅). Voorbeeld XML en regelcontrole bijgewerkt. |
-| 2026-05-11 | v2.3 | **Sectie 19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen voor Kassa, Frontend en Planning bijgewerkt. Queue/exchange overzicht uitgebreid met routing keys voor dit RPC-paar. Globale regelcontrole: alle 6 regels geslaagd. Request-XSD uitgebreid met `source="frontend"` zodat zowel Kassa als Frontend dit RPC-bericht kunnen versturen. |
-| 2026-05-11 | v2.3 | **Sectie 26.2 bijgewerkt** — `wallet_lease_grant` XSD uitgebreid met optioneel `<payment_due>` element (openstaande inschrijvingskosten bezoeker). Bevat `<amount currency="eur">` (Rule 3 ✅) en optionele `<status>` (unpaid/paid). Voorbeeld XML bijgewerkt. |
-
----
-
 ##  QUICK REFERENCE — Per Team: Wat ontvang jij? Wat verstuur je?
 
 > ### 🛑 PROJECT-WIDE RULE: THE SIDECAR PRINCIPLE
@@ -44,7 +32,7 @@
 | **VERZENDT** | `invoice_request` | → CRM | [6.5](#65-invoice_request-kassa--crm) |
 | **VERZENDT** | `payment_registered` | → CRM | [6.6](#66-payment_registered-kassa--rabbitmq) |
 | **VERZENDT** | `payment_status`, `wallet_balance_update` | → Frontend | [18](#18-frontend--kassa-direct-flows) |
-| **RPC** | `user_sessions_request` / `user_sessions_response` | ↔ Planning | [19.7](#197-user_sessions_request--user_sessions_response-rpc) |
+| **RPC** | `user_sessions_request` / `user_sessions_response` | ↔ Frontend | [19.7](#197-user_sessions_request--user_sessions_response-rpc) |
 | **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3. Heartbeat](#3-heartbeat--alle-teams--monitoring) |
 
 **XSD's referentie:** `Kassa/integratie/schemas/` — wordt als referentie-implementatie gebruikt door andere teams.
@@ -63,7 +51,7 @@
 | **ONTVANGT** | `company_registration` | ← Frontend | [5.9](#59-company_registration-frontend--crm) |
 | **ONTVANGT** | `company_update` | ← Frontend | [5.10](#510-company_update-frontend--crm) |
 | **ONTVANGT** | `company_delete` | ← Frontend | [5.11](#511-company_delete-frontend--crm) |
-| **ONTVANGT** | `session_created`, `session_updated` | ← Planning | [7.1-7.2](#71-session_created) |
+| **ONTVANGT** | `session_created`, `session_updated`, `session_deleted` | ← Frontend | [7](#7-frontend--crm-sessie-events) |
 | **ONTVANGT** | `payment_registered` | ← Kassa | [6.6](#66-payment_registered-kassa--rabbitmq) |
 | **ONTVANGT** | `invoice_status` | ← Facturatie | [8.1](#81-invoice_status) |
 | **ONTVANGT** | `mailing_status` | ← Mailing | [9.1](#91-mailing_status) |
@@ -96,18 +84,14 @@
 | **VERZENDT** | `company_delete` | → CRM | [5.11](#511-company_delete-frontend--crm) |
 | **VERZENDT** | `event_ended` | → Facturatie, Kassa (exchange: `event.ended`) | [5.7](#57-event_ended), [11.6](#116-event_ended-frontend--facturatie), [11.7](#117-event_ended-frontend--kassa) |
 | **VERZENDT** | `calendar_invite` | → Planning | [19.3](#193-calendar_invite--calendar_invite_confirmed) |
-| **VERZENDT** | `session_create_request` | → Planning | [19.4](#194-session_create_request-frontend--planning) |
-| **VERZENDT** | `session_update_request` | → Planning | [19.5](#195-session_update_request-frontend--planning) |
-| **VERZENDT** | `session_delete_request` | → Planning | [19.6](#196-session_delete_request-frontend--planning) |
 | **VERZENDT** | `payment_registered` | → Facturatie | [11.5](#115-payment_registered-frontend--facturatie) |
 | **ONTVANGT** | `payment_registered` | ← CRM | [14.1](#141-payment_registered-crm--frontend) |
 | **ONTVANGT** | `payment_status`, `wallet_balance_update` | ← Kassa | [18](#18-frontend--kassa-direct-flows) |
-| **ONTVANGT** | `session_created`, `session_updated`, `session_deleted` | ← Planning | [7](#7-planning--crm) |
 | **ONTVANGT** | `calendar_invite_confirmed` | ← Planning | [19.3](#193-calendar_invite--calendar_invite_confirmed) |
 | **ONTVANGT** | `invoice_available` | ← Facturatie | [13.5](#135-facturatie--frontend) |
 | **ONTVANGT** | `vat_validation_error` | ← CRM / Facturatie | [20.1](#201-vat_validation_error) |
 | **RPC** | `session_view_request` / `session_view_response` | ↔ Planning | [19.2](#192-session_view_request--session_view_response-rpc) |
-| **RPC** | `user_sessions_request` / `user_sessions_response` | ↔ Planning | [19.7](#197-user_sessions_request--user_sessions_response-rpc) |
+| **RPC** | `user_sessions_request` / `user_sessions_response` | ↔ Kassa | [19.7](#197-user_sessions_request--user_sessions_response-rpc) |
 | **RPC** | `identity_request` | → Identity | [15.1-15.3](#151-rpc-request--gebruiker-aanmaken) |
 | **BROADCAST** | `heartbeat` (via sidecar) | → Monitoring | [3](#3-heartbeat--alle-teams--monitoring) |
 
@@ -246,7 +230,7 @@
 16. [RabbitMQ Queue & Exchange Overzicht](#16-rabbitmq-queue--exchange-overzicht)
 17. [Per-Team Samenvatting](#17-per-team-samenvatting)
 18. [Frontend ← Kassa (Direct flows)](#18-frontend--kassa-direct-flows)
-19. [Frontend ↔ Planning (Directe flows)](#19-frontend--planning-directe-flows) *(19.1 user_checkin, 19.2 session_view RPC ~~DEPRECATED~~, 19.3 calendar_invite, 19.4 session_create_request, 19.5 session_update_request, 19.6 session_delete_request, 19.7 user_sessions RPC → Frontend, 19.8 Frontend → Kassa sessiewijzigingen)*
+19. [Frontend ↔ Planning / Kassa (Directe flows)](#19-frontend--planning--kassa-directe-flows) *(19.1 user_checkin, 19.2 session_view RPC ~~DEPRECATED~~, 19.3 calendar_invite, 19.7 user_sessions RPC Kassa → Frontend, 19.8 Frontend → Kassa sessiewijzigingen)*
 20. [CRM / Facturatie → Frontend: BTW Validatiefout](#20-crm--facturatie--frontend-btw-validatiefout) *(20.1 vat_validation_error)*
 21. [Migratie Roadmap (NIEUW v2.3)](#21-migratie-roadmap)
 22. [Validatie Checklist](#22-validatie-checklist-per-bericht)
@@ -876,7 +860,6 @@ Wanneer een nieuwe persoon zich inschrijft via de website.
                 </xs:sequence></xs:complexType>
               </xs:element>
               <xs:element name="address" type="xs:string"/>
-              <xs:element name="company_id" type="xs:string" minOccurs="0"/>
               <xs:element name="payment_due">
                 <xs:complexType><xs:sequence>
                   <xs:element name="amount">
@@ -987,7 +970,6 @@ Wanneer een gebruiker zijn profiel wijzigt.
               </xs:element>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
-              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1143,7 +1125,6 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
               </xs:element>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
-              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -1202,7 +1183,6 @@ Wanneer een nieuw gebruikersaccount wordt aangemaakt zonder directe sessie-insch
       <type>company</type>
       <company_name>Erasmushogeschool Brussel</company_name>
       <vat_number>BE0876543210</vat_number>
-      <company_id>ehb-001</company_id>
     </customer>
   </body>
 </message>
@@ -1473,7 +1453,7 @@ Wanneer een sessie of event is afgelopen.
 
 ### 5.8 `company_member_removed` (Frontend → CRM)
 
-Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich heeft geregistreerd, of wanneer een lid van een bedrijf handmatig wordt ontkoppeld. Dit bericht instrueert CRM om de koppeling tussen de gebruiker (`identity_uuid`) en het bedrijf (`company_id`) te verwijderen.
+Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich heeft geregistreerd, of wanneer een lid van een bedrijf handmatig wordt ontkoppeld. Dit bericht instrueert CRM om de koppeling tussen de gebruiker (`identity_uuid`) en het bedrijf (`vat_number`) te verwijderen.
 
 - **Queue:** `crm.incoming`
 - **Richting:** Frontend → CRM
@@ -1510,7 +1490,7 @@ Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich 
             <xs:complexType><xs:sequence>
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="email"         type="xs:string"/>
-              <xs:element name="company_id"   type="xs:string"/>
+              <xs:element name="vat_number"    type="xs:string"/>
               <xs:element name="reason">
                 <xs:simpleType><xs:restriction base="xs:string">
                   <xs:enumeration value="invite_revoked"/>
@@ -1541,7 +1521,7 @@ Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich 
     <customer>
       <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-123456789abc</identity_uuid>
       <email>uitgenodigde@example.com</email>
-      <company_id>uid-3</company_id>
+      <vat_number>BE0123456789</vat_number>
       <reason>invite_revoked</reason>
     </customer>
   </body>
@@ -1550,7 +1530,7 @@ Wanneer een bedrijfsbeheerder een uitnodiging intrekt voordat de gebruiker zich 
 
 #### Verwacht Gedrag CRM
 1. Zoek de gebruiker op via `identity_uuid`.
-2. Verwijder de koppeling tussen de gebruiker en het bedrijf (`company_id`).
+2. Verwijder de koppeling tussen de gebruiker en het bedrijf (`vat_number`).
 3. **Zet het gebruikerstype terug naar `private`** als er geen andere bedrijfskoppeling meer overblijft voor deze gebruiker.
 4. Als de gebruiker nog geen account heeft aangemaakt (invite was pending), verwijdert CRM de pre-registratie.
 5. Log de actie met de meegeleverde `reason`.
@@ -2942,17 +2922,14 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
 
 ---
 
-## 7. Planning → CRM
+## 7. Frontend → CRM (sessie-events)
 
-- **Exchange:** `planning.exchange` (topic)
-- **Queue:** `planning.session.events`
-- **Routing keys:** `planning.session.created`, `planning.session.updated`, `planning.session.deleted`
-- **CRM luistert op:** `planning.session.events`
+> **⚠️ Breaking change v2.3:** Planning's database is overgenomen door Frontend. Frontend verstuurt voortaan zelf `session_created`, `session_updated` en `session_deleted` — zowel naar CRM als naar Kassa. Planning publiceert deze berichten niet meer.
 
-> ** Wijziging voor Planning-team:**
-> - `version` moet `2.0` zijn (was `1.0`)
-> - `xmlns="urn:integration:planning:v1"` verwijderen van het `<message>` element
-> - **Master UUID (Session Persistence):** Alle berichten behorend bij dezelfde sessie (created, updated, deleted) MOETEN dezelfde `correlation_id` bevatten. Dit is de Master UUID voor de sessie, gegenereerd door de Master UUID Manager in Planning.
+- **Exchange:** `frontend.exchange` (topic)
+- **Queue:** `frontend.session.events`
+- **Routing keys:** `frontend.session.created`, `frontend.session.updated`, `frontend.session.deleted`
+- **CRM luistert op:** `frontend.session.events`
 ### 7.1 `session_created`
 
 #### XSD
@@ -2973,7 +2950,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
           <xs:element name="message_id"    type="UUIDType"/>
           <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="planning"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="session_created"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
@@ -3034,7 +3011,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
   <header>
     <message_id>4be2f3a4-b5c6-7890-efab-890123400010</message_id>
     <timestamp>2026-04-20T08:00:00Z</timestamp>
-    <source>planning</source>
+    <source>frontend</source>
     <type>session_created</type>
     <version>2.0</version>
   </header>
@@ -3083,7 +3060,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
           <xs:element name="message_id"    type="UUIDType"/>
           <xs:element name="timestamp"     type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="planning"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="session_updated"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
@@ -3144,7 +3121,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
   <header>
     <message_id>5cf3a4b5-c6d7-8901-fabc-901234500011</message_id>
     <timestamp>2026-05-15T13:45:00Z</timestamp>
-    <source>planning</source>
+    <source>frontend</source>
     <type>session_updated</type>
     <version>2.0</version>
   </header>
@@ -3193,7 +3170,7 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
           <xs:element name="message_id"     type="UUIDType"/>
           <xs:element name="timestamp"      type="xs:dateTime"/>
           <xs:element name="source"><xs:simpleType><xs:restriction base="xs:string">
-            <xs:enumeration value="planning"/></xs:restriction></xs:simpleType></xs:element>
+            <xs:enumeration value="frontend"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="type"><xs:simpleType><xs:restriction base="xs:string">
             <xs:enumeration value="session_deleted"/></xs:restriction></xs:simpleType></xs:element>
           <xs:element name="version"><xs:simpleType><xs:restriction base="xs:string">
@@ -3220,14 +3197,14 @@ Kassa stuurt dit bij elk foutscenario. Monitoring ontvangt dit voor het dashboar
   <header>
     <message_id>6da4b5c6-d7e8-9012-abcd-012345600012</message_id>
     <timestamp>2026-05-14T16:00:00Z</timestamp>
-    <source>planning</source>
+    <source>frontend</source>
     <type>session_deleted</type>
     <version>2.0</version>
   </header>
   <body>
     <session_id>sess-workshop-003</session_id>
     <reason>Spreker is ziek gevallen</reason>
-    <deleted_by>planning-admin</deleted_by>
+    <deleted_by>frontend-admin</deleted_by>
   </body>
 </message>
 ```
@@ -3602,7 +3579,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
               </xs:element>
               <xs:element name="company_name" type="xs:string" minOccurs="0"/>
               <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
-              <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
               <xs:element name="badge_id"     type="xs:string" minOccurs="0"/>
               <xs:element name="payment_due">
                 <xs:complexType><xs:sequence>
@@ -3652,7 +3628,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
       <type>company</type>
       <company_name>Erasmushogeschool Brussel</company_name>
       <vat_number>BE0876543210</vat_number>
-      <company_id>ehb-001</company_id>
       <payment_due>
         <amount currency="eur">25.00</amount>
         <status>unpaid</status>
@@ -3712,7 +3687,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
           </xs:element>
           <xs:element name="company_name" type="xs:string" minOccurs="0"/>
           <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
-          <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
           <xs:element name="payment_due" minOccurs="0">
             <xs:complexType><xs:sequence>
               <xs:element name="amount">
@@ -3879,7 +3853,6 @@ CRM stuurt een nieuw klantprofiel door zodat Kassa betalingen kan verwerken.
           </xs:element>
           <xs:element name="company_name" type="xs:string" minOccurs="0"/>
           <xs:element name="vat_number"   type="xs:string" minOccurs="0"/>
-          <xs:element name="company_id"   type="xs:string" minOccurs="0"/>
           <xs:element name="payment_due" minOccurs="0">
             <xs:complexType><xs:sequence>
               <xs:element name="amount">
@@ -5186,7 +5159,8 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Frontend | Facturatie | `facturatie.incoming` | — (payment_registered direct, sectie 11.5) |
 | Kassa | CRM | `crm.incoming` | exchange: `kassa.exchange`, routing: `kassa.payments.consumption` / `registration` / `refund` / `invoice` / `badge` |
 | IoT (Raspberry Pi) | Kassa | `kassa.incoming` | exchange: `kassa.exchange`, routing: `kassa.incoming` |
-| Planning | CRM | `planning.session.events` | exchange: `planning.exchange`, routing: `planning.session.*` |
+| Frontend | CRM | `frontend.session.events` | exchange: `frontend.exchange`, routing: `frontend.session.*` (session_created/updated/deleted) |
+| Frontend | Kassa | `kassa.incoming` | exchange: `kassa.exchange`, routing: `frontend.to.kassa.session.*` (session_created/updated/deleted) |
 | Facturatie | CRM | `crm.incoming` | — |
 | Mailing | CRM | `crm.incoming` | — |
 | CRM | Kassa | `kassa.incoming` | exchange: `kassa.exchange` (topic) |
@@ -5200,10 +5174,8 @@ Zodra Identity succesvol een nieuwe gebruiker aanmaakt, broadcast het dit naar *
 | Alle teams | Monitoring | `logs` | default exchange (`""`), routing_key: `logs` |
 | Frontend/CRM | Planning | `planning.calendar.invite` | exchange: `calendar.exchange`, routing: `frontend.to.planning.calendar.invite` |
 | Planning | Frontend | reply_to queue (RPC) | exchange: `calendar.exchange`, routing: `planning.to.frontend.calendar.invite.confirmed` |
-| Frontend/CRM | Planning | `planning.session.events` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` (RPC) |
-| Planning | Frontend | reply_to queue (RPC) | exchange: `planning.exchange`, routing: `planning.to.frontend.session.view.response` |
-| Frontend | Planning | `planning.session.events` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.create` / `update` / `delete` |
-| Planning | Frontend | — | exchange: `planning.exchange`, routing: `planning.to.frontend.session.created` / `updated` / `deleted` |
+| Kassa | Frontend | reply_to queue (RPC) | exchange: `kassa.exchange`, routing: `kassa.to.frontend.user_sessions_request` |
+| Frontend | Kassa | reply_to queue (RPC) | routing: `frontend.to.kassa.user_sessions_response` |
 | **Alle teams** | **Identity** | `identity.user.create.request` | RPC (Sectie 15) |
 | **Alle teams** | **Identity** | `identity.user.lookup.email.request` | RPC |
 | **Alle teams** | **Identity** | `identity.user.lookup.uuid.request` | RPC |
@@ -5247,22 +5219,15 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 | → Facturatie, Kassa | `event_ended` | queue: `event.ended` + `facturatie.incoming` + `kassa.incoming` |
 | → Facturatie | `payment_registered` | queue: `facturatie.incoming` |
 | → Planning | `calendar_invite` | exchange: `calendar.exchange`, routing: `frontend.to.planning.calendar.invite` |
-| → Planning | `session_create_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.create` |
-| → Planning | `session_update_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.update` |
-| → Planning | `session_delete_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.delete` |
-| → Planning | `session_view_request` (RPC) | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` |
-| → Planning | `user_sessions_request` (RPC) | exchange: `planning.exchange`, routing: `frontend.to.planning.user_sessions_request` |
+| → CRM | `session_created`, `session_updated`, `session_deleted` | exchange: `frontend.exchange`, routing: `frontend.session.created/updated/deleted` |
+| → Kassa | `session_created`, `session_updated`, `session_deleted` | exchange: `kassa.exchange`, routing: `frontend.to.kassa.session.*` |
 | → Identity | `identity_request` (RPC) | queue: `identity.user.create.request` |
 | ← CRM | `payment_registered` | queue: `frontend.incoming` |
 | ← CRM / Facturatie | `vat_validation_error` | queue: `frontend.incoming` |
 | ← Kassa | `payment_status` | queue: `frontend.payments`, routing: `kassa.frontend.payment` |
 | ← Kassa | `wallet_balance_update` | queue: `frontend.payments`, routing: `kassa.frontend.wallet` |
 | ← Planning | `calendar_invite_confirmed` | reply_to queue, routing: `planning.to.frontend.calendar.invite.confirmed` |
-| ← Planning | `session_view_response` (RPC) | reply_to queue, routing: `planning.to.frontend.session.view.response` |
-| ← Planning | `user_sessions_response` (RPC) | reply_to queue, routing: `planning.to.frontend.user_sessions_response` |
-| ← Planning | `session_created` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.created` |
-| ← Planning | `session_updated` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.updated` |
-| ← Planning | `session_deleted` | exchange: `planning.exchange`, routing: `planning.to.frontend.session.deleted` |
+| ← Kassa | `user_sessions_request` (RPC) | reply_to queue, routing: `kassa.to.frontend.user_sessions_request` |
 | ← Facturatie | `invoice_available` | queue: `frontend.incoming` |
 
 **Verplichte registratie-volgorde:**
@@ -5310,12 +5275,11 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 | ← Frontend | `session_update_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.update` |
 | ← Frontend | `session_delete_request` | exchange: `planning.exchange`, routing: `frontend.to.planning.session.delete` |
 | ← Frontend | `session_view_request` (RPC) | exchange: `planning.exchange`, routing: `frontend.to.planning.session.view` |
-| ← Kassa | `user_sessions_request` (RPC) | exchange: `planning.exchange`, routing: `kassa.to.planning.user_sessions_request` |
-| ← Frontend | `user_sessions_request` (RPC) | exchange: `planning.exchange`, routing: `frontend.to.planning.user_sessions_request` |
-| → Kassa/Frontend | `user_sessions_response` (RPC) | reply_to queue, routing: `planning.to.kassa.user_sessions_response` / `planning.to.frontend.user_sessions_response` |
 | ← CRM | `cancel_registration` | exchange: `calendar.exchange`, routing: `crm.to.planning.cancel_registration` |
 
-**Belangrijk:** Gebruikt Master UUID via `correlation_id` voor alle sessie-gerelateerde berichten. `correlation_id` = de `session_uuid` uit de Planning database.
+**Belangrijk:** Gebruikt Master UUID via `correlation_id` voor alle sessie-gerelateerde berichten.
+
+> **⚠️ v2.3:** `user_sessions_request` / `user_sessions_response` zijn verplaatst naar Frontend (sectie 19.7). Planning ontvangt en beantwoordt dit RPC niet meer.
 
 ---
 
@@ -5367,7 +5331,7 @@ CRM is de centrale data-hub. Zie secties 5–14 voor alle gedetailleerde flows.
 | Richting | Berichttype | Queue / Exchange / Routing |
 |----------|-------------|---------------------------|
 | ← Frontend | `new_registration`, `user_*`, `company_*`, `cancel_registration`, `event_ended`, `user_checkin` | queue: `crm.incoming` |
-| ← Planning | `session_created`, `session_updated`, `session_deleted` | exchange: `planning.exchange`, routing: `planning.session.*` |
+| ← Frontend | `session_created`, `session_updated`, `session_deleted` | exchange: `frontend.exchange`, routing: `frontend.session.*` |
 | ← Kassa | `consumption_order`, `payment_registered`, `badge_assigned`, `refund_processed`, `invoice_request` | routing: `kassa.payments.*` |
 | ← Facturatie | `invoice_status`, `payment_registered` | queue: `crm.incoming` |
 | ← Mailing | `mailing_status` | queue: `crm.incoming` |
@@ -5407,7 +5371,7 @@ CRM is de centrale data-hub. Zie secties 5–14 voor alle gedetailleerde flows.
 
 ---
 
-## 19. Frontend ↔ Planning (Directe flows)
+## 19. Frontend ↔ Planning / Kassa (Directe flows)
 
 > **GECENTRALISEERD:** Deze flows zijn de officiële standaard voor de communicatie tussen Frontend en Planning. 
 > Ze zijn essentieel voor het ophalen van sessiedata (`session_view_request/response`) die getoond wordt op de frontend zodat gebruikers zich kunnen inschrijven.
@@ -6235,11 +6199,10 @@ Kassa vraagt de sessielijst op van een bezoeker bij **Frontend** (voorheen Plann
   </xs:simpleType>
 
   <!--
-    user_sessions_request — Kassa / Frontend → Planning (RPC request)
-    Sent by Kassa when a visitor's QR code is scanned, or by Frontend to fetch a user's sessions.
-    Planning responds with user_sessions_response on the reply_to queue.
-    Routing key (Kassa):    kassa.to.planning.user_sessions_request
-    Routing key (Frontend): frontend.to.planning.user_sessions_request
+    user_sessions_request — Kassa → Frontend (RPC request)
+    Sent by Kassa when a visitor's QR code is scanned.
+    Frontend responds with user_sessions_response on the reply_to queue.
+    Routing key (Kassa): kassa.to.frontend.user_sessions_request
   -->
   <xs:element name="message">
     <xs:complexType>
@@ -6307,10 +6270,10 @@ Kassa vraagt de sessielijst op van een bezoeker bij **Frontend** (voorheen Plann
   </xs:simpleType>
 
   <!--
-    user_sessions_response — Planning → Kassa (RPC response)
-    Published by Planning in reply to a user_sessions_request.
+    user_sessions_response — Frontend → Kassa (RPC response)
+    Published by Frontend in reply to a user_sessions_request.
     The correlation_id matches the request's correlation_id.
-    Routing key: planning.to.kassa.user_sessions_response
+    Routing key: frontend.to.kassa.user_sessions_response
   -->
   <xs:element name="message">
     <xs:complexType>
