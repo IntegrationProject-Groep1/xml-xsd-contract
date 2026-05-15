@@ -2,6 +2,13 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-15 15:00 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: Facturatie, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: **§13.5.1 `invoice_available`**: `pdf_url` (xs:anyURI) vervangen door `pdf_base64` (xs:base64Binary) en `status` enum toegevoegd aan de body (draft, unpaid, sent, paid, overdue, cancelled). XSD en voorbeeld XML bijgewerkt.
+- Reden: Issue #54 — `pdf_url` vereist een FossBilling-login die onbruikbaar is voor klanten. Frontend vroeg ook factuurstatus om betalingsstatus correct te kunnen tonen.
+
 ## 2026-05-15 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
 - Betrokken teams: Kassa, Facturatie

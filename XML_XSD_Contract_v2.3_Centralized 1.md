@@ -4738,7 +4738,17 @@ Facturatie stuurt na elke succesvolle factuuraanmaak een `invoice_available` ber
             <xs:sequence>
               <xs:element name="identity_uuid" type="UUIDType"/>
               <xs:element name="invoice_id"    type="xs:string"/>
-              <xs:element name="pdf_url"       type="xs:anyURI"/>
+              <xs:element name="status">
+                <xs:simpleType><xs:restriction base="xs:string">
+                  <xs:enumeration value="draft"/>
+                  <xs:enumeration value="unpaid"/>
+                  <xs:enumeration value="sent"/>
+                  <xs:enumeration value="paid"/>
+                  <xs:enumeration value="overdue"/>
+                  <xs:enumeration value="cancelled"/>
+                </xs:restriction></xs:simpleType>
+              </xs:element>
+              <xs:element name="pdf_base64" type="xs:base64Binary"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -4763,7 +4773,8 @@ Facturatie stuurt na elke succesvolle factuuraanmaak een `invoice_available` ber
   <body>
     <identity_uuid>550e8400-e29b-41d4-a716-446655440000</identity_uuid>
     <invoice_id>142</invoice_id>
-    <pdf_url>https://facturatie.desiderius.me/invoice/142</pdf_url>
+    <status>unpaid</status>
+    <pdf_base64>JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZy...</pdf_base64>
   </body>
 </message>
 ```
