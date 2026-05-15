@@ -16,6 +16,7 @@
 
 | Datum | Versie | Wijziging |
 |-------|--------|-----------|
+| 2026-05-15 | v2.3 | **Sectie 19.8 herschreven** — `session_created/updated/deleted` (Frontend → Kassa) beschrijven de **sessie zelf**, niet een gebruikersregistratie. `identity_uuid` verwijderd uit body. Volledige sessievelden toegevoegd: `start_datetime`, `end_datetime`, `location`, `session_type`, `status`, `max_attendees`, `current_attendees`, `price currency="eur"` (optioneel), `speaker` (optioneel). `session_deleted` body: enkel `session_id`, `reason`, `deleted_by`. Kassa maakt/updatet alleen het POS-product — geen partnerwijziging, geen bus event. Kassa routing table bijgewerkt: `user_sessions_request` RPC target gewijzigd van Planning naar Frontend. |
 | 2026-05-11 | v2.3 | **Secties 19.2 & 19.5 bijgewerkt** — `session_view_response` uitgebreid met optioneel `<price currency="eur">` per sessie (Rule 3 ✅). `session_update_request` uitgebreid met optioneel `<current_attendees>` en `<price currency="eur">`. Voorbeeld XML's bijgewerkt. |
 | 2026-05-11 | v2.3 | **Sectie 19.7 bijgewerkt** — `user_sessions_response` XSD uitgebreid met optioneel `<price currency="eur">` element per sessie (Rule 3 ✅). Voorbeeld XML en regelcontrole bijgewerkt. |
 | 2026-05-11 | v2.3 | **Sectie 19.7 toegevoegd** — `user_sessions_request` / `user_sessions_response` RPC (Kassa & Frontend → Planning). Quick reference tabellen voor Kassa, Frontend en Planning bijgewerkt. Queue/exchange overzicht uitgebreid met routing keys voor dit RPC-paar. Globale regelcontrole: alle 6 regels geslaagd. Request-XSD uitgebreid met `source="frontend"` zodat zowel Kassa als Frontend dit RPC-bericht kunnen versturen. |
@@ -5286,8 +5287,9 @@ Elke service is verantwoordelijk voor zijn eigen DLQ-afhandeling bij validatiefo
 | ← IoT / Kassa | `badge_scanned` | queue: `kassa.incoming` |
 | ← CRM | `new_registration`, `profile_update`, `cancel_registration` | queue: `kassa.incoming` |
 | ← Frontend | `event_ended` | queue: `kassa.incoming` |
-| → Planning | `user_sessions_request` (RPC) | exchange: `planning.exchange`, routing: `kassa.to.planning.user_sessions_request` |
-| ← Planning | `user_sessions_response` (RPC) | reply_to queue, routing: `planning.to.kassa.user_sessions_response` |
+| ← Frontend | `session_created`, `session_updated`, `session_deleted` | queue: `kassa.incoming`, routing: `frontend.to.kassa.session.*` |
+| → Frontend | `user_sessions_request` (RPC) | exchange: `kassa.exchange`, routing: `kassa.to.frontend.user_sessions_request` |
+| ← Frontend | `user_sessions_response` (RPC) | reply_to queue, routing: `frontend.to.kassa.user_sessions_response` |
 
 ---
 
@@ -6517,7 +6519,9 @@ Kassa vraagt de sessielijst op van een bezoeker bij **Frontend** (voorheen Plann
 
 ## 19.8 Frontend → Kassa: Sessiewijzigingen (Push)
 
-Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa via `kassa.exchange`. Kassa werkt `x_session_title` op de partner bij en notificeert de POS.
+Frontend (eigenaar van de sessiecatalogus, overgenomen van Planning) pusht sessiewijzigingen naar Kassa via `kassa.exchange`. Deze berichten beschrijven de **sessie zelf** — er is geen gebruiker aan gekoppeld. Kassa gebruikt ze uitsluitend om het POS-productcatalogus in sync te houden: bij `session_created` of `session_updated` wordt het bijhorende POS-product aangemaakt of bijgewerkt, bij `session_deleted` blijft het product staan (bezoekers kunnen de sessie nog betalen via QR-scan).
+
+De koppeling **gebruiker ↔ sessie** verloopt uitsluitend via de QR-scan RPC (sectie 19.7): op het moment dat een bezoeker zijn badge scant, vraagt Kassa aan Frontend welke sessies die bezoeker heeft, en werkt de partner in Odoo bij.
 
 - **Exchange:** `kassa.exchange`
 - **Queue (Kassa):** `kassa.incoming`
@@ -6528,9 +6532,11 @@ Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa
 | `session_updated` | `frontend.to.kassa.session.updated` |
 | `session_deleted` | `frontend.to.kassa.session.deleted` |
 
-> **Let op:** Dit zijn gebruikersregistratie-events (een specifieke gebruiker heeft zich in- of uitgeschreven voor een sessie), niet sessiecatalogus-updates. Voor cataloguswijzigingen zie sectie 7 (Planning → CRM).
+> **XSD-bestanden (Kassa):** `Kassa/integratie/schemas/schema_session_created.xsd`, `schema_session_updated.xsd`, `schema_session_deleted.xsd`
 
 ### 19.8.1 `session_created` (Frontend → Kassa)
+
+Kassa ontvangt dit bericht wanneer een nieuwe sessie in het systeem wordt aangemaakt. Kassa maakt het bijhorende POS-product aan (of laat het bestaan als het er al is) en stelt de prijs in.
 
 #### XSD
 
@@ -6542,13 +6548,6 @@ Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa
       <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="CurrencyAmountType">
-    <xs:simpleContent>
-      <xs:extension base="xs:decimal">
-        <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
   <xs:element name="message">
     <xs:complexType><xs:sequence>
       <xs:element name="header">
@@ -6566,14 +6565,49 @@ Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <!-- identity_uuid: voor welke gebruiker deze sessieregistratie geldt -->
-          <xs:element name="identity_uuid" type="UUIDType"/>
-          <xs:element name="session">
+          <!-- Geen identity_uuid op body-niveau: sessie is niet aan een gebruiker gekoppeld -->
+          <xs:element name="session_id"        type="xs:string"/>
+          <xs:element name="title"             type="xs:string"/>
+          <xs:element name="start_datetime"    type="xs:dateTime"/>
+          <xs:element name="end_datetime"      type="xs:dateTime"/>
+          <xs:element name="location"          type="xs:string"  minOccurs="0"/>
+          <xs:element name="session_type" minOccurs="0">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="keynote"/>
+              <xs:enumeration value="workshop"/>
+              <xs:enumeration value="reception"/>
+              <xs:enumeration value="other"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+          <xs:element name="status" minOccurs="0">
+            <xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="draft"/>
+              <xs:enumeration value="published"/>
+              <xs:enumeration value="cancelled"/>
+            </xs:restriction></xs:simpleType>
+          </xs:element>
+          <xs:element name="max_attendees"     type="xs:positiveInteger"    minOccurs="0"/>
+          <xs:element name="current_attendees" type="xs:nonNegativeInteger" minOccurs="0"/>
+          <!-- price: deelnameprijs voor deze sessie (optioneel; afwezig = gratis) -->
+          <xs:element name="price" minOccurs="0">
+            <xs:complexType><xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="currency" type="xs:string" fixed="eur" use="required"/>
+              </xs:extension>
+            </xs:simpleContent></xs:complexType>
+          </xs:element>
+          <!-- speaker: optioneel — identity_uuid alleen aanwezig als spreker een systeemgebruiker is -->
+          <xs:element name="speaker" minOccurs="0">
             <xs:complexType><xs:sequence>
-              <xs:element name="session_id" type="xs:string"/>
-              <xs:element name="title"      type="xs:string"/>
-              <!-- price optioneel: afwezig = gratis -->
-              <xs:element name="price"      type="CurrencyAmountType" minOccurs="0"/>
+              <xs:element name="identity_uuid" type="UUIDType" minOccurs="0"/>
+              <xs:element name="contact">
+                <xs:complexType><xs:sequence>
+                  <xs:element name="first_name" type="xs:string"/>
+                  <xs:element name="last_name"  type="xs:string"/>
+                </xs:sequence></xs:complexType>
+              </xs:element>
+              <xs:element name="organisation" type="xs:string" minOccurs="0"/>
+              <xs:element name="email"        type="xs:string" minOccurs="0"/>
             </xs:sequence></xs:complexType>
           </xs:element>
         </xs:sequence></xs:complexType>
@@ -6583,15 +6617,58 @@ Frontend pusht proactief sessiewijzigingen voor specifieke gebruikers naar Kassa
 </xs:schema>
 ```
 
+#### Voorbeeld XML
+
+```xml
+<message>
+  <header>
+    <message_id>4be2f3a4-b5c6-7890-efab-890123400010</message_id>
+    <timestamp>2026-04-20T08:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>session_created</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>sess-keynote-001</session_id>
+    <title>Keynote: AI in Healthcare</title>
+    <start_datetime>2026-05-15T14:00:00Z</start_datetime>
+    <end_datetime>2026-05-15T15:00:00Z</end_datetime>
+    <location>Aula A - Campus Jette</location>
+    <session_type>keynote</session_type>
+    <status>published</status>
+    <max_attendees>120</max_attendees>
+    <current_attendees>0</current_attendees>
+    <price currency="eur">25.00</price>
+    <speaker>
+      <contact>
+        <first_name>Sarah</first_name>
+        <last_name>Leclercq</last_name>
+      </contact>
+      <organisation>UZ Brussel</organisation>
+      <email>s.leclercq@uzbrussel.be</email>
+    </speaker>
+  </body>
+</message>
+```
+
+#### Kassa-gedrag
+
+- Zoek POS-product op naam (`title`). Bestaat het al → update prijs indien gewijzigd. Bestaat het niet → maak aan met `available_in_pos=True` in de categorie "Sessions".
+- Geen partnerwijziging, geen bus event. De gebruiker ↔ sessie koppeling loopt via QR-scan (sectie 19.7).
+
 ### 19.8.2 `session_updated` (Frontend → Kassa)
 
-Zelfde body als `session_created`. Kassa zoekt op `session_id` en update titel en prijs in-place (upsert als niet gevonden).
+Identieke body-structuur als 19.8.1 (`session_created`), met `type=session_updated` en optioneel `<change_reason>` veld. Kassa werkt de POS-productprijs bij als die verschilt.
 
 #### XSD
 
-Identiek aan 19.8.1, met `<xs:enumeration value="session_updated"/>` als type.
+Identiek aan 19.8.1, met:
+- `<xs:enumeration value="session_updated"/>` als type
+- Extra optioneel veld in body: `<xs:element name="change_reason" type="xs:string" minOccurs="0"/>`
 
 ### 19.8.3 `session_deleted` (Frontend → Kassa)
+
+Sessie verwijderd uit het systeem. Kassa logt dit en doet verder niets: het POS-product blijft bestaan omdat bezoekers de sessie nog kunnen betalen via QR-scan.
 
 #### XSD
 
@@ -6620,15 +6697,38 @@ Identiek aan 19.8.1, met `<xs:enumeration value="session_updated"/>` als type.
       </xs:element>
       <xs:element name="body">
         <xs:complexType><xs:sequence>
-          <xs:element name="identity_uuid" type="UUIDType"/>
-          <xs:element name="session_id"   type="xs:string"/>
-          <xs:element name="reason"       type="xs:string" minOccurs="0"/>
+          <xs:element name="session_id"  type="xs:string"/>
+          <xs:element name="reason"      type="xs:string" minOccurs="0"/>
+          <xs:element name="deleted_by"  type="xs:string" minOccurs="0"/>
         </xs:sequence></xs:complexType>
       </xs:element>
     </xs:sequence></xs:complexType>
   </xs:element>
 </xs:schema>
 ```
+
+#### Voorbeeld XML
+
+```xml
+<message>
+  <header>
+    <message_id>6da4b5c6-d7e8-9012-abcd-012345600012</message_id>
+    <timestamp>2026-05-14T16:00:00Z</timestamp>
+    <source>frontend</source>
+    <type>session_deleted</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>sess-workshop-003</session_id>
+    <reason>Spreker is ziek gevallen</reason>
+    <deleted_by>admin@frontend.be</deleted_by>
+  </body>
+</message>
+```
+
+#### Kassa-gedrag
+
+Kassa logt de verwijdering en stuurt `basic_ack`. Het bijhorende POS-product wordt **niet** verwijderd — andere bezoekers kunnen de sessie nog steeds betalen via QR-scan.
 
 ---
 
