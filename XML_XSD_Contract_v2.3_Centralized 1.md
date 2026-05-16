@@ -4722,6 +4722,7 @@ Facturatie stuurt na elke succesvolle factuuraanmaak een `invoice_available` ber
                   <xs:enumeration value="cancelled"/>
                 </xs:restriction></xs:simpleType>
               </xs:element>
+              <xs:element name="invoice_date" type="xs:dateTime"/>
               <xs:element name="pdf_base64" type="xs:base64Binary"/>
             </xs:sequence>
           </xs:complexType>
@@ -4748,6 +4749,7 @@ Facturatie stuurt na elke succesvolle factuuraanmaak een `invoice_available` ber
     <identity_uuid>550e8400-e29b-41d4-a716-446655440000</identity_uuid>
     <invoice_id>142</invoice_id>
     <status>unpaid</status>
+    <invoice_date>2026-05-06T10:30:00Z</invoice_date>
     <pdf_base64>JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZy...</pdf_base64>
   </body>
 </message>

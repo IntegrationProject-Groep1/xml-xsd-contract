@@ -2,6 +2,13 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-16 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: Facturatie, Frontend
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`
+- Wijziging: **§13.5.1 `invoice_available`**: `invoice_date` (xs:dateTime) toegevoegd aan de body, tussen `status` en `pdf_base64`. XSD en voorbeeld XML bijgewerkt.
+- Reden: Issue #56 — Frontend heeft de factuurdatum nodig om correct weer te geven en te filteren.
+
 ## 2026-05-15 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
 - Betrokken teams: CRM, Frontend, Kassa, Facturatie
