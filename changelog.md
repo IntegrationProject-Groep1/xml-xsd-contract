@@ -2,6 +2,17 @@
 
 Alle wijzigingen aan deze repository worden hier chronologisch bijgehouden.
 
+## 2026-05-19 (+02:00)
+- Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
+- Betrokken teams: Frontend, Kassa
+- Bestanden: `XML_XSD_Contract_v2.3_Centralized 1.md`, `changelog.md`
+- Wijzigingen:
+  1. **§5.5 `user_registered` — dual-publish + prijs**: Frontend publiceert dit bericht voortaan naar **twee** exchanges: `crm.incoming` (bestaand) én `kassa.exchange` (routing key: `kassa.incoming.user_registered`). Optioneel `<price currency="eur">` element toegevoegd aan de body. `email`, `contact`, `type` optioneel gemaakt (`minOccurs="0"`) zodat Kassa ook berichten zonder CRM-profieldata accepteert. `payment_status` optioneel + `unpaid` als extra enum-waarde. `correlation_id` optioneel. Voorbeeld XML's bijgewerkt met `<session_title>` en `<price>`.
+  2. **§5.5b `user_unregistered` — nieuw bericht**: Wanneer een gebruiker zich uitschrijft uit een sessie. Frontend publiceert dual: naar `crm.incoming` én `kassa.exchange` (routing key: `kassa.incoming.user_unregistered`). Body: `identity_uuid` (verplicht), `session_id` (verplicht), `session_title` (optioneel). Volledige XSD en voorbeeld XML toegevoegd.
+  3. **Quick Reference — Kassa**: Twee nieuwe ONTVANGT-rijen: `user_registered ← Frontend` en `user_unregistered ← Frontend`.
+  4. **Quick Reference — Frontend**: `user_registered` VERZENDT-rij bijgewerkt naar "CRM + Kassa (dual-publish)"; `user_unregistered` VERZENDT-rij toegevoegd.
+- Reden: Hybride push+RPC architectuur. `new_registration` (CRM) stuurt altijd €0,00 door een CRM-beperking. Met proactieve push van Frontend weet Kassa de correcte sessieprijs op het moment van inschrijving, en werkt de kassa volledig offline van Frontend. De QR-scan RPC wordt een best-effort refresh (2s timeout) in plaats van de primaire databron.
+
 ## 2026-05-16 (+02:00)
 - Auteur: Claude Sonnet 4.6 (AI-assistent — luyckfasseel.jeremy@gmail.com)
 - Betrokken teams: Facturatie, Frontend
